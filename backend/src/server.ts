@@ -218,6 +218,20 @@ try {
   process.exit(1);
 }
 
+// Validate the file-storage provider BEFORE serving traffic: a bad
+// STORAGE_PROVIDER or incomplete Supabase config must fail the deploy with
+// a precise message instead of surfacing as 500s on the first upload or
+// photo read.
+try {
+  getFileStorage();
+  console.log(
+    `File storage provider: ${(process.env.STORAGE_PROVIDER ?? "local").trim().toLowerCase()}`,
+  );
+} catch (err) {
+  console.error("Failed to initialize file storage:", err);
+  process.exit(1);
+}
+
 // Auth API under /api/v1/auth (register/login/refresh/logout/me).
 await app.register(authRoutes, { prefix: "/api/v1/auth" });
 

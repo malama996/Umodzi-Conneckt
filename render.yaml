@@ -1,6 +1,9 @@
 # Render deployment configuration (Task 36)
 # This file documents the intended Render setup but does NOT contain secrets.
-# All environment variables must be set in the Render dashboard.
+# All secret values must be set in the Render dashboard.
+#
+# QUICK START: copy render.env.example (repo root) into the Render dashboard
+# Environment tab — it lists every variable below with its required value.
 
 services:
   # Backend API + WebSocket service
@@ -12,12 +15,14 @@ services:
     startCommand: npm run start -w backend
     healthCheckPath: /health
     envVars:
+      - key: NODE_VERSION
+        value: "20"
       - key: NODE_ENV
         value: production
       - key: DATABASE_URL
         sync: false  # Set in Render dashboard — restricted runtime role (umodzi_app)
       - key: MIGRATIONS_DATABASE_URL
-        sync: false  # Set in Render dashboard — admin role for migrations ONLY
+        sync: false  # Set in Render dashboard — admin role; used by the boot-time migration runner
       - key: JWT_SECRET
         sync: false  # Generate with: openssl rand -hex 32
       - key: FRONTEND_ORIGIN
@@ -26,8 +31,28 @@ services:
         sync: false
       - key: ADMIN_PASSWORD
         sync: false
+      # --- Cross-domain cookie auth + proxy correctness (REQUIRED) ---
+      # The backend refuses to boot in production without COOKIE_SECURE=true,
+      # and cookie auth breaks silently between netlify.app and onrender.com
+      # without COOKIE_SAME_SITE=none. TRUST_PROXY makes Fastify honour
+      # X-Forwarded-* from Render's TLS terminator (real client IPs for rate
+      # limiting, correct protocol).
+      - key: TRUST_PROXY
+        value: "true"
+      - key: COOKIE_SECURE
+        value: "true"
+      - key: COOKIE_SAME_SITE
+        value: "none"
+      # --- File uploads ---
+      # local   = server disk (EPHEMERAL on Render: photos/docs are lost on
+      #           every redeploy/restart — fine only for throwaway demos)
+      # supabase = durable object storage; also set SUPABASE_URL,
+      #           SUPABASE_STORAGE_KEY, SUPABASE_PUBLIC_BUCKET,
+      #           SUPABASE_PRIVATE_BUCKET (see render.env.example)
       - key: STORAGE_DIR
         value: var/uploads
+      - key: STORAGE_PROVIDER
+        value: local
       # Optional: Uncomment and configure for production SMS
       # - key: SMS_PROVIDER
       #   sync: false
@@ -48,8 +73,11 @@ services:
       # - key: VAPID_PRIVATE_KEY
       #   sync: false
 
-# Note: The frontend is deployed separately on Netlify (see DEPLOYMENT.md).
-# Database migrations should be run manually or via a deploy hook BEFORE deploying:
-#   npm run migrate -w backend
-# Do NOT include migrations in the start command - this causes issues with
-# connection pooling and can fail if the admin URL isn't available at runtime.
+# Migrations: the server runs pending SQL migrations ONCE at boot, before it
+# accepts traffic (backend/src/server.ts → runMigrations()), using
+# MIGRATIONS_DATABASE_URL for DDL. Nothing extra is needed in the start
+# command — do NOT add `npm run migrate` to it (double-running and pool
+# contention are the reasons it is kept out).
+#
+# The frontend is deployed separately on Netlify (see netlify.env.example and
+# DEPLOYMENT.md).

@@ -29,11 +29,7 @@ export type ServiceArea = (typeof SERVICE_AREAS)[number];
 // ---------------------------------------------------------------------------
 // Availability states (display strings)
 // ---------------------------------------------------------------------------
-export const AVAILABILITY_STATES = [
-  'Available now',
-  'Available today',
-  'Unavailable',
-] as const;
+export const AVAILABILITY_STATES = ['Available now', 'Available today', 'Unavailable'] as const;
 export type AvailabilityState = (typeof AVAILABILITY_STATES)[number];
 
 // ---------------------------------------------------------------------------
@@ -135,13 +131,7 @@ export interface CascadingOfferResult {
 // Service request lifecycle statuses
 // ---------------------------------------------------------------------------
 export type ServiceRequestStatus =
-  | 'pending'
-  | 'matching'
-  | 'matched'
-  | 'no_match'
-  | 'in_progress'
-  | 'completed'
-  | 'cancelled';
+  'pending' | 'matching' | 'matched' | 'no_match' | 'in_progress' | 'completed' | 'cancelled';
 
 // ---------------------------------------------------------------------------
 // Service request (core entity)

@@ -140,7 +140,15 @@ npm run migrate -w backend
 - **Build Command**: `npm ci && npm run build -w backend`
 - **Start Command**: `npm run start -w backend`
 
-> **Note**: Migrations should be run manually or via a separate deploy hook, not on every start. The `render.yaml` includes migrations in the start command for convenience, but this is **not recommended** for production.
+> **Migrations**: the server runs pending SQL migrations **at boot, before
+> serving traffic**, using `MIGRATIONS_DATABASE_URL` for DDL (see
+> `backend/src/server.ts`). Nothing extra is needed — do **not** add
+> `npm run migrate` to the start command (double-running and connection-pool
+> contention are exactly why it is kept out).
+
+> **Quick config**: copy every variable from [`render.env.example`](render.env.example)
+> into the Render dashboard Environment tab — it is the authoritative list,
+> kept in sync with `render.yaml`.
 
 ### 3. Health Check Path
 
@@ -159,9 +167,20 @@ npm run migrate -w backend
 | `ADMIN_EMAIL` | `admin@yourdomain.com` | **YES** |
 | `ADMIN_PASSWORD` | Strong password | **YES** |
 | `STORAGE_DIR` | `var/uploads` | No |
-| `TRUST_PROXY` | `true` | No |
-| `COOKIE_SECURE` | `true` | No |
-| `COOKIE_SAME_SITE` | `none` (if cross-domain) | No |
+| `TRUST_PROXY` | `true` | No — **REQUIRED** (Render terminates TLS; without it every client shares the proxy's rate-limit bucket) |
+| `COOKIE_SECURE` | `true` | No — **REQUIRED** (backend refuses to boot in production without it) |
+| `COOKIE_SAME_SITE` | `none` | No — **REQUIRED** (Netlify ≠ Render origin; `lax` silently drops the refresh cookie cross-site) |
+| `STORAGE_PROVIDER` | `supabase` (recommended) or `local` | No |
+| `SUPABASE_URL` | `https://PROJECT-REF.supabase.co` | No — required when `STORAGE_PROVIDER=supabase` |
+| `SUPABASE_STORAGE_KEY` | New service-role key for this app | **YES** — required when `STORAGE_PROVIDER=supabase` |
+| `SUPABASE_PUBLIC_BUCKET` | `profile-photos` | No — required when `STORAGE_PROVIDER=supabase` |
+| `SUPABASE_PRIVATE_BUCKET` | `verification-docs` | No — required when `STORAGE_PROVIDER=supabase` |
+
+> **Uploads are EPHEMERAL with `STORAGE_PROVIDER=local`**: Render's disk is
+> wiped on every redeploy/restart, losing profile photos and verification
+> documents. For production set `STORAGE_PROVIDER=supabase` and create the two
+> buckets in Supabase Dashboard → Storage first (full instructions in
+> [`render.env.example`](render.env.example)).
 
 ### Optional Environment Variables
 
@@ -198,11 +217,14 @@ Netlify will automatically detect `netlify.toml` and install `@netlify/plugin-ne
 
 ### 3. Environment Variables (Set in Netlify Dashboard)
 
+> **Quick config**: copy [`netlify.env.example`](netlify.env.example) into the
+> Netlify dashboard — it is the authoritative list.
+
 | Variable | Value | Sensitive? |
 |----------|-------|------------|
-| `NODE_VERSION` | `20` | No |
+| `NODE_VERSION` | `20` (already set in `netlify.toml`) | No |
 | `NEXT_PUBLIC_API_BASE_URL` | `https://your-backend.onrender.com/api/v1` | No |
-| `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | From backend VAPID setup | No |
+| `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | From backend VAPID setup (optional) | No |
 
 > **Important**: `NEXT_PUBLIC_*` variables are baked into the build at compile time. You must **redeploy** after changing them.
 
