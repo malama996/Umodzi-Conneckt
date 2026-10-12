@@ -92,7 +92,20 @@ jobs:
           DATABASE_URL: postgresql://postgres:test-password@localhost:5432/umodzi_test
 
       - name: Run privacy tests
-        run: npx tsx scripts/task28-3a1-location-privacy-tests.ts
+        run: |
+          npx tsx src/server.ts &
+          SERVER_PID=$!
+          trap "kill $SERVER_PID" EXIT
+
+          for i in {1..30}; do
+            if curl --fail --silent http://localhost:3001/health > /dev/null; then
+              break
+            fi
+            sleep 1
+          done
+
+          curl --fail --silent http://localhost:3001/health > /dev/null
+          npx tsx scripts/task28-3a1-location-privacy-tests.ts
         working-directory: backend
         env:
           DATABASE_URL: postgresql://postgres:test-password@localhost:5432/umodzi_test
