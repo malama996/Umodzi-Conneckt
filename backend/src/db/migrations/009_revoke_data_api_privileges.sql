@@ -20,18 +20,42 @@
 -- in STATE.md §29 — re-grant ALL to the three roles restores the exact
 -- prior grant state; no data operation is involved.
 
--- 1. Stop future tables from silently regaining Data API access.
---    (New tables created by migrations would otherwise pick these up
---    through the default ACLs below.)
-ALTER DEFAULT PRIVILEGES IN SCHEMA public FOR ROLE postgres
-  REVOKE ALL ON TABLES FROM anon, authenticated, service_role;
-ALTER DEFAULT PRIVILEGES IN SCHEMA public FOR ROLE postgres
-  REVOKE ALL ON SEQUENCES FROM anon, authenticated, service_role;
-ALTER DEFAULT PRIVILEGES IN SCHEMA public FOR ROLE postgres
-  REVOKE ALL ON FUNCTIONS FROM anon, authenticated, service_role;
+-- 1+2. Revoke Data API privileges only when those roles exist in this
+--      cluster (Supabase has them; plain PostgreSQL CI databases do not).
+DO $$
+DECLARE
+  target_roles text;
+BEGIN
+  SELECT string_agg(quote_ident(rolname), ', ')
+    INTO target_roles
+  FROM pg_roles
+  WHERE rolname IN ('anon', 'authenticated', 'service_role');
 
--- 2. Revoke every existing grant on every public table/sequence from the
---    Data API roles. The `postgres` role owns all these objects, so it
---    can revoke; no owner transfer needed.
-REVOKE ALL ON ALL TABLES IN SCHEMA public FROM anon, authenticated, service_role;
-REVOKE ALL ON ALL SEQUENCES IN SCHEMA public FROM anon, authenticated, service_role;
+  IF target_roles IS NULL THEN
+    RETURN;
+  END IF;
+
+  -- Stop future tables from silently regaining Data API access.
+  EXECUTE format(
+    'ALTER DEFAULT PRIVILEGES IN SCHEMA public FOR ROLE postgres REVOKE ALL ON TABLES FROM %s',
+    target_roles
+  );
+  EXECUTE format(
+    'ALTER DEFAULT PRIVILEGES IN SCHEMA public FOR ROLE postgres REVOKE ALL ON SEQUENCES FROM %s',
+    target_roles
+  );
+  EXECUTE format(
+    'ALTER DEFAULT PRIVILEGES IN SCHEMA public FOR ROLE postgres REVOKE ALL ON FUNCTIONS FROM %s',
+    target_roles
+  );
+
+  -- Revoke every existing grant on every public table/sequence.
+  EXECUTE format(
+    'REVOKE ALL ON ALL TABLES IN SCHEMA public FROM %s',
+    target_roles
+  );
+  EXECUTE format(
+    'REVOKE ALL ON ALL SEQUENCES IN SCHEMA public FROM %s',
+    target_roles
+  );
+END $$;
