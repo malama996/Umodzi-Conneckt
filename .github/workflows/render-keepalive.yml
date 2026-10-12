@@ -1,0 +1,63 @@
+name: Render Keep-Alive & Health Check
+
+on:
+  schedule:
+    # Run every 10 minutes (best-effort; GitHub may delay scheduled runs)
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Manual trigger reason'
+        required: false
+        default: 'Manual health check'
+
+permissions:
+  contents: read
+
+# Prevent overlapping keep-alive runs
+concurrency:
+  group: render-keepalive
+  cancel-in-progress: false
+
+jobs:
+  health-check:
+    name: Check Render Backend Health
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+
+    steps:
+      - name: Validate RENDER_HEALTH_URL is set
+        if: ${{ vars.RENDER_HEALTH_URL == '' }}
+        run: |
+          echo "::error::RENDER_HEALTH_URL repository variable is not set"
+          echo "Set it in: Settings → Secrets and variables → Actions → Variables"
+          echo "Example: https://your-app.onrender.com/health"
+          exit 1
+
+      - name: Check backend health
+        uses: nick-fields/retry@v3
+        with:
+          max_attempts: 3
+          timeout_minutes: 1
+          retry_wait_seconds: 5
+          command: |
+            echo "Checking health at: ${{ vars.RENDER_HEALTH_URL }}"
+            HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+              --max-time 10 \
+              "${{ vars.RENDER_HEALTH_URL }}")
+
+            echo "HTTP status: $HTTP_STATUS"
+
+            if [ "$HTTP_STATUS" != "200" ]; then
+              echo "::error::Health check failed with status $HTTP_STATUS"
+              exit 1
+            fi
+
+            echo "✅ Backend is healthy (status: $HTTP_STATUS)"
+
+      - name: Report failure
+        if: failure()
+        run: |
+          echo "::warning::Render backend health check failed"
+          echo "Check the Render dashboard for logs and service status"
+          echo "URL: https://dashboard.render.com"

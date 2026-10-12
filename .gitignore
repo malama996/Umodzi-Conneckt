@@ -1,0 +1,18 @@
+# Credentials and local runtime state
+.env
+.env.*
+!.env.example
+backend/.env
+frontend/.env.local
+
+# Generated output and local storage
+node_modules/
+frontend/.next/
+backend/dist/
+backend/var/uploads/
+coverage/
+*.tsbuildinfo
+
+# Editor and operating-system files
+.DS_Store
+Thumbs.db

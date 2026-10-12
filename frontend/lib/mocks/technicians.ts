@@ -1,0 +1,92 @@
+/**
+ * Mock technician data — typed against canonical SkillCategory and Technician.
+ * Updated from legacy values: Mechanics→Automotive, "ICT support"→ICT.
+ * Added a Refrigeration specialist for full 9-category coverage.
+ *
+ * Used only by the deprecated lib/data.ts shim (legacy prototype pages).
+ * New code should import from @/lib/api/techniciansApi (real backend).
+ */
+import type { Technician } from '../types';
+
+export const technicians: Technician[] = [
+  {
+    id: 'tech-001',
+    name: 'Chanda M.',
+    category: 'Electrical',
+    skills: ['Electrical', 'HVAC'],
+    serviceArea: 'Kitwe',
+    city: 'Kitwe',
+    rating: 4.8,
+    jobs: 42,
+    verified: true,
+    availability: 'Available now',
+    availabilityStatus: 'available',
+    accountStatus: 'active',
+    bio: null,
+    hasPhoto: false,
+  },
+  {
+    id: 'tech-002',
+    name: 'Bwalya K.',
+    category: 'Plumbing',
+    skills: ['Plumbing', 'Refrigeration'],
+    serviceArea: 'Ndola',
+    city: 'Ndola',
+    rating: 4.7,
+    jobs: 35,
+    verified: true,
+    availability: 'Available today',
+    availabilityStatus: 'available',
+    accountStatus: 'active',
+    bio: null,
+    hasPhoto: false,
+  },
+  {
+    id: 'tech-003',
+    name: 'Mwamba T.',
+    category: 'ICT',
+    skills: ['ICT', 'Electronics'],
+    serviceArea: 'Kitwe',
+    city: 'Kitwe',
+    rating: 4.9,
+    jobs: 51,
+    verified: true,
+    availability: 'Available now',
+    availabilityStatus: 'available',
+    accountStatus: 'active',
+    bio: null,
+    hasPhoto: false,
+  },
+  {
+    id: 'tech-004',
+    name: 'Mulenga P.',
+    category: 'Appliance Repair',
+    skills: ['Appliance Repair', 'Electronics'],
+    serviceArea: 'Ndola',
+    city: 'Ndola',
+    rating: 4.6,
+    jobs: 28,
+    verified: false,
+    availability: 'Available today',
+    availabilityStatus: 'available',
+    accountStatus: 'active',
+    bio: null,
+    hasPhoto: false,
+  },
+  {
+    id: 'tech-005',
+    name: 'Kasongo L.',
+    category: 'Automotive',
+    skills: ['Automotive', 'Handyman'],
+    serviceArea: 'Kitwe',
+    city: 'Kitwe',
+    rating: 4.5,
+    jobs: 19,
+    verified: true,
+    availability: 'Available now',
+    availabilityStatus: 'available',
+    accountStatus: 'active',
+    bio: null,
+    hasPhoto: false,
+  },
+];

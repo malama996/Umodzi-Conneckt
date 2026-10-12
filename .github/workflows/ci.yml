@@ -1,0 +1,98 @@
+name: CI Validation
+
+on:
+  push:
+    branches: [main, staging]
+  pull_request:
+    branches: [main, staging]
+
+# Prevent concurrent runs on the same branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      # Isolated PostgreSQL for integration tests (if needed)
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: test-password
+          POSTGRES_DB: umodzi_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Backend typecheck
+        run: npm run typecheck -w backend
+
+      - name: Backend build
+        run: npm run build -w backend
+
+      - name: Frontend typecheck
+        run: npm run typecheck -w frontend
+
+      - name: Frontend lint
+        run: npm run lint -w frontend
+
+      - name: Frontend format check
+        run: npm run format:check -w frontend
+
+      - name: Frontend build
+        run: npm run build -w frontend
+        env:
+          NEXT_PUBLIC_API_BASE_URL: http://localhost:3001/api/v1
+          NEXT_PUBLIC_VAPID_PUBLIC_KEY: test-vapid-key
+
+      - name: Run database migrations
+        run: npm run migrate -w backend
+        env:
+          DATABASE_URL: postgresql://postgres:test-password@localhost:5432/umodzi_test
+
+      - name: Run backend unit tests
+        run: npx tsx scripts/task23-tests.ts
+        working-directory: backend
+        env:
+          DATABASE_URL: postgresql://postgres:test-password@localhost:5432/umodzi_test
+
+      - name: Run frontend integration tests
+        run: npx --no-install tsx scripts/task22-tests.ts
+        working-directory: frontend
+
+      - name: Run classification tests
+        run: npx tsx scripts/task33-classify-tests.ts
+        working-directory: backend
+        env:
+          DATABASE_URL: postgresql://postgres:test-password@localhost:5432/umodzi_test
+
+      - name: Run privacy tests
+        run: npx tsx scripts/task28-3a1-location-privacy-tests.ts
+        working-directory: backend
+        env:
+          DATABASE_URL: postgresql://postgres:test-password@localhost:5432/umodzi_test

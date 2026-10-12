@@ -1,0 +1,48 @@
+# Netlify configuration for Umodzi Connect frontend (Task 36)
+# Next.js 15 App Router with SSR support via @netlify/plugin-nextjs
+
+[build]
+  # Monorepo root — build from workspace directory
+  base = "."
+  publish = "frontend/.next"
+  command = "npm ci && npm run build -w frontend"
+
+# Next.js plugin for full SSR, ISR, and API route support
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# Environment variables (set these in Netlify dashboard)
+[build.environment]
+  NODE_VERSION = "20"
+  # NEXT_PUBLIC_API_BASE_URL and NEXT_PUBLIC_VAPID_PUBLIC_KEY must be set
+  # in the Netlify dashboard. Do NOT set them here with empty values.
+
+# Security headers
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(self)"
+
+# Cache static assets aggressively
+[[headers]]
+  for = "/_next/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Service worker must not be cached
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# Note: The backend URL (NEXT_PUBLIC_API_BASE_URL) must be set in the
+# Netlify dashboard to your deployed Render service URL. Do NOT use
+# localhost or development URLs in production.
+#
+# Cookie authentication works across domains because:
+# - Backend sets FRONTEND_ORIGIN to your Netlify domain
+# - CORS credentials:true allows HttpOnly cookies
+# - SameSite=lax (or none if cross-subdomain) permits cross-site cookies

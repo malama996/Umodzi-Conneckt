@@ -1,0 +1,768 @@
+# CLAUDE CODE IMPLEMENTATION PROMPT — UMODZI CONNECT
+
+## Theme B: Navy + Teal + Coral — CANONICAL LIVE PRODUCT DESIGN SYSTEM
+
+### Reusable UI Design System, Landing Page, Authentication and Application-Wide Styling
+
+## 1. Your Role
+
+Act as a senior software engineer and UI/UX designer with at least 10 years of experience building production-ready web applications, service marketplaces, responsive dashboards and reusable design systems.
+
+You are working on **Umodzi Connect**, a smart dispatch and trust-verification platform that connects consumers with verified skilled technicians in Zambia.
+
+Implement the visual identity shown in the supplied **Navy + Teal + Coral reference image** throughout the existing application.
+
+The reference image is the visual specification and establishes the canonical live design system for:
+
+* Landing page
+* Login page
+* Registration page
+* Consumer dashboard
+* Technician dashboard
+* Technician discovery and search
+* Technician profiles
+* Service request forms
+* Dispatch and job tracking
+* Navigation, cards, forms, buttons, dialogs and notifications
+
+**Important:** Theme B is not inspiration. It is the canonical reusable UX/UI system for the live application. Reproduce its composition, proportions, typography hierarchy, button shapes, cards, navigation, authentication split, spacing, section transitions, technician cards, verification badges, search/filter patterns, mobile layout and dashboard language in real, functional, responsive application components. Do not introduce a different visual language on later screens.
+
+Do not build a disconnected prototype. Work inside the existing project, preserve its functionality and integrate the design into its existing architecture.
+
+---
+
+## 2. Brand Identity
+
+**Product name:** Umodzi Connect
+
+**Tagline:** Skilled People. Stronger Communities.
+
+**Product purpose:** Help people discover trusted technicians, request services, and track technician assignments through skill-based matching, location awareness and transparent trust signals.
+
+The interface should feel:
+
+* Modern and professionally engineered.
+* Friendly and community-oriented.
+* Trustworthy without appearing like a banking application.
+* Technically capable without looking like a generic AI dashboard.
+* Appropriate for Zambia, particularly the initial Kitwe and Ndola service areas.
+* Comfortable to use on mobile phones, laptops and desktop computers.
+* Lightweight enough for users with limited mobile data and slower internet connections.
+
+Avoid generic AI-generated SaaS styling, excessive gradients, excessive glassmorphism, random decorative icons, unnecessary animation, oversized empty spaces and repetitive template-like cards.
+
+The identity should be recognizable even when the logo is absent.
+
+## 3. Official Color System
+
+Use the following as the initial design tokens. Centralize them so the entire application uses the same values.
+
+| Token            | Hex       | Purpose                                                               |
+| ---------------- | --------- | --------------------------------------------------------------------- |
+| Primary Navy     | `#102A43` | Main branding, navigation, headings and primary structure             |
+| Deep Navy        | `#082F3C` | Dark hero backgrounds, deep surfaces and selected navigation states   |
+| Primary Teal     | `#00A6A6` | Main interactive accents, location indicators and selected controls   |
+| Deep Teal        | `#007F83` | Hover states, stronger teal surfaces and emphasis                     |
+| Coral            | `#FF6B6B` | Important calls to action, secondary emphasis and selected highlights |
+| Light Background | `#F5F8FA` | Main application background                                           |
+| White            | `#FFFFFF` | Cards, forms and elevated surfaces                                    |
+| Primary Text     | `#243746` | Body text and labels                                                  |
+| Muted Text       | `#647786` | Supporting text and secondary information                             |
+| Border           | `#DCE5EA` | Input borders, card outlines and dividers                             |
+| Success          | `#16845B` | Verified states, completed jobs and successful actions                |
+| Warning          | `#D99100` | Pending states and warnings                                           |
+| Error            | `#C83E4D` | Errors, failed requests and destructive actions                       |
+
+Do not use all colors with equal intensity.
+
+Apply the colors according to their semantic roles:
+
+* Navy establishes the brand and visual structure.
+* Teal communicates interaction, location, navigation and progress.
+* Coral attracts attention to important actions.
+* White and light backgrounds maintain readability.
+* Success, warning and error colors communicate status independently of branding.
+
+Use white text on dark surfaces and sufficiently dark text on light surfaces. Check contrast before finalizing buttons, labels, badges and navigation items.
+
+Create a shared theme definition using the styling system already installed in the project. If CSS variables are appropriate, establish tokens such as:
+
+```css
+:root {
+  --color-primary: #102A43;
+  --color-primary-deep: #082F3C;
+  --color-accent: #00A6A6;
+  --color-accent-hover: #007F83;
+  --color-highlight: #FF6B6B;
+
+  --color-background: #F5F8FA;
+  --color-surface: #FFFFFF;
+  --color-text: #243746;
+  --color-text-muted: #647786;
+  --color-border: #DCE5EA;
+
+  --color-success: #16845B;
+  --color-warning: #D99100;
+  --color-error: #C83E4D;
+
+  --radius-card: 14px;
+  --radius-control: 10px;
+
+  --shadow-card: 0 4px 18px rgba(16, 42, 67, 0.07);
+}
+```
+
+Adapt the syntax to the existing framework. Do not introduce a second styling system unnecessarily.
+
+## 4. Logo and Branding
+
+Create a consistent Umodzi Connect brand presentation across the application.
+
+The logo concept should combine:
+
+* A recognizable location-pin or location-marker element.
+* A distinctive U-shaped or connected-path symbol.
+* The words “Umodzi Connect”.
+* Navy, teal and coral as the principal brand colors.
+
+The brand should be compact enough for a mobile header and clear enough for a desktop sidebar.
+
+If the project already has an approved logo, reuse it and adapt the surrounding interface to the theme. Do not replace existing brand assets without checking them first.
+
+If no usable logo exists, create a simple reusable logo component using available assets or a clean SVG. Avoid emoji as a substitute for the actual logo.
+
+Provide consistent variants for:
+
+* Full logo with text.
+* Compact symbol.
+* Light version for dark backgrounds.
+* Dark version for light backgrounds.
+
+Use the tagline “Skilled People. Stronger Communities.” where appropriate, particularly on the landing page and selected branding surfaces.
+
+## 5. Global Layout and Reusable Design System
+
+Before redesigning individual pages, establish a consistent set of shared components.
+
+Create or adapt reusable components for:
+
+* `AppShell`
+* `PublicHeader`
+* `PublicFooter`
+* `DashboardLayout`
+* `Sidebar`
+* `MobileNavigation`
+* `PageHeader`
+* `PrimaryButton`
+* `SecondaryButton`
+* `IconButton`
+* `FormField`
+* `TextInput`
+* `PasswordInput`
+* `SelectField`
+* `SearchBar`
+* `Card`
+* `StatusBadge`
+* `RatingDisplay`
+* `VerifiedBadge`
+* `TechnicianCard`
+* `ServiceRequestCard`
+* `EmptyState`
+* `LoadingState`
+* `ErrorState`
+* `ConfirmDialog`
+* `Notification`
+* `Pagination` or the existing equivalent.
+
+Use the project's current naming conventions and component structure instead of blindly duplicating components that already exist.
+
+### Shared component rules
+
+1. Components must use the shared theme tokens.
+2. Components must behave consistently across public pages and authenticated areas.
+3. Buttons need hover, focus, active, disabled and loading states where applicable.
+4. Form controls need labels, validation messages and accessible keyboard behavior.
+5. Cards should have consistent spacing, borders, radius and shadow.
+6. Status badges must use semantic status colors rather than arbitrary decorative colors.
+7. Navigation should visibly identify the current page.
+8. Layouts must work on mobile, tablet and desktop.
+9. Use the project's existing icon library, if available, consistently.
+10. Avoid duplicating entire components for minor color or spacing differences.
+
+The design system must make future modules easy to add without inventing a new appearance for every page.
+
+## 6. Landing Page — Match the Reference Image
+
+The landing page is the main public introduction to Umodzi Connect.
+
+It should follow the reference image's dark, visually rich hero layout, with a strong text area, technician photography, location-based service discovery and a clear call to action.
+
+### A. Header
+
+Create a responsive public header with:
+
+* Umodzi Connect logo on the left.
+* Home.
+* Services.
+* How It Works.
+* About.
+* Login.
+* Get Started.
+
+On desktop, display the navigation horizontally.
+
+On mobile, use a compact header and accessible mobile navigation.
+
+Use navy for the header or its primary structure, teal for active navigation and coral for the primary Get Started action.
+
+The header must remain readable over the hero area. If using a transparent header, ensure the text remains visible over the background image.
+
+### B. Hero section
+
+Create a large, responsive hero section with two visual areas.
+
+**Text area:**
+
+* Small introductory brand label.
+* Large headline, for example: “Local Skills. Real Solutions.”
+* Supporting text explaining that users can connect with verified technicians in Ndola, Kitwe and other supported locations.
+* Trust indicators such as Verified Profiles, Smart Matching, Live Location and Trusted Reviews.
+* Service search field.
+* Search button.
+* Primary CTA: “Find a Technician”.
+* Secondary CTA: “Become a Technician”.
+
+**Image area:**
+
+* Large, high-quality photograph of a real-looking local technician.
+* The image should feel authentic, professional and community-oriented.
+* Use a balanced crop, clear subject placement and responsive sizing.
+* Incorporate teal and coral accent shapes sparingly.
+* Include subtle location-inspired graphics only when they improve the composition.
+
+The hero should feel like a carefully art-directed marketplace website, not a generic landing-page template.
+
+### C. Background image support — mandatory
+
+The landing page MUST support a configurable background photograph, as demonstrated in the reference image.
+
+Do not hardcode the hero image permanently into the JSX or component markup.
+
+Implement a reusable hero component that accepts configuration properties similar to:
+
+```tsx
+type HeroSectionProps = {
+  title: string;
+  description: string;
+  backgroundImage?: string;
+  backgroundPosition?: string;
+  overlayOpacity?: number;
+  primaryActionLabel?: string;
+  primaryActionHref?: string;
+};
+```
+
+Adapt the interface to the project's actual language and conventions.
+
+The background image should be changeable without redesigning the component.
+
+Provide a central configuration source for the default hero content and image. The exact configuration format should follow the existing project architecture.
+
+Requirements for image handling:
+
+* Support an image URL or an existing local project asset.
+* Allow a configurable image focal point, such as `center`, `center right` or `65% center`.
+* Allow a configurable dark overlay so text remains readable.
+* Use an appropriate `cover` crop and responsive positioning.
+* Provide a sensible fallback when no image is configured or the image fails to load.
+* Avoid layout shifts while images load.
+* Use optimized images where the existing framework supports them.
+* Keep meaningful alternative text for informative images.
+* Respect mobile crop differences, including the ability to configure a different mobile image if needed.
+* Avoid downloading large decorative images unnecessarily on mobile connections.
+
+A suitable implementation may use CSS background images or a layered image element. Choose the approach that works best with the existing stack.
+
+For example, the design may use a dark navy overlay over a technician photograph, with teal and coral accent elements. The photograph must remain visible rather than being completely obscured by a solid background.
+
+**Future editing requirement:** Structure the hero configuration so an authorized administrator could eventually manage the image and hero copy through an existing content-management mechanism or a future settings interface. Do not build an unnecessary backend upload service unless the project already supports it or it is explicitly needed.
+
+### D. Additional landing-page sections
+
+Under the hero, create consistent sections for:
+
+1. Popular Services — plumbing, electrical work, mechanics, appliance repair, ICT support and other configured categories.
+2. How It Works — describe the request, matching, technician acceptance and service completion process.
+3. Featured Technicians — display profile photographs, skills, locations, ratings and verification status.
+4. Why Umodzi Connect — explain verification, transparent reviews, location-based matching and dispatch.
+5. Service Areas — initially highlight Ndola and Kitwe, in line with the project scope.
+6. Call to Action — invite consumers to request a service and technicians to join the platform.
+7. Footer — logo, navigation, support links, contact details when configured, and relevant legal links.
+
+Do not invent real contact information, customer testimonials, completed-job statistics or verification claims. Use actual project data or clearly marked placeholders when data is unavailable.
+
+## 7. Login Page
+
+The login page must follow the same Navy + Teal + Coral identity.
+
+Use a polished split-screen or image-backed composition consistent with the reference image.
+
+### Layout
+
+Desktop:
+
+* One side presents the brand, a concise headline, supporting copy and a relevant technician photograph or configurable image.
+* The other side contains a clean login card.
+
+Mobile:
+
+* Stack the brand and form vertically.
+* Avoid excessive scrolling.
+* Keep the form controls comfortable to use on smaller screens.
+
+### Login card
+
+Include:
+
+* Umodzi Connect logo.
+* “Welcome Back” heading.
+* Short supporting message.
+* Email or phone number, according to supported authentication.
+* Password.
+* Password visibility toggle.
+* Remember-me option only if supported.
+* Forgot-password link if the recovery flow exists.
+* Primary Login button.
+* Registration link.
+* Appropriate validation, loading, success and error states.
+
+If the existing system supports multiple roles, use the actual role-resolution or authentication flow. Do not introduce a fake role selector that could conflict with backend authorization.
+
+The form must remain connected to the existing authentication logic.
+
+## 8. Registration Page
+
+Build registration using the same reusable authentication layout, form components, typography, colors, spacing and responsive behavior as the login page.
+
+The registration interface must not look like a separate product.
+
+Include only the fields required by the existing registration requirements.
+
+Depending on the actual supported registration flow, these may include:
+
+* Full name.
+* Email address or phone number.
+* Password.
+* Confirm password, if required.
+* Account type, if users are permitted to select it.
+* Required terms and privacy acknowledgement.
+* Register button.
+* Link to login.
+
+For technician registration, show the additional fields or onboarding steps required by the current system, such as service categories, service area and relevant profile details.
+
+Keep the process manageable on mobile. If the form becomes long, use clearly labeled steps with progress indicators rather than placing everything into one overwhelming screen.
+
+Do not collect identity documents or sensitive information unless the existing requirements actually call for them.
+
+Registration must connect to the current backend, enforce its validation rules and respect role permissions.
+
+## 9. Authenticated Application Dashboard
+
+Use a consistent dashboard shell based on the reference image.
+
+### Desktop structure
+
+* Persistent navy sidebar.
+* Umodzi Connect branding at the top.
+* Clear navigation icons and labels.
+* Active navigation state using teal.
+* Coral or semantic badges for unread notifications.
+* Main content area on a light background.
+* Top bar containing page search when appropriate, notifications and user profile.
+* Responsive content cards with consistent spacing.
+
+### Example consumer navigation
+
+Use the actual routes and modules that exist in the project. The navigation may include:
+
+* Dashboard.
+* New Service Request.
+* Find Technicians.
+* My Requests.
+* Messages.
+* Notifications.
+* Profile.
+* Settings.
+* Log Out.
+
+### Consumer dashboard content
+
+Where supported by the existing system, show:
+
+* Total requests.
+* Requests in progress.
+* Completed services.
+* Unread notifications.
+* Create Service Request CTA.
+* Recent service requests.
+* Technician recommendations.
+* Current or preferred service location.
+* Relevant quick actions.
+
+Use actual API data. Never replace working backend integration with hardcoded demo information merely to make the screen look populated.
+
+If data is unavailable, provide a useful empty state.
+
+### Technician dashboard
+
+Use the same design system but adapt the navigation and content to the technician's role.
+
+Potential sections include:
+
+* Dashboard.
+* Incoming Requests.
+* Assigned Jobs.
+* Availability.
+* Services and Skills.
+* Service Area.
+* Reviews.
+* Messages.
+* Profile.
+* Settings.
+
+Show only features that exist or are required by the current application specification.
+
+### Administrator and verification modules
+
+Where these modules already exist, retain their permissions and routes while applying the shared theme.
+
+Use consistent tables, filters, verification statuses, request queues, audit information and management forms.
+
+Do not expose administrator-only information to consumers or technicians.
+
+## 10. Technician Discovery and Profile
+
+### Technician search and listing
+
+Create a polished listing interface with:
+
+* Search by skill, service or location.
+* Filters for service category, distance, availability and verification where supported.
+* Sorting based on the actual available matching criteria.
+* Technician cards with photo, name, skills, location, distance, rating, review count and verification status.
+* Clear contact or request-service action.
+
+Use teal for location-related accents, navy for names and headings, and coral for prominent actions.
+
+### Technician profile
+
+Include:
+
+* Profile photograph or fallback avatar.
+* Technician name.
+* Verified status when genuinely verified.
+* Service categories.
+* Service area and distance when available.
+* Experience and completed jobs only when supported by real data.
+* Ratings and reviews.
+* Description and listed services.
+* Availability.
+* Request Service CTA.
+
+The layout should remain clean when optional profile data is missing.
+
+Never imply that a technician is verified merely because a profile exists.
+
+## 11. Service Request Flow
+
+The service request process should use a clear, guided layout.
+
+A possible sequence is:
+
+1. Describe the problem.
+2. Select or confirm the service category.
+3. Confirm the service location.
+4. Review the request details.
+5. Submit the request.
+
+Adapt the sequence to the actual requirements and existing implementation.
+
+The interface may include:
+
+* Problem description.
+* AI-assisted category suggestion, if implemented.
+* Ability to correct the suggested category.
+* Location confirmation.
+* Optional photograph attachment if supported.
+* Request summary.
+* Validation and submission feedback.
+
+Use progress indicators, clear field labels, concise helper text and visible error messages.
+
+AI-assisted classification must be presented as a suggestion, not an unquestionable decision. Preserve user control over the selected category.
+
+Do not simulate AI results or successful submissions when the underlying functionality is unavailable.
+
+## 12. Smart Dispatch and Tracking
+
+Create a tracking experience consistent with the reference image.
+
+Where the required data and map integration exist, display:
+
+* Request status.
+* Assigned technician.
+* Technician verification status.
+* Estimated arrival, when genuinely available.
+* Location and route visualization.
+* Contact actions.
+* Status progression, such as Requested, Assigned, On the Way, Arrived and Completed.
+
+The exact status names must match the actual system state model.
+
+Use navy for the main information structure, teal for route and progress indicators, and coral for important actions or alerts.
+
+Map integration should use the provider already configured in the project. Do not fabricate a live route, GPS position or arrival time.
+
+If map data is unavailable, show a clear location summary and an appropriate fallback.
+
+## 13. Forms, Tables, Badges and Feedback
+
+All form and data components must follow the same theme.
+
+### Forms
+
+* Consistent labels and spacing.
+* Visible focus states.
+* Helpful validation messages.
+* Accessible required-field indicators.
+* Proper disabled and loading states.
+* Clear distinction between input errors and general notifications.
+
+### Status badges
+
+Use semantic colors for states such as:
+
+* Verified.
+* Pending Verification.
+* Rejected.
+* Available.
+* Unavailable.
+* Requested.
+* Assigned.
+* In Progress.
+* Completed.
+* Cancelled.
+
+Ensure the color communicates the state consistently throughout the application.
+
+### Tables and lists
+
+Use consistent headers, row spacing, borders, empty states, pagination and mobile-friendly behavior.
+
+### Notifications
+
+Create consistent success, warning, error and informational feedback.
+
+Do not use coral for every status simply because it is part of the brand.
+
+## 14. Typography, Spacing and Visual Hierarchy
+
+Use the existing typography if it is already established and suitable. Otherwise, use a clean, modern sans-serif family such as Inter or Manrope.
+
+Typography should distinguish:
+
+* Large hero headings.
+* Page titles.
+* Section headings.
+* Card titles.
+* Body text.
+* Supporting labels.
+* Form labels and helper messages.
+
+Use a consistent spacing scale rather than arbitrary margins throughout the project.
+
+Recommended starting points:
+
+* Main content spacing: 24–32 px on desktop.
+* Card padding: 16–24 px.
+* Form field spacing: 16–20 px.
+* Card radius: approximately 14 px.
+* Input radius: approximately 10 px.
+* Button height: generally 44–48 px.
+
+Adapt these values to the existing component library and actual screen sizes.
+
+Avoid excessively rounded controls, oversized headings on every page and unnecessary shadows.
+
+## 15. Mobile-First and Low-Data Requirements
+
+Umodzi Connect targets users in Zambia, including people using smartphones and mobile data connections with varying reliability.
+
+Therefore:
+
+* Design mobile layouts deliberately rather than merely shrinking desktop pages.
+* Use responsive breakpoints appropriate to the existing CSS framework.
+* Keep navigation accessible on small screens.
+* Ensure forms work with mobile keyboards.
+* Optimize images and avoid unnecessary large downloads.
+* Lazy-load below-the-fold imagery where appropriate.
+* Avoid heavy animation and autoplay video.
+* Respect reduced-motion preferences.
+* Use lightweight icons and reuse existing assets.
+* Prevent horizontal overflow.
+* Provide meaningful loading, empty and error states.
+* Ensure the primary service-request journey remains easy to complete on mobile.
+
+Do not sacrifice accessibility or readability to achieve a compact layout.
+
+## 16. Accessibility and Interaction States
+
+Follow WCAG accessibility principles and the project's existing standards.
+
+Ensure:
+
+* Keyboard navigation works.
+* Focus indicators are visible.
+* Text and controls have sufficient contrast.
+* Inputs have programmatically associated labels.
+* Images have appropriate alternative text.
+* Icon-only buttons have accessible names.
+* Validation errors are identifiable without relying only on color.
+* Dialogs manage focus correctly.
+* Touch targets are comfortable on mobile.
+* Buttons and links use the correct semantic elements.
+
+Every visible interactive control must perform its intended action.
+
+Do not create buttons, filters, tabs or navigation items that appear functional but have no implementation.
+
+## 17. Technical Implementation Rules
+
+Before editing any code:
+
+1. Inspect the repository structure.
+2. Identify the actual frontend framework, language, styling system and component library.
+3. Identify the existing route structure and authentication flow.
+4. Inspect current public pages, dashboards, forms and shared components.
+5. Identify existing API calls, state management and role-based access rules.
+6. Identify existing image assets and map integrations.
+7. Identify the current design conventions that must be retained for compatibility.
+
+Then implement the theme using the existing architecture.
+
+The proposal's intended technology stack is Next.js for the frontend, Fastify with TypeScript for the backend, and PostgreSQL with PostGIS for data and geospatial functionality. However, **verify the actual repository before making stack-specific changes**. Do not migrate or replace the current stack just to implement this design.
+
+Use the existing routing, authentication, API clients, data models and state management wherever possible.
+
+Do not:
+
+* Rebuild the application from scratch.
+* Replace real API calls with mock data.
+* Remove existing features.
+* Change database schemas without a genuine requirement.
+* weaken authorization or validation.
+* introduce unnecessary dependencies.
+* create multiple competing theme files.
+* hardcode the landing page photograph into reusable component logic.
+* redesign only the landing page while leaving the rest of the application inconsistent.
+
+Keep the design tokens, logo, shared layouts and common components in predictable locations that match the existing repository conventions.
+
+## 18. Image Configuration and Asset Management
+
+Create a maintainable way to manage the landing page's hero image and any other major promotional images.
+
+Prefer configuration-driven content, for example:
+
+```ts
+const landingPageConfig = {
+  hero: {
+    title: "Local Skills. Real Solutions.",
+    description:
+      "Connect with skilled technicians and find trusted local services.",
+    backgroundImage: "/images/umodzi-technician-hero.webp",
+    backgroundPosition: "center right",
+    overlayOpacity: 0.62
+  }
+};
+```
+
+This is an illustrative example, not a requirement to use this exact file structure.
+
+Use an actual image that exists in the project or provide a suitable, properly licensed asset. If no image is available, build the image slot with a deliberate fallback and explain how to add the final image.
+
+Changing the configured image should update the landing page without requiring changes to the hero component's implementation.
+
+Keep image references, overlay settings and mobile image settings centralized where practical.
+
+## 19. Testing and Quality Assurance
+
+After implementation:
+
+1. Run the existing lint and type-check commands.
+2. Run relevant automated tests.
+3. Build the application using its existing build command.
+4. Resolve errors introduced by the changes.
+5. Test the landing page on desktop and mobile widths.
+6. Test login and registration layouts and their existing functionality.
+7. Test navigation and shared components across user roles.
+8. Check form validation, loading and error states.
+9. Confirm that the hero image can be changed through configuration.
+10. Confirm that missing or failed images do not break the layout.
+11. Check that existing routes and backend integrations still work.
+12. Verify that the theme remains consistent across all implemented pages.
+
+If browser testing tools are available, capture screenshots of the actual running application and compare them with the reference image.
+
+Do not claim that a test passed unless it was actually executed.
+
+## 20. Definition of Done
+
+The implementation is complete when:
+
+* The application consistently uses the Navy + Teal + Coral theme.
+* The landing page matches the supplied visual direction.
+* The landing page supports a configurable background photograph and image positioning.
+* Login and registration use the same brand identity and shared components.
+* Consumer and technician dashboards use the same design system.
+* Technician listings, profiles, service requests and tracking share consistent layouts.
+* Existing authentication, role permissions, routing and backend integrations remain intact.
+* Mobile layouts work without horizontal overflow.
+* Components can be reused when new modules are added.
+* No major page has an unrelated or leftover color theme.
+* Relevant checks and builds have been executed, with any remaining issues documented.
+
+## 21. How You Should Execute the Work
+
+Work directly in the existing repository.
+
+First, inspect the project and briefly identify the existing architecture, shared components and implementation plan.
+
+Then proceed to implement the theme rather than stopping after producing recommendations or a design description.
+
+Implement in this order:
+
+1. Shared color tokens and design foundations.
+2. Logo and reusable global components.
+3. Public header, footer and landing page.
+4. Configurable hero background image.
+5. Login and registration.
+6. Authenticated dashboard layouts.
+7. Technician discovery and profile pages.
+8. Service request and dispatch tracking pages.
+9. Remaining modules and responsive refinements.
+10. Testing, build verification and final cleanup.
+
+You may adjust the order where necessary to respect dependencies in the existing project.
+
+When finished, report:
+
+* What files and components were changed.
+* Which pages were implemented or updated.
+* How to change the hero background image.
+* Which existing functionality was preserved.
+* Which tests and build commands were executed and their actual results.
+* Any remaining work or limitations.
+
+**Final design principle:** Umodzi Connect must look like one carefully designed product across every screen. The landing page, login, registration, dashboards and future modules should all share the same Navy + Teal + Coral identity, while their layouts adapt to the user's role and task. The supplied reference image defines the visual direction; the existing application's requirements and working functionality define what must be preserved.

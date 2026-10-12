@@ -1,0 +1,55 @@
+# Render deployment configuration (Task 36)
+# This file documents the intended Render setup but does NOT contain secrets.
+# All environment variables must be set in the Render dashboard.
+
+services:
+  # Backend API + WebSocket service
+  - type: web
+    name: umodzi-backend
+    env: node
+    rootDir: .
+    buildCommand: npm ci && npm run build -w backend
+    startCommand: npm run start -w backend
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false  # Set in Render dashboard — restricted runtime role (umodzi_app)
+      - key: MIGRATIONS_DATABASE_URL
+        sync: false  # Set in Render dashboard — admin role for migrations ONLY
+      - key: JWT_SECRET
+        sync: false  # Generate with: openssl rand -hex 32
+      - key: FRONTEND_ORIGIN
+        sync: false  # Your Netlify domain, e.g. https://umodzi.netlify.app
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: STORAGE_DIR
+        value: var/uploads
+      # Optional: Uncomment and configure for production SMS
+      # - key: SMS_PROVIDER
+      #   sync: false
+      # - key: AFRICASTALKING_USERNAME
+      #   sync: false
+      # - key: AFRICASTALKING_API_KEY
+      #   sync: false
+      # - key: AFRICASTALKING_FROM
+      #   value: Umodzi
+      # Optional: Uncomment for AI classification
+      # - key: GEMINI_API_KEY
+      #   sync: false
+      # Optional: Web Push VAPID keys
+      # - key: VAPID_SUBJECT
+      #   sync: false
+      # - key: VAPID_PUBLIC_KEY
+      #   sync: false
+      # - key: VAPID_PRIVATE_KEY
+      #   sync: false
+
+# Note: The frontend is deployed separately on Netlify (see DEPLOYMENT.md).
+# Database migrations should be run manually or via a deploy hook BEFORE deploying:
+#   npm run migrate -w backend
+# Do NOT include migrations in the start command - this causes issues with
+# connection pooling and can fail if the admin URL isn't available at runtime.
