@@ -96,6 +96,7 @@ jobs:
         working-directory: backend
         env:
           DATABASE_URL: postgresql://postgres:test-password@localhost:5432/umodzi_test
+          ADMIN_EMAIL: admin@umodzi.test
 
       - name: Run file storage tests
         # Local + Supabase providers against a stubbed fetch — no DB, no network.
