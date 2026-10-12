@@ -2,7 +2,8 @@
 -- Task 35.2 (DB-1/DB-2 continuation) — enable Row Level Security on every
 -- application table and add the ONE legitimate policy: full access for the
 -- dedicated runtime role `umodzi_app` (created by
--- scripts/task352-create-runtime-role.ts; this migration must run AFTER it).
+-- scripts/task352-create-runtime-role.ts; when absent in CI/plain Postgres,
+-- this migration creates a NOLOGIN placeholder so policy DDL still succeeds).
 --
 -- WHY a full-access policy for the app role is the CORRECT mapped access
 -- (not a lazy bypass): Umodzi Connect's row-level rules (customer owns
@@ -30,15 +31,32 @@
 -- SECURITY + DROP POLICY p_app_all — privilege/policy-only operations.
 
 DO $$
-DECLARE t text;
+DECLARE
+  t text;
+  role_available boolean;
 BEGIN
+  role_available := EXISTS (
+    SELECT 1 FROM pg_roles WHERE rolname = 'umodzi_app'
+  );
+
+  IF NOT role_available THEN
+    BEGIN
+      EXECUTE 'CREATE ROLE umodzi_app NOLOGIN';
+      role_available := true;
+    EXCEPTION
+      WHEN insufficient_privilege THEN
+        RAISE NOTICE
+          'Role umodzi_app is missing and cannot be created by current user; RLS enabled but p_app_all policy creation is skipped.';
+    END;
+  END IF;
+
   FOREACH t IN ARRAY ARRAY[
     'users', 'sessions', 'technicians', 'service_requests', 'dispatch_offers',
     'conversations', 'messages', 'notifications', 'push_subscriptions',
     'user_phones', 'technician_verification_documents', 'reviews', 'audit_events'
   ] LOOP
     EXECUTE format('ALTER TABLE %I ENABLE ROW LEVEL SECURITY', t);
-    IF NOT EXISTS (
+    IF role_available AND NOT EXISTS (
       SELECT 1 FROM pg_policies
       WHERE schemaname = 'public' AND tablename = t AND policyname = 'p_app_all'
     ) THEN
