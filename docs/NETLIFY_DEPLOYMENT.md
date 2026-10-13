@@ -47,6 +47,14 @@ NEXT_PUBLIC_VAPID_PUBLIC_KEY=<VAPID public key, if push is enabled>
 changing them. Never put database, JWT, VAPID private, SMS, or provider
 credentials in Netlify frontend variables.
 
+`netlify.toml` excludes only `NEXT_PUBLIC_API_BASE_URL` from Netlify's secrets
+scanning because this public backend address is intentionally embedded in the
+client bundle and can also appear in Next.js webpack cache files. Secrets
+scanning remains enabled for other environment variables and files. This URL
+must not contain credentials, API keys, tokens, or other sensitive information;
+keep those on the backend rather than adding further scan exclusions or
+disabling scanning.
+
 ## 3. Release verification
 
 1. Request `https://<api-domain>/ready` and confirm `200`.
