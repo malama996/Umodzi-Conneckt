@@ -9,7 +9,9 @@
   --bg: #f5f8fa;
   --white: #fff;
   --text: #243746;
-  --muted: #647786;
+  /* Darkened from #647786 (4.15:1 on --bg — below WCAG AA) to 4.99:1.
+     Same colour family; only the luminance moved. */
+  --muted: #5a6e7d;
   --line: #dce5ea;
   --success: #16845b;
   --warning: #d99100;
@@ -40,6 +42,7 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-body);
+  line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -100,7 +103,7 @@ p {
   display: block;
   font-size: 7px;
   letter-spacing: 1px;
-  color: #758793;
+  color: var(--muted);
   margin-top: 5px;
 }
 .logo-light .logo-word {
@@ -116,8 +119,10 @@ p {
   display: block;
 }
 .public-header {
-  height: 72px;
-  padding: 0 max(5vw, 24px);
+  height: calc(72px + env(safe-area-inset-top));
+  padding-top: env(safe-area-inset-top);
+  padding-left: max(5vw, 24px, env(safe-area-inset-left));
+  padding-right: max(5vw, 24px, env(safe-area-inset-right));
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -163,6 +168,10 @@ p {
   color: #fff;
   font-size: 12px;
   font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 8px;
 }
 .button {
   border: 0;
@@ -206,6 +215,7 @@ button:focus-visible {
 .hero {
   min-height: 760px;
   height: 100vh;
+  height: 100dvh;
   max-height: 900px;
   position: relative;
   isolation: isolate;
@@ -216,7 +226,8 @@ button:focus-visible {
   overflow: hidden;
   display: flex;
   align-items: center;
-  padding: 110px max(8vw, 24px) 85px;
+  padding: calc(110px + env(safe-area-inset-top)) max(8vw, 24px)
+    calc(85px + env(safe-area-inset-bottom));
 }
 .hero:before {
   content: '';
@@ -294,8 +305,10 @@ button:focus-visible {
 }
 .hero h1 {
   font-size: clamp(47px, 6vw, 76px);
-  line-height: 1.01;
-  letter-spacing: -3.7px;
+  line-height: 1.04;
+  /* em-based so the tracking scales with the fluid clamp (a fixed -3.7px
+     was -0.079em at the 47px end — far tighter than intended). */
+  letter-spacing: -0.02em;
   margin: 22px 0 17px;
   font-weight: 900;
 }
@@ -325,10 +338,10 @@ h2 em {
 }
 .hero-trust-grid b {
   color: #e2edef;
-  font-size: 8px;
+  font-size: 9px;
   line-height: 1.25;
   text-transform: uppercase;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.05em;
 }
 .hero-search {
   display: flex;
@@ -350,15 +363,17 @@ h2 em {
   border: 0;
   outline: 0;
   padding: 11px 3px;
-  font-size: 11px;
+  /* 16px minimum: smaller inputs trigger iOS Safari's focus zoom. */
+  font-size: 16px;
   color: var(--navy);
 }
 .search-button {
   background: var(--coral);
   color: #fff;
   border-radius: 7px;
-  padding: 11px 19px;
-  font-size: 10px;
+  padding: 12px 19px;
+  min-height: 44px;
+  font-size: 11px;
   font-weight: 900;
 }
 .hero-actions {
@@ -373,6 +388,9 @@ h2 em {
   color: #fff;
   font-size: 11px;
   font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
 }
 .text-action span {
   color: #71ddd6;
@@ -462,8 +480,8 @@ h2 em {
 }
 h2 {
   font-size: clamp(31px, 4vw, 47px);
-  line-height: 1.08;
-  letter-spacing: -1.9px;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
   color: var(--navy);
   margin: 13px 0 0;
   font-weight: 900;
@@ -472,6 +490,9 @@ h2 {
   font-size: 11px;
   color: var(--teal2);
   font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
 }
 .service-grid {
   max-width: 1120px;
@@ -753,6 +774,7 @@ h2 {
   background: #071f31;
   color: #fff;
   padding: 45px max(8vw, 24px) 18px;
+  padding-bottom: calc(18px + env(safe-area-inset-bottom));
 }
 .footer-grid {
   display: flex;
@@ -770,14 +792,14 @@ h2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px 28px;
-  font-size: 10px;
+  font-size: 12px;
   color: #d6e1e5;
 }
 /* Task 32: grouped footer navigation (Platform / Legal). Headings are
    plain muted labels, never links. */
 .footer-group {
   display: grid;
-  gap: 12px;
+  gap: 0;
   align-content: start;
 }
 .footer-heading {
@@ -790,6 +812,8 @@ h2 {
 }
 .footer-group a {
   display: block;
+  /* ≥44px touch targets for footer navigation (mobile accessibility). */
+  padding: 12px 0;
 }
 .footer-group a:hover {
   color: #fff;
@@ -818,6 +842,7 @@ h2 {
 }
 .auth-page {
   min-height: 100vh;
+  min-height: 100dvh;
   display: grid;
   grid-template-columns: 1.04fr 0.96fr;
   background: #fff;
@@ -827,6 +852,7 @@ h2 {
     linear-gradient(90deg, rgba(8, 47, 60, 0.76), rgba(8, 47, 60, 0.12)),
     url('/images/login-background-technician.jpg') center/cover no-repeat;
   min-height: 100vh;
+  min-height: 100dvh;
   color: #fff;
   padding: 30px 6vw;
   position: relative;
@@ -884,9 +910,12 @@ h2 {
   display: none;
 }
 .back-link {
-  font-size: 10px;
+  font-size: 12px;
   color: var(--muted);
-  margin-bottom: 20px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-bottom: 8px;
 }
 .back-link:hover {
   color: var(--teal2);
@@ -929,7 +958,7 @@ h2 {
   outline: 0;
   background: #fff;
   color: var(--text);
-  font-size: 12px;
+  font-size: 16px;
 }
 .auth-card input:focus,
 .auth-card select:focus,
@@ -1003,6 +1032,7 @@ h2 {
 }
 .app-page {
   min-height: 100vh;
+  min-height: 100dvh;
   padding-top: 108px;
 }
 .page-wrap {
@@ -1128,7 +1158,7 @@ h2 {
   outline: 0;
   background: #fff;
   color: var(--text);
-  font-size: 12px;
+  font-size: 16px;
   width: 100%;
 }
 .request-form input:focus {
@@ -1240,8 +1270,9 @@ h2 {
   flex-wrap: wrap;
 }
 .form-note {
-  font-size: 9px;
-  color: #84939b;
+  font-size: 12px;
+  /* Was #84939b (3.1:1 — below WCAG AA); var(--muted) is AA-verified. */
+  color: var(--muted);
   line-height: 1.5;
 }
 .dispatch-section {
@@ -1885,7 +1916,7 @@ h2 {
   outline: 0;
   background: #fff;
   color: var(--text);
-  font-size: 12px;
+  font-size: 16px;
   width: 100%;
 }
 .match-form-panel textarea {
@@ -1972,6 +2003,7 @@ h2 {
 }
 .profile-page {
   min-height: 100vh;
+  min-height: 100dvh;
   padding: 110px 24px 75px;
 }
 .profile-wrap {
@@ -2084,6 +2116,7 @@ h2 {
 }
 .dashboard-shell {
   min-height: 100vh;
+  min-height: 100dvh;
   display: grid;
   grid-template-columns: 205px 1fr;
   background: var(--bg);
@@ -2092,7 +2125,8 @@ h2 {
   background: linear-gradient(180deg, var(--deep), var(--navy));
   color: #fff;
   min-height: 100vh;
-  padding: 23px 13px 18px;
+  min-height: 100dvh;
+  padding: 23px 13px calc(18px + env(safe-area-inset-bottom));
   display: flex;
   flex-direction: column;
   position: sticky;
@@ -2169,6 +2203,210 @@ h2 {
   background: none;
   border: 0;
   text-align: left;
+}
+/* ===== Mobile navigation drawer (Phase 3) =====
+   One drawer pattern serves the public header and the dashboard sidebar.
+   Base rules live here (hidden on wide screens); the ≤950px block below
+   switches them on. Only transform/opacity animate; the discrete
+   `visibility` switch keeps the closed panel out of the tab order. */
+.nav-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: var(--control-radius);
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+}
+.nav-toggle:focus-visible {
+  outline: 3px solid var(--teal);
+  outline-offset: 2px;
+}
+.mobile-nav {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: min(320px, 86vw);
+  z-index: 1200;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 18px max(20px, env(safe-area-inset-left))
+    calc(18px + env(safe-area-inset-bottom)) 20px;
+  background: linear-gradient(180deg, var(--deep), var(--navy));
+  color: #fff;
+  box-shadow: var(--shadow-lg);
+  transform: translateX(-100%);
+  visibility: hidden;
+  transition: transform 0.25s ease, visibility 0s linear 0.25s;
+  overscroll-behavior: contain;
+  -webkit-tap-highlight-color: transparent;
+}
+.mobile-nav-open {
+  transform: translateX(0);
+  visibility: visible;
+  transition: transform 0.25s ease, visibility 0s linear 0s;
+}
+.mobile-nav-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+  padding-bottom: 8px;
+}
+.mobile-nav-links {
+  display: grid;
+  gap: 2px;
+}
+.mobile-nav-links a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 10px 8px;
+  border-radius: var(--control-radius);
+  color: #edf5f6;
+  font-size: 15px;
+  font-weight: 700;
+  transition: background 0.15s ease;
+}
+.mobile-nav-links a:hover,
+.mobile-nav-links a:active {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+.mobile-nav-icon {
+  display: inline-flex;
+  color: #71ddd6;
+}
+.mobile-nav-actions {
+  display: grid;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+.mobile-nav-actions .button {
+  width: 100%;
+}
+.mobile-nav-actions .header-auth {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+.mobile-nav .header-user {
+  color: #b7c9cf;
+}
+.sidebar-user {
+  display: none;
+  align-items: center;
+  gap: 11px;
+  margin: 0 0 14px;
+  padding: 10px 9px;
+  border-radius: var(--control-radius);
+  background: rgba(255, 255, 255, 0.06);
+}
+.sidebar-user-avatar {
+  flex: none;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--teal);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+}
+.sidebar-user-meta {
+  display: grid;
+  min-width: 0;
+}
+.sidebar-user-meta b {
+  font-size: 13px;
+  color: #fff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sidebar-user-meta small {
+  font-size: 10px;
+  color: #b7c9cf;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.mobile-menu-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: var(--control-radius);
+  background: transparent;
+  color: var(--navy);
+  cursor: pointer;
+}
+.mobile-menu-toggle:hover {
+  background: rgba(11, 31, 58, 0.06);
+}
+.mobile-menu-toggle:focus-visible {
+  outline: 3px solid var(--teal);
+  outline-offset: 2px;
+}
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sidebar-backdrop {
+  display: none;
+}
+/* Log-out confirmation dialog (§3) — existing button styles only. */
+.confirm-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1300;
+  background: rgba(8, 47, 60, 0.55);
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+.confirm-dialog {
+  width: min(360px, 100%);
+  background: #fff;
+  border-radius: var(--card-radius);
+  box-shadow: var(--shadow-lg);
+  padding: 24px;
+  display: grid;
+  gap: 12px;
+}
+.confirm-dialog p {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--navy);
+}
+.confirm-dialog .confirm-desc {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.confirm-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+.confirm-actions .button,
+.confirm-actions .outline-button {
+  min-height: 44px;
 }
 .sidebar-logout:disabled {
   opacity: 0.6;
@@ -2485,24 +2723,56 @@ h2 {
     grid-template-columns: 1fr;
   }
   .dashboard-shell {
-    grid-template-columns: 78px 1fr;
+    grid-template-columns: 1fr;
   }
-  .sidebar .logo-word,
-  .sidebar-nav a:not(.sidebar-active)::after,
-  .sidebar-nav a {
-    justify-content: center;
+  /* ≤950px: the sidebar becomes a slide-in drawer from the LEFT (the old
+     78px icon-only rail is gone — labels stay readable). The public
+     header's hamburger + .mobile-nav panel switch on here too. */
+  .nav-toggle {
+    display: inline-flex;
   }
-  .sidebar-nav a {
-    font-size: 0;
+  .mobile-menu-toggle {
+    display: inline-flex;
   }
-  .sidebar-nav a span {
-    font-size: 13px;
+  .sidebar-user {
+    display: flex;
   }
-  .sidebar-nav .sidebar-active {
-    font-size: 0;
+  .sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 280px;
+    max-width: 85vw;
+    z-index: 1050;
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition: transform 0.25s ease, visibility 0s linear 0.25s;
+    box-shadow: var(--shadow-lg);
+    overscroll-behavior: contain;
   }
-  .sidebar-logout span {
-    display: none;
+  .sidebar-open .sidebar {
+    transform: translateX(0);
+    visibility: visible;
+    transition: transform 0.25s ease, visibility 0s linear 0s;
+  }
+  .sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 1040;
+    border: 0;
+    padding: 0;
+    background: rgba(8, 47, 60, 0.6);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    pointer-events: none;
+  }
+  .sidebar-open .sidebar-backdrop {
+    opacity: 1;
+    pointer-events: auto;
   }
   .dashboard-grid {
     grid-template-columns: 1fr;
@@ -2513,8 +2783,9 @@ h2 {
 }
 @media (max-width: 650px) {
   .public-header {
-    height: 66px;
-    padding: 0 16px;
+    height: calc(66px + env(safe-area-inset-top));
+    padding: env(safe-area-inset-top) max(16px, env(safe-area-inset-right)) 0
+      max(16px, env(safe-area-inset-left));
   }
   .logo-word {
     font-size: 16px;
@@ -2533,7 +2804,8 @@ h2 {
   }
   .hero {
     min-height: 735px;
-    padding: 115px 20px 90px;
+    padding: calc(115px + env(safe-area-inset-top)) 20px
+      calc(90px + env(safe-area-inset-bottom));
     background-position: 64% center;
   }
   .hero:before {
@@ -2546,7 +2818,7 @@ h2 {
   }
   .hero h1 {
     font-size: 48px;
-    letter-spacing: -2.9px;
+    letter-spacing: -0.02em;
   }
   .hero-content > p {
     font-size: 13px;
@@ -2559,7 +2831,7 @@ h2 {
     font-size: 15px;
   }
   .hero-trust-grid b {
-    font-size: 7px;
+    font-size: 9px;
   }
   .hero-search {
     max-width: 100%;
@@ -2658,79 +2930,14 @@ h2 {
   .dashboard-shell {
     grid-template-columns: 1fr;
   }
-  /* Mobile menu toggle button */
-  .mobile-menu-toggle {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: fixed;
-    top: 12px;
-    right: 16px;
-    z-index: 1100;
-    width: 44px;
-    height: 44px;
-    border: 0;
-    border-radius: var(--control-radius);
-    background: var(--navy);
-    color: #fff;
-    cursor: pointer;
-    box-shadow: var(--shadow-lg);
-    transition: background 0.18s ease;
-  }
-  .mobile-menu-toggle:hover {
-    background: var(--deep);
-  }
-  .mobile-menu-toggle:focus-visible {
-    outline: 3px solid var(--teal);
-    outline-offset: 2px;
-  }
-  /* Sidebar wrapper for mobile drawer */
-  .sidebar-wrapper {
-    position: relative;
-  }
-  .sidebar-backdrop {
-    display: none;
-  }
-  @media (max-width: 650px) {
-    .sidebar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      bottom: 0;
-      width: 280px;
-      max-width: 85vw;
-      z-index: 1050;
-      transform: translateX(-100%);
-      transition: transform 0.25s ease;
-      box-shadow: var(--shadow-lg);
-    }
-    .sidebar-open .sidebar {
-      transform: translateX(0);
-    }
-    .sidebar-backdrop {
-      display: block;
-      position: fixed;
-      inset: 0;
-      z-index: 1040;
-      background: rgba(8, 47, 60, 0.6);
-      backdrop-filter: blur(4px);
-      opacity: 0;
-      transition: opacity 0.25s ease;
-      pointer-events: none;
-    }
-    .sidebar-open .sidebar-backdrop {
-      opacity: 1;
-      pointer-events: auto;
-    }
-  }
   .dashboard-topbar {
-    padding: 0 15px;
+    padding: 0 max(15px, env(safe-area-inset-right)) 0 max(15px, env(safe-area-inset-left));
   }
   .global-search {
     width: 55%;
   }
   .dashboard-page {
-    padding: 20px 15px 40px;
+    padding: 20px 15px calc(40px + env(safe-area-inset-bottom));
   }
   .stat-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -2751,9 +2958,6 @@ h2 {
   }
   .hero h1 {
     font-size: 43px;
-  }
-  .hero-search input {
-    font-size: 10px;
   }
   .search-button {
     padding: 11px 12px;
@@ -2818,7 +3022,7 @@ h2 {
   outline: 0;
   background: #fff;
   color: var(--text);
-  font-size: 12px;
+  font-size: 16px;
   width: 100%;
 }
 .profile-editor input:focus,
@@ -3000,6 +3204,7 @@ h2 {
 }
 .auth-gate {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -3039,7 +3244,7 @@ h2 {
 .header-login {
   background: none;
   border: 0;
-  padding: 0;
+  padding: 0 8px;
   cursor: pointer;
   font: inherit;
 }
@@ -3198,7 +3403,7 @@ h2 {
   outline: 0;
   background: transparent;
   color: var(--text);
-  font-size: 12px;
+  font-size: 16px;
 }
 .admin-search:focus-within {
   border-color: var(--teal);
@@ -3219,7 +3424,7 @@ h2 {
   outline: 0;
   background: #fff;
   color: var(--text);
-  font-size: 12px;
+  font-size: 16px;
 }
 .admin-field select:focus {
   border-color: var(--teal);
@@ -3920,7 +4125,7 @@ h2 {
   outline: 0;
   background: #fff;
   color: var(--text);
-  font-size: 12px;
+  font-size: 16px;
   font-family: inherit;
   resize: vertical;
 }
@@ -4374,6 +4579,7 @@ h2 {
 .privacy-page {
   background: var(--bg);
   min-height: 100vh;
+  min-height: 100dvh;
   padding: 30px 20px 60px;
 }
 .privacy-shell {

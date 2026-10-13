@@ -2,14 +2,18 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useState, type ReactNode } from 'react';
+import { useCallback, useState, type ReactNode } from 'react';
 import {
   LuArrowRight,
   LuBell,
   LuBriefcaseBusiness,
   LuClipboardList,
   LuClock,
+  LuHouse,
+  LuInfo,
   LuLayoutDashboard,
+  LuLayoutGrid,
+  LuListChecks,
   LuLogOut,
   LuMapPin,
   LuMenu,
@@ -26,8 +30,11 @@ import {
 
 import type { TechnicianCategory } from '@/lib/categories';
 import { logout, useAuth } from '@/lib/auth';
-import type { UserRole } from '@/lib/auth/authTypes';
+import type { AuthUser, UserRole } from '@/lib/auth/authTypes';
 import { useUnreadNotificationCount } from '@/lib/privacy/useUnreadNotificationCount';
+import { useMobileDrawer } from '@/lib/ui/useMobileDrawer';
+import { usePendingOffersCount } from '@/lib/offers/usePendingOffersCount';
+import { UI_V2 } from '@/lib/uiFlags';
 import AuthNav from './AuthNav';
 
 /**
@@ -50,12 +57,16 @@ export function BrandAsset({
   width,
   height,
   className,
+  loading,
 }: {
   src: string;
   alt: string;
   width: number;
   height: number;
   className?: string;
+  /* Below-the-fold artwork passes loading="lazy" (low-data promise);
+     above-the-fold assets stay eager, the browser default. */
+  loading?: 'lazy' | 'eager';
 }) {
   const decorative = alt === '';
   return (
@@ -65,6 +76,8 @@ export function BrandAsset({
       alt={alt}
       width={width}
       height={height}
+      loading={loading}
+      decoding="async"
       aria-hidden={decorative || undefined}
     />
   );
@@ -105,21 +118,106 @@ export function Logo({ light = false, compact = false }: { light?: boolean; comp
   );
 }
 
+/**
+ * One shared config drives the desktop top nav AND the mobile drawer so
+ * the two can never drift apart (§3). Icons use the existing Lucide set
+ * (react-icons/lu) and only render inside the drawer.
+ */
+const PUBLIC_NAV_LINKS: { label: string; href: string; icon: ReactNode }[] = [
+  { label: 'Home', href: '/', icon: <LuHouse size={17} aria-hidden="true" /> },
+  { label: 'Services', href: '/#services', icon: <LuLayoutGrid size={17} aria-hidden="true" /> },
+  { label: 'How It Works', href: '/#how', icon: <LuListChecks size={17} aria-hidden="true" /> },
+  { label: 'About', href: '/#about', icon: <LuInfo size={17} aria-hidden="true" /> },
+];
+
+/** Initials badge: first+last name initial (one letter for a single name),
+ * uppercased, falling back to the email local part, then '?'. */
+function initialsFor(user: Pick<AuthUser, 'firstName' | 'lastName' | 'email'> | null): string {
+  const fullName = user ? `${user.firstName} ${user.lastName}`.trim() : '';
+  return (
+    (fullName || user?.email || '')
+      .split(/[\s@.]+/)
+      .filter(Boolean)
+      .map((part) => part[0])
+      .join('')
+      .slice(0, 2)
+      .toUpperCase() || '?'
+  );
+}
+
 export function PublicHeader() {
+  const [navOpen, setNavOpen] = useState(false);
+  const close = useCallback(() => setNavOpen(false), []);
+  const { panelRef, onTouchStart, onTouchEnd } = useMobileDrawer(navOpen, close);
   return (
     <header className="public-header">
       <Logo light />
       <nav className="desktop-nav" aria-label="Primary navigation">
-        <Link className="nav-active" href="/">
-          Home
-        </Link>
-        <Link href="/#services">Services</Link>
-        <Link href="/#how">How It Works</Link>
-        <Link href="/#about">About</Link>
+        {PUBLIC_NAV_LINKS.map((link, index) => (
+          <Link key={link.label} className={index === 0 ? 'nav-active' : ''} href={link.href}>
+            {link.label}
+          </Link>
+        ))}
       </nav>
       <div className="header-actions">
         <AuthNav />
       </div>
+      {/* Mobile (≤950px): the CSS hides .desktop-nav; this hamburger +
+          left drawer replace it. Gated by the UI_V2 flag (lib/uiFlags) for
+          a one-env-var rollback. */}
+      {UI_V2 && (
+        <>
+          <button
+            type="button"
+            className="nav-toggle"
+            aria-expanded={navOpen}
+            aria-controls="public-mobile-nav"
+            aria-label={navOpen ? 'Close menu' : 'Open menu'}
+            onClick={() => setNavOpen((open) => !open)}
+          >
+            {navOpen ? <LuX size={22} aria-hidden="true" /> : <LuMenu size={22} aria-hidden="true" />}
+          </button>
+          <nav
+            ref={panelRef}
+            id="public-mobile-nav"
+            data-drawer-panel
+            className={`mobile-nav ${navOpen ? 'mobile-nav-open' : ''}`}
+            aria-label="Mobile navigation"
+            aria-hidden={!navOpen}
+            inert={!navOpen || undefined}
+            onTouchStart={onTouchStart}
+            onTouchEnd={onTouchEnd}
+          >
+            <div className="mobile-nav-head">
+              <Logo light />
+            </div>
+            <div className="mobile-nav-links">
+              {PUBLIC_NAV_LINKS.map((link) => (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  onClick={close}
+                  tabIndex={navOpen ? 0 : -1}
+                >
+                  <span className="mobile-nav-icon">{link.icon}</span>
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+            <div className="mobile-nav-actions">
+              <Link
+                href="/matching"
+                className="button button-coral"
+                onClick={close}
+                tabIndex={navOpen ? 0 : -1}
+              >
+                Find a Technician <LuArrowRight size={13} aria-hidden="true" />
+              </Link>
+              <AuthNav />
+            </div>
+          </nav>
+        </>
+      )}
     </header>
   );
 }
@@ -228,9 +326,17 @@ export function VerifiedBadge() {
  * "#" placeholder while chat did not exist). Administrators deliberately do
  * NOT get an admin-to-user chat: their item list stays Task 25 only.
  */
-export function Sidebar({ active = 'Dashboard' }: { active?: string }) {
+export function Sidebar({
+  active = 'Dashboard',
+  onNavigate,
+}: {
+  active?: string;
+  /** Called after any nav link is tapped — the drawer closes itself. */
+  onNavigate?: () => void;
+}) {
   const { user } = useAuth();
   const unread = useUnreadNotificationCount();
+  const pendingOffers = usePendingOffersCount();
   const router = useRouter();
   const pathname = usePathname();
   const consumerItems: [string, string, ReactNode][] = [
@@ -346,6 +452,9 @@ export function Sidebar({ active = 'Dashboard' }: { active?: string }) {
       ? technicianItems
       : consumerItems;
   const [loggingOut, setLoggingOut] = useState(false);
+  const [confirmLogout, setConfirmLogout] = useState(false);
+  const fullName = user ? `${user.firstName} ${user.lastName}`.trim() : '';
+  const initials = initialsFor(user);
 
   /**
    * Real logout (Phase 2 P0 fix).
@@ -378,9 +487,22 @@ export function Sidebar({ active = 'Dashboard' }: { active?: string }) {
   };
 
   return (
-    <aside className="sidebar">
-      <Logo light />{' '}
-      <nav className="sidebar-nav" aria-label="Primary navigation">
+    <aside className="sidebar" data-drawer-panel>
+      <Logo light />
+      {/* Drawer identity header (§3): avatar + full name + role label.
+          Visible only where the sidebar becomes a drawer (≤950px). */}
+      {user && (
+        <div className="sidebar-user">
+          <span className="sidebar-user-avatar" aria-hidden="true">
+            {initials}
+          </span>
+          <span className="sidebar-user-meta">
+            <b>{fullName || user.email}</b>
+            <small>{IDENTITY_LABELS[user.role]}</small>
+          </span>
+        </div>
+      )}
+      <nav id="sidebar-nav" className="sidebar-nav" aria-label="Primary navigation">
         {isAdmin
           ? adminGroups.map((group) => (
               <div key={group.heading} className="sidebar-group">
@@ -390,6 +512,7 @@ export function Sidebar({ active = 'Dashboard' }: { active?: string }) {
                     key={label}
                     href={href}
                     className={active === label ? 'sidebar-active' : ''}
+                    onClick={onNavigate}
                   >
                     <span>{icon}</span>
                     {label}
@@ -398,9 +521,17 @@ export function Sidebar({ active = 'Dashboard' }: { active?: string }) {
               </div>
             ))
           : items.map(([label, href, icon]) => (
-              <Link key={label} href={href} className={active === label ? 'sidebar-active' : ''}>
+              <Link
+                key={label}
+                href={href}
+                className={active === label ? 'sidebar-active' : ''}
+                onClick={onNavigate}
+              >
                 <span>{icon}</span>
                 {label}
+                {label === 'Offers' && pendingOffers > 0 && (
+                  <b className="sidebar-count">{pendingOffers}</b>
+                )}
                 {label === 'Notifications' && unread > 0 && (
                   <b className="sidebar-count">{unread}</b>
                 )}
@@ -410,16 +541,64 @@ export function Sidebar({ active = 'Dashboard' }: { active?: string }) {
       <button
         type="button"
         className="sidebar-logout"
-        /* At ≤950px the CSS hides the visible label (icon-only control), so the
-           accessible name must not depend on that text. */
         aria-label={loggingOut ? 'Signing out' : 'Log out'}
         title="Log out"
-        onClick={() => void handleLogout()}
+        onClick={() => setConfirmLogout(true)}
         disabled={loggingOut}
       >
         <LuLogOut size={13} className="ic" aria-hidden="true" />{' '}
         <span>{loggingOut ? 'Signing out…' : 'Log Out'}</span>
       </button>
+      {/* Log-out confirmation (§3): the existing server-side logout runs
+          only after explicit confirmation. */}
+      {confirmLogout && (
+        <div
+          className="confirm-backdrop"
+          role="presentation"
+          onClick={() => setConfirmLogout(false)}
+        >
+          <div
+            className="confirm-dialog"
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="logout-confirm-title"
+            aria-describedby="logout-confirm-desc"
+            onClick={(event) => event.stopPropagation()}
+            onKeyDown={(event) => {
+              if (event.key === 'Escape') {
+                event.stopPropagation();
+                setConfirmLogout(false);
+              }
+            }}
+          >
+            <p id="logout-confirm-title">Log out of Umodzi Connect?</p>
+            <p id="logout-confirm-desc" className="confirm-desc">
+              You will need your email and password to sign back in.
+            </p>
+            <div className="confirm-actions">
+              <button
+                type="button"
+                className="outline-button"
+                autoFocus
+                onClick={() => setConfirmLogout(false)}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="button button-coral"
+                disabled={loggingOut}
+                onClick={() => {
+                  setConfirmLogout(false);
+                  void handleLogout();
+                }}
+              >
+                {loggingOut ? 'Signing out…' : 'Log out'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </aside>
   );
 }
@@ -447,6 +626,8 @@ export function DashboardLayout({
 }) {
   const { user } = useAuth();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const closeMobileNav = useCallback(() => setMobileNavOpen(false), []);
+  const { panelRef, onTouchStart, onTouchEnd } = useMobileDrawer(mobileNavOpen, closeMobileNav);
 
   /**
    * The identity chip previously rendered HARDCODED values for every
@@ -457,54 +638,53 @@ export function DashboardLayout({
    */
   const fullName = user ? `${user.firstName} ${user.lastName}`.trim() : '';
   const displayName = fullName || user?.email || '…';
-  const initials =
-    (fullName || user?.email || '')
-      .split(/[\s@.]+/)
-      .filter(Boolean)
-      .map((part) => part[0])
-      .join('')
-      .slice(0, 2)
-      .toUpperCase() || '?';
-
-  // Close mobile nav on ESC key
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Escape' && mobileNavOpen) {
-      setMobileNavOpen(false);
-    }
-  };
+  const initials = initialsFor(user);
 
   return (
-    <div className="dashboard-shell" onKeyDown={handleKeyDown}>
-      {/* Mobile hamburger menu button */}
-      <button
-        type="button"
-        className="mobile-menu-toggle"
-        aria-label={mobileNavOpen ? 'Close navigation menu' : 'Open navigation menu'}
-        aria-expanded={mobileNavOpen}
-        onClick={() => setMobileNavOpen(!mobileNavOpen)}
+    <div className="dashboard-shell">
+      {/* Sidebar drawer (≤950px) + dimmed backdrop. Focus trap, Escape,
+          scroll lock, swipe-left and route-change close come from the
+          shared useMobileDrawer hook. */}
+      <div
+        ref={panelRef}
+        className={`sidebar-wrapper ${mobileNavOpen ? 'sidebar-open' : ''}`}
+        inert={!mobileNavOpen || undefined}
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
       >
-        {mobileNavOpen ? <LuX size={24} /> : <LuMenu size={24} />}
-      </button>
-
-      {/* Sidebar with mobile overlay */}
-      <div className={`sidebar-wrapper ${mobileNavOpen ? 'sidebar-open' : ''}`}>
-        <Sidebar active={active} />
-        {/* Backdrop to close drawer on tap */}
-        <div
+        <Sidebar active={active} onNavigate={closeMobileNav} />
+        <button
+          type="button"
           className="sidebar-backdrop"
-          onClick={() => setMobileNavOpen(false)}
-          aria-hidden="true"
+          aria-label="Close navigation menu"
+          tabIndex={mobileNavOpen ? 0 : -1}
+          onClick={closeMobileNav}
         />
       </div>
 
       <div className="dashboard-main">
         <div className="dashboard-topbar">
-          {/* Phone widths hide the sidebar (and its logo) — keep a compact
-              brand mark in the topbar there. Hidden at wider widths so the
-              desktop topbar is unchanged. */}
-          <Link href="/" className="dashboard-brand" aria-label="Umodzi Connect home">
-            <BrandAsset src="/branding/umodzi-connect-mark.svg" alt="" width={112} height={116} />
-          </Link>
+          <div className="topbar-left">
+            <button
+              type="button"
+              className="mobile-menu-toggle"
+              aria-label={mobileNavOpen ? 'Close navigation menu' : 'Open navigation menu'}
+              aria-expanded={mobileNavOpen}
+              aria-controls="sidebar-nav"
+              onClick={() => setMobileNavOpen((open) => !open)}
+            >
+              {mobileNavOpen ? (
+                <LuX size={22} aria-hidden="true" />
+              ) : (
+                <LuMenu size={22} aria-hidden="true" />
+              )}
+            </button>
+            {/* Compact brand mark beside the toggle — phone widths hide the
+                sidebar (and its logo); wider widths hide both (CSS). */}
+            <Link href="/" className="dashboard-brand" aria-label="Umodzi Connect home">
+              <BrandAsset src="/branding/umodzi-connect-mark.svg" alt="" width={112} height={116} />
+            </Link>
+          </div>
           {/* The former global search box had no handler, no state and no
               destination — it accepted typing and did nothing. Removed rather
               than left as a control that only looks functional. */}
