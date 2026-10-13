@@ -2366,6 +2366,11 @@ h2 {
 .sidebar-backdrop {
   display: none;
 }
+/* Desktop (>950px): the sidebar-wrapper must participate in the
+   dashboard-shell grid as if it were the sidebar itself. */
+.sidebar-wrapper {
+  display: contents;
+}
 /* Log-out confirmation dialog (§3) — existing button styles only. */
 .confirm-backdrop {
   position: fixed;
