@@ -11,7 +11,15 @@ services:
     name: umodzi-backend
     env: node
     rootDir: .
-    buildCommand: npm ci && npm run build -w backend
+    # --include=dev is REQUIRED here: NODE_ENV=production is set for this
+    # service (envVars below) and Render applies env vars at build time, so
+    # plain `npm ci` OMITS devDependencies — `typescript`, `@types/node`,
+    # `@types/pg` — and `tsc` fails with TS2591 "Cannot find name 'process'"
+    # / TS7016 "no declaration file for 'pg'" errors. The dev packages are
+    # build-time only; the runtime still serves compiled dist/ with
+    # production dependencies only.
+    installCommand: npm ci --include=dev
+    buildCommand: npm run build -w backend
     startCommand: npm run start -w backend
     healthCheckPath: /health
     envVars:

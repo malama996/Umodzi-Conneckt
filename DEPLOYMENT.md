@@ -135,10 +135,21 @@ npm run migrate -w backend
 - **Root Directory**: `.` (repository root)
 - **Branch**: `main` (or `staging` for testing)
 
-### 2. Build & Start Commands
+### 2. Install, Build & Start Commands
 
-- **Build Command**: `npm ci && npm run build -w backend`
+- **Install Command**: `npm ci --include=dev`
+- **Build Command**: `npm run build -w backend`
 - **Start Command**: `npm run start -w backend`
+
+> **Why `--include=dev` is not optional**: the service sets
+> `NODE_ENV=production`, and Render applies environment variables **during the
+> build** as well as at runtime. npm then treats the install as production and
+> skips devDependencies — including `typescript`, `@types/node` and
+> `@types/pg` — so `tsc` fails with errors like `Cannot find name 'process'`
+> (TS2591) and `Could not find a declaration file for module 'pg'` (TS7016),
+> plus cascading `unref`/`resume`/implicit-`any` errors. `--include=dev`
+> forces the full install at build time only; the running service still uses
+> compiled `dist/` code with production dependencies only.
 
 > **Migrations**: the server runs pending SQL migrations **at boot, before
 > serving traffic**, using `MIGRATIONS_DATABASE_URL` for DDL (see

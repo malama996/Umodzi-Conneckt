@@ -11,10 +11,12 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# Environment variables (set these in Netlify dashboard)
+# Environment variables (set secrets in the Netlify dashboard)
 [build.environment]
-  NODE_VERSION = "20"
-  SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_API_BASE_URL"
+  NODE_VERSION = "22"
+  # These two values are intentionally public (they get inlined into the
+  # client bundle), so the secrets scanner must ignore them.
+  SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_API_BASE_URL,NEXT_PUBLIC_VAPID_PUBLIC_KEY"
   # NEXT_PUBLIC_API_BASE_URL and NEXT_PUBLIC_VAPID_PUBLIC_KEY must be set
   # in the Netlify dashboard. Do NOT set them here with empty values.
 
