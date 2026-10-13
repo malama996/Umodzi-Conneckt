@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Manrope, Inter } from 'next/font/google';
 import './globals.css';
 import { ServiceWorkerRegistration } from '@/components/ServiceWorkerRegistration';
@@ -26,6 +26,19 @@ export const metadata: Metadata = {
   title: 'Umodzi Connect',
   description: 'Skilled People. Stronger Communities.',
   icons: { icon: '/branding/umodzi-connect-favicon.svg' },
+};
+
+/* Mobile/PWA viewport (Phase 2):
+   - viewportFit 'cover' lets the standalone PWA use the full display
+     (notches/home bars); globals.css pairs it with env(safe-area-inset-*)
+     padding on the header/footer/hero so nothing is ever covered.
+   - themeColor matches the manifest (#0B1F3A) so the Android status bar
+     blends with the app chrome. */
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+  themeColor: '#0B1F3A',
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

@@ -32,6 +32,10 @@ export default function Home() {
   return (
     <>
       <HomeAuthRedirect />
+      {/* LCP: the hero background is painted from an inline style, which the
+         browser only discovers late. Preloading it (React 19 hoists this to
+          <head>) keeps LCP fast on slow connections. */}
+      <link rel="preload" as="image" href={hero.backgroundImage} />
       <PublicHeader />
       <main>
         <section
@@ -198,7 +202,14 @@ export default function Home() {
                 <span>{n}</span>
                 <h3>{t}</h3>
                 <p>{d}</p>
-                <BrandAsset className="step-art" src={art} alt={artAlt} width={640} height={480} />
+                <BrandAsset
+                  className="step-art"
+                  src={art}
+                  alt={artAlt}
+                  width={640}
+                  height={480}
+                  loading="lazy"
+                />
               </article>
             ))}
           </div>
@@ -238,6 +249,7 @@ export default function Home() {
               alt="Umodzi Connect"
               width={414}
               height={86}
+              loading="lazy"
             />
             <BrandAsset
               className="split-art"
@@ -245,6 +257,7 @@ export default function Home() {
               alt="Illustration: a verified technician profile with ratings and customer reviews"
               width={640}
               height={480}
+              loading="lazy"
             />
           </div>
           <div className="principles">

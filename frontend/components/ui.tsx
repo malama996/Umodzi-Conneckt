@@ -50,12 +50,16 @@ export function BrandAsset({
   width,
   height,
   className,
+  loading,
 }: {
   src: string;
   alt: string;
   width: number;
   height: number;
   className?: string;
+  /* Below-the-fold artwork passes loading="lazy" (low-data promise);
+     above-the-fold assets stay eager, the browser default. */
+  loading?: 'lazy' | 'eager';
 }) {
   const decorative = alt === '';
   return (
@@ -65,6 +69,8 @@ export function BrandAsset({
       alt={alt}
       width={width}
       height={height}
+      loading={loading}
+      decoding="async"
       aria-hidden={decorative || undefined}
     />
   );
