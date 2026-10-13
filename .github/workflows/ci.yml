@@ -110,6 +110,10 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:test-password@localhost:5432/umodzi_test
           ADMIN_EMAIL: admin@umodzi.test
+          # The server fails fast at boot without JWT_SECRET (loadJwtConfig()
+          # runs before any route serves), so the health check below never
+          # passes. Throwaway CI-only value, >= 32 chars; not a real secret.
+          JWT_SECRET: ci-only-jwt-secret-for-github-actions-000000
 
       - name: Run file storage tests
         # Local + Supabase providers against a stubbed fetch — no DB, no network.

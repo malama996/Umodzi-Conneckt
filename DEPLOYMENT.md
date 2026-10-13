@@ -94,24 +94,37 @@ git push -u origin staging
 4. **Get Connection Strings**:
    - **Runtime** (`DATABASE_URL`): Use pooler connection with `umodzi_app` role
      ```
-     postgresql://umodzi_app:PASSWORD@aws-0-region.pooler.supabase.com:6543/postgres?sslmode=verify-full
+     postgresql://umodzi_app:PASSWORD@aws-0-region.pooler.supabase.com:6543/postgres?sslmode=verify-full&sslrootcert=supabase-ca.pem
      ```
    - **Migrations** (`MIGRATIONS_DATABASE_URL`): Use direct connection with admin role
      ```
-     postgresql://postgres:ADMIN_PASSWORD@db.region.supabase.co:5432/postgres?sslmode=verify-full
+     postgresql://postgres:ADMIN_PASSWORD@db.region.supabase.co:5432/postgres?sslmode=verify-full&sslrootcert=supabase-ca.pem
      ```
 
 ### SSL Certificate Verification
 
-For `sslmode=verify-full`, download Supabase CA certificate:
-```bash
-curl -o backend/ca-cert.crt https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem
-```
+Both connection strings use `sslmode=verify-full` **together with Supabase's CA
+certificate** (`sslrootcert=supabase-ca.pem`, a path relative to `backend/`,
+where the server process runs).
 
-Then update `DATABASE_URL`:
-```
-postgresql://user:pass@host:port/db?sslmode=verify-full&sslrootcert=./ca-cert.crt
-```
+**Why the CA file is mandatory**: Supabase's certificate chain ends in
+Supabase's own private CA, which Node.js does not trust by default.
+`verify-full` without the CA file makes the backend crash at boot with
+`SELF_SIGNED_CERT_IN_CHAIN`, and the AWS RDS public root bundle does NOT
+validate Supabase's chain. Two more traps to avoid:
+
+- `sslmode=require` is **an alias for `verify-full`** in `pg` ≥ 8.16 — it does
+  not skip verification and crashes the same way.
+- `sslrootcert` pointing at a missing file crashes at boot with `ENOENT` —
+  commit the file before deploying.
+
+Setup (one time):
+
+1. Supabase Dashboard → **Project Settings → Database → SSL Configuration** →
+   download the CA certificate (`prod-ca-2021.crt`).
+2. Save it as `backend/supabase-ca.pem` and **commit it** (a CA certificate is
+   public information, never a secret).
+3. Keep `&sslrootcert=supabase-ca.pem` on both URLs in the Render dashboard.
 
 ### Migration Strategy
 
@@ -385,7 +398,9 @@ After deployment, verify these features work in production:
 - Ensure HTTPS is enabled on both frontend and backend
 
 ### Database Connection Fails
-- Verify `DATABASE_URL` format includes `?sslmode=verify-full`
+- Verify `DATABASE_URL` format includes
+  `?sslmode=verify-full&sslrootcert=supabase-ca.pem` **and**
+  `backend/supabase-ca.pem` is committed (missing file = boot crash)
 - Check Supabase dashboard for connection limits
 - Test connection string locally: `psql "YOUR_DATABASE_URL"`
 - Check Render logs for detailed error messages
