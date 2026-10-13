@@ -2204,6 +2204,210 @@ h2 {
   border: 0;
   text-align: left;
 }
+/* ===== Mobile navigation drawer (Phase 3) =====
+   One drawer pattern serves the public header and the dashboard sidebar.
+   Base rules live here (hidden on wide screens); the ≤950px block below
+   switches them on. Only transform/opacity animate; the discrete
+   `visibility` switch keeps the closed panel out of the tab order. */
+.nav-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: var(--control-radius);
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+}
+.nav-toggle:focus-visible {
+  outline: 3px solid var(--teal);
+  outline-offset: 2px;
+}
+.mobile-nav {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: min(320px, 86vw);
+  z-index: 1200;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 18px max(20px, env(safe-area-inset-left))
+    calc(18px + env(safe-area-inset-bottom)) 20px;
+  background: linear-gradient(180deg, var(--deep), var(--navy));
+  color: #fff;
+  box-shadow: var(--shadow-lg);
+  transform: translateX(-100%);
+  visibility: hidden;
+  transition: transform 0.25s ease, visibility 0s linear 0.25s;
+  overscroll-behavior: contain;
+  -webkit-tap-highlight-color: transparent;
+}
+.mobile-nav-open {
+  transform: translateX(0);
+  visibility: visible;
+  transition: transform 0.25s ease, visibility 0s linear 0s;
+}
+.mobile-nav-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+  padding-bottom: 8px;
+}
+.mobile-nav-links {
+  display: grid;
+  gap: 2px;
+}
+.mobile-nav-links a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 10px 8px;
+  border-radius: var(--control-radius);
+  color: #edf5f6;
+  font-size: 15px;
+  font-weight: 700;
+  transition: background 0.15s ease;
+}
+.mobile-nav-links a:hover,
+.mobile-nav-links a:active {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+.mobile-nav-icon {
+  display: inline-flex;
+  color: #71ddd6;
+}
+.mobile-nav-actions {
+  display: grid;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+.mobile-nav-actions .button {
+  width: 100%;
+}
+.mobile-nav-actions .header-auth {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+.mobile-nav .header-user {
+  color: #b7c9cf;
+}
+.sidebar-user {
+  display: none;
+  align-items: center;
+  gap: 11px;
+  margin: 0 0 14px;
+  padding: 10px 9px;
+  border-radius: var(--control-radius);
+  background: rgba(255, 255, 255, 0.06);
+}
+.sidebar-user-avatar {
+  flex: none;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--teal);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+}
+.sidebar-user-meta {
+  display: grid;
+  min-width: 0;
+}
+.sidebar-user-meta b {
+  font-size: 13px;
+  color: #fff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sidebar-user-meta small {
+  font-size: 10px;
+  color: #b7c9cf;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.mobile-menu-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: var(--control-radius);
+  background: transparent;
+  color: var(--navy);
+  cursor: pointer;
+}
+.mobile-menu-toggle:hover {
+  background: rgba(11, 31, 58, 0.06);
+}
+.mobile-menu-toggle:focus-visible {
+  outline: 3px solid var(--teal);
+  outline-offset: 2px;
+}
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sidebar-backdrop {
+  display: none;
+}
+/* Log-out confirmation dialog (§3) — existing button styles only. */
+.confirm-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1300;
+  background: rgba(8, 47, 60, 0.55);
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+.confirm-dialog {
+  width: min(360px, 100%);
+  background: #fff;
+  border-radius: var(--card-radius);
+  box-shadow: var(--shadow-lg);
+  padding: 24px;
+  display: grid;
+  gap: 12px;
+}
+.confirm-dialog p {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--navy);
+}
+.confirm-dialog .confirm-desc {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.confirm-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+.confirm-actions .button,
+.confirm-actions .outline-button {
+  min-height: 44px;
+}
 .sidebar-logout:disabled {
   opacity: 0.6;
   cursor: progress;
@@ -2519,24 +2723,56 @@ h2 {
     grid-template-columns: 1fr;
   }
   .dashboard-shell {
-    grid-template-columns: 78px 1fr;
+    grid-template-columns: 1fr;
   }
-  .sidebar .logo-word,
-  .sidebar-nav a:not(.sidebar-active)::after,
-  .sidebar-nav a {
-    justify-content: center;
+  /* ≤950px: the sidebar becomes a slide-in drawer from the LEFT (the old
+     78px icon-only rail is gone — labels stay readable). The public
+     header's hamburger + .mobile-nav panel switch on here too. */
+  .nav-toggle {
+    display: inline-flex;
   }
-  .sidebar-nav a {
-    font-size: 0;
+  .mobile-menu-toggle {
+    display: inline-flex;
   }
-  .sidebar-nav a span {
-    font-size: 13px;
+  .sidebar-user {
+    display: flex;
   }
-  .sidebar-nav .sidebar-active {
-    font-size: 0;
+  .sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 280px;
+    max-width: 85vw;
+    z-index: 1050;
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition: transform 0.25s ease, visibility 0s linear 0.25s;
+    box-shadow: var(--shadow-lg);
+    overscroll-behavior: contain;
   }
-  .sidebar-logout span {
-    display: none;
+  .sidebar-open .sidebar {
+    transform: translateX(0);
+    visibility: visible;
+    transition: transform 0.25s ease, visibility 0s linear 0s;
+  }
+  .sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 1040;
+    border: 0;
+    padding: 0;
+    background: rgba(8, 47, 60, 0.6);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    pointer-events: none;
+  }
+  .sidebar-open .sidebar-backdrop {
+    opacity: 1;
+    pointer-events: auto;
   }
   .dashboard-grid {
     grid-template-columns: 1fr;
@@ -2693,71 +2929,6 @@ h2 {
   }
   .dashboard-shell {
     grid-template-columns: 1fr;
-  }
-  /* Mobile menu toggle button */
-  .mobile-menu-toggle {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: fixed;
-    top: 12px;
-    right: 16px;
-    z-index: 1100;
-    width: 44px;
-    height: 44px;
-    border: 0;
-    border-radius: var(--control-radius);
-    background: var(--navy);
-    color: #fff;
-    cursor: pointer;
-    box-shadow: var(--shadow-lg);
-    transition: background 0.18s ease;
-  }
-  .mobile-menu-toggle:hover {
-    background: var(--deep);
-  }
-  .mobile-menu-toggle:focus-visible {
-    outline: 3px solid var(--teal);
-    outline-offset: 2px;
-  }
-  /* Sidebar wrapper for mobile drawer */
-  .sidebar-wrapper {
-    position: relative;
-  }
-  .sidebar-backdrop {
-    display: none;
-  }
-  @media (max-width: 650px) {
-    .sidebar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      bottom: 0;
-      width: 280px;
-      max-width: 85vw;
-      z-index: 1050;
-      transform: translateX(-100%);
-      transition: transform 0.25s ease;
-      box-shadow: var(--shadow-lg);
-    }
-    .sidebar-open .sidebar {
-      transform: translateX(0);
-    }
-    .sidebar-backdrop {
-      display: block;
-      position: fixed;
-      inset: 0;
-      z-index: 1040;
-      background: rgba(8, 47, 60, 0.6);
-      backdrop-filter: blur(4px);
-      opacity: 0;
-      transition: opacity 0.25s ease;
-      pointer-events: none;
-    }
-    .sidebar-open .sidebar-backdrop {
-      opacity: 1;
-      pointer-events: auto;
-    }
   }
   .dashboard-topbar {
     padding: 0 max(15px, env(safe-area-inset-right)) 0 max(15px, env(safe-area-inset-left));
