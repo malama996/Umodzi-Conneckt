@@ -2658,8 +2658,70 @@ h2 {
   .dashboard-shell {
     grid-template-columns: 1fr;
   }
-  .sidebar {
+  /* Mobile menu toggle button */
+  .mobile-menu-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 12px;
+    right: 16px;
+    z-index: 1100;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    border-radius: var(--control-radius);
+    background: var(--navy);
+    color: #fff;
+    cursor: pointer;
+    box-shadow: var(--shadow-lg);
+    transition: background 0.18s ease;
+  }
+  .mobile-menu-toggle:hover {
+    background: var(--deep);
+  }
+  .mobile-menu-toggle:focus-visible {
+    outline: 3px solid var(--teal);
+    outline-offset: 2px;
+  }
+  /* Sidebar wrapper for mobile drawer */
+  .sidebar-wrapper {
+    position: relative;
+  }
+  .sidebar-backdrop {
     display: none;
+  }
+  @media (max-width: 650px) {
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 280px;
+      max-width: 85vw;
+      z-index: 1050;
+      transform: translateX(-100%);
+      transition: transform 0.25s ease;
+      box-shadow: var(--shadow-lg);
+    }
+    .sidebar-open .sidebar {
+      transform: translateX(0);
+    }
+    .sidebar-backdrop {
+      display: block;
+      position: fixed;
+      inset: 0;
+      z-index: 1040;
+      background: rgba(8, 47, 60, 0.6);
+      backdrop-filter: blur(4px);
+      opacity: 0;
+      transition: opacity 0.25s ease;
+      pointer-events: none;
+    }
+    .sidebar-open .sidebar-backdrop {
+      opacity: 1;
+      pointer-events: auto;
+    }
   }
   .dashboard-topbar {
     padding: 0 15px;

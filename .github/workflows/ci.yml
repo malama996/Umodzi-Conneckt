@@ -114,6 +114,10 @@ jobs:
           # runs before any route serves), so the health check below never
           # passes. Throwaway CI-only value, >= 32 chars; not a real secret.
           JWT_SECRET: ci-only-jwt-secret-for-github-actions-000000
+          # The privacy tests assert against real technician rows, including
+          # the Kitwe pilot coordinate (seedInitialTechnicians). A fresh CI
+          # database is otherwise empty and every field assertion fails.
+          SEED_DEMO_DATA: "true"
 
       - name: Run file storage tests
         # Local + Supabase providers against a stubbed fetch — no DB, no network.

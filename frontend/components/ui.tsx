@@ -12,6 +12,7 @@ import {
   LuLayoutDashboard,
   LuLogOut,
   LuMapPin,
+  LuMenu,
   LuMessageCircle,
   LuPlus,
   LuSettings,
@@ -20,6 +21,7 @@ import {
   LuUser,
   LuUsers,
   LuWrench,
+  LuX,
 } from 'react-icons/lu';
 
 import type { TechnicianCategory } from '@/lib/categories';
@@ -444,6 +446,7 @@ export function DashboardLayout({
   active?: string;
 }) {
   const { user } = useAuth();
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   /**
    * The identity chip previously rendered HARDCODED values for every
@@ -463,9 +466,37 @@ export function DashboardLayout({
       .slice(0, 2)
       .toUpperCase() || '?';
 
+  // Close mobile nav on ESC key
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape' && mobileNavOpen) {
+      setMobileNavOpen(false);
+    }
+  };
+
   return (
-    <div className="dashboard-shell">
-      <Sidebar active={active} />
+    <div className="dashboard-shell" onKeyDown={handleKeyDown}>
+      {/* Mobile hamburger menu button */}
+      <button
+        type="button"
+        className="mobile-menu-toggle"
+        aria-label={mobileNavOpen ? 'Close navigation menu' : 'Open navigation menu'}
+        aria-expanded={mobileNavOpen}
+        onClick={() => setMobileNavOpen(!mobileNavOpen)}
+      >
+        {mobileNavOpen ? <LuX size={24} /> : <LuMenu size={24} />}
+      </button>
+
+      {/* Sidebar with mobile overlay */}
+      <div className={`sidebar-wrapper ${mobileNavOpen ? 'sidebar-open' : ''}`}>
+        <Sidebar active={active} />
+        {/* Backdrop to close drawer on tap */}
+        <div
+          className="sidebar-backdrop"
+          onClick={() => setMobileNavOpen(false)}
+          aria-hidden="true"
+        />
+      </div>
+
       <div className="dashboard-main">
         <div className="dashboard-topbar">
           {/* Phone widths hide the sidebar (and its logo) — keep a compact
