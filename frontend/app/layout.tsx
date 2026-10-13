@@ -13,6 +13,8 @@ const manrope = Manrope({
   weight: ['500', '600', '700', '800'],
   variable: '--font-heading',
   display: 'swap',
+  preload: true,
+  adjustFontFallback: true,
 });
 
 const inter = Inter({
@@ -20,6 +22,8 @@ const inter = Inter({
   weight: ['400', '500', '600', '700'],
   variable: '--font-body',
   display: 'swap',
+  preload: true,
+  adjustFontFallback: true,
 });
 
 export const metadata: Metadata = {
