@@ -648,7 +648,6 @@ export function DashboardLayout({
       <div
         ref={panelRef}
         className={`sidebar-wrapper ${mobileNavOpen ? 'sidebar-open' : ''}`}
-        inert={!mobileNavOpen || undefined}
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
