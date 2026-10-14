@@ -18,7 +18,7 @@ coverage/
 *.mjs
 backend/scripts/production-fixes-api-tests.ts
 backend/scripts/purge-test-fixtures.ts
-frontend/lib/ui/useGeolocation.ts
+
 
 # Editor and operating-system files
 .DS_Store
