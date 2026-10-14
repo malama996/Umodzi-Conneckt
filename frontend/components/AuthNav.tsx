@@ -1,23 +1,27 @@
 'use client';
 import Link from 'next/link';
-import { useRouter, usePathname } from 'next/navigation';
 import { LuArrowUpRight } from 'react-icons/lu';
-import { logout, useAuth } from '@/lib/auth';
+import { useAuth } from '@/lib/auth';
+import AccountMenu from './AccountMenu';
 
 /**
- * Header session controls (Task 23) — rendered inside PublicHeader.
+ * Header session controls (Task 23, refined by §4) — rendered inside
+ * PublicHeader, both in the desktop action area and inside the mobile drawer.
  *
  *   loading     → nothing (avoids a login/logout flash during restore)
  *   anonymous   → the original "Login" link + "Get Started" button
- *   authenticated → signed-in chip + a real Log out button
+ *   authenticated → the shared interactive avatar menu
  *
- * Logout clears the refresh session server-side and drops local auth
- * state; the router then returns the user to the landing page.
+ * The authenticated branch used to render the label "Signed in as …" next to
+ * a plain Log out button: a static indicator where every user expects a
+ * control. It is now the same `AccountMenu` the dashboard topbar uses, so the
+ * avatar opens the account menu here too — same identity, same items, same
+ * confirmed logout. `variant="dark"` restyles it for the translucent header;
+ * `compact` keeps the avatar alone where there is no room for the name (the
+ * mobile drawer, a 360px header).
  */
-export default function AuthNav() {
-  const { status, user } = useAuth();
-  const router = useRouter();
-  const pathname = usePathname();
+export default function AuthNav({ compact = false }: { compact?: boolean }) {
+  const { status } = useAuth();
 
   if (status === 'loading') {
     return null;
@@ -36,32 +40,9 @@ export default function AuthNav() {
     );
   }
 
-  const handleLogout = async () => {
-    await logout();
-    // Protected pages already redirect themselves the moment the store
-    // flips to anonymous (RequireAuth → /login?next=…). Issuing a second
-    // navigation from here would race that redirect — both transitions
-    // abort and the router stalls — so on those pages we navigate NOWHERE
-    // and let the gate own the single transition. On public pages there is
-    // no gate, so return to the landing page ourselves.
-    const onProtectedPage =
-      pathname === '/matching' ||
-      pathname === '/dashboard' ||
-      pathname === '/technician/offers' ||
-      pathname.startsWith('/admin');
-    if (!onProtectedPage) {
-      router.push('/');
-    }
-  };
-
   return (
     <div className="header-auth">
-      <span className="header-user">
-        Signed in as {user ? `${user.firstName} ${user.lastName}`.trim() : '…'}
-      </span>
-      <button type="button" className="header-login" onClick={() => void handleLogout()}>
-        Log out
-      </button>
+      <AccountMenu variant="dark" compact={compact} />
     </div>
   );
 }

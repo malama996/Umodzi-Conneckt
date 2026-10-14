@@ -51,11 +51,31 @@ export interface TechnicianProfileRow {
   updated_at: string;
 }
 
+/**
+ * Normalise an injected client's query result into a plain rows array.
+ *
+ * The `client` parameter below may be EITHER a `pg` client (whose `query`
+ * resolves `{ rows, rowCount, … }`) OR the pool helper from `db/client.ts`
+ * (whose `query` resolves the rows array DIRECTLY — see its
+ * `Promise<T[]>` return type). Both are legitimate injections: a transaction
+ * hands in the `pg` client, while the export path hands in the helper.
+ * Assuming the `pg` shape while being handed the helper is precisely what
+ * broke the data export — `rows` was `undefined`, `rows[0]` threw a
+ * TypeError, and the route reported it as the generic "Failed to build your
+ * data export". Normalising here keeps ONE implementation usable from both
+ * call sites instead of duplicating the query.
+ */
+function queryRows<T>(result: unknown): T[] {
+  if (Array.isArray(result)) return result as T[];
+  const rows = (result as { rows?: unknown } | null | undefined)?.rows;
+  return Array.isArray(rows) ? (rows as T[]) : [];
+}
+
 async function findTechnicianProfile(
   client: { query: Function },
   userId: string,
 ): Promise<TechnicianProfileRow | null> {
-  const { rows } = await client.query(
+  const result = await client.query(
     `SELECT id, name, category, skills, service_area, latitude, longitude,
             rating, jobs, verified, availability, availability_status, bio,
             photo_key, verification_status, verification_rejection_reason,
@@ -64,7 +84,7 @@ async function findTechnicianProfile(
        FROM technicians WHERE user_id = $1`,
     [userId],
   );
-  return rows[0] ?? null;
+  return queryRows<TechnicianProfileRow>(result)[0] ?? null;
 }
 
 /** Host of a push endpoint only — never the path, which is a send capability. */

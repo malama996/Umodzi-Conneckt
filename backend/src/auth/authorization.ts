@@ -335,14 +335,38 @@ export async function assertOfferEligibility(
  * its own cascade ('matched' / 'no_match'). Customers keep the existing
  * full status vocabulary (unchanged Task-15 lifecycle behaviour).
  */
+/**
+ * Statuses a technician may ever write. `matched`/`no_match` are dispatch
+ * outcomes; `in_progress`/`completed` are the progress + completion records
+ * of the job the technician actually holds — see the awarded-offer check that
+ * the status route applies ON TOP of this guard (an accepted offer by their own technician
+ * profile). Widening this list does not widen access: without that accepted
+ * offer the route still answers 403, which is what keeps "a technician who
+ * merely received an offer cannot close somebody else's job" true.
+ */
+const TECHNICIAN_REQUEST_STATUS_WRITES: readonly string[] = [
+  'matched',
+  'no_match',
+  'in_progress',
+  'completed',
+];
+
+/**
+ * Role-level write scope for a request status.
+ *
+ * Customers (request owners) and administrators keep the full vocabulary —
+ * that is the existing, tested contract. Technicians are limited to their
+ * own dispatch outcomes plus the progress/completion states of the job they
+ * were awarded, which the caller verifies against the accepted offer.
+ */
 export function assertRequestStatusWriteScope(
   status: string,
   user: AuthenticatedUser,
 ): void {
-  if (user.role === 'technician' && status !== 'matched' && status !== 'no_match') {
+  if (user.role === 'technician' && !TECHNICIAN_REQUEST_STATUS_WRITES.includes(status)) {
     throw new HttpError(
       403,
-      'Forbidden: technicians may only record matched or no_match on requests they were offered',
+      'Forbidden: technicians may only record matched, no_match, in_progress or completed on requests they were offered',
     );
   }
 }

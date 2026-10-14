@@ -101,21 +101,21 @@ export function useMobileDrawer(open: boolean, close: () => void) {
   // re-renders.
   const pathname = usePathname();
   const pathnameWhenOpenedRef = useRef<string | null>(null);
-  
+  /** Mirrors the current pathname without making the "opened at" effect depend
+   *  on it: that effect must run ONLY when the drawer opens. If it re-ran on
+   *  every navigation it would overwrite the remembered path with the new one
+   *  and the drawer would silently stop closing on route change. */
+  const latestPathnameRef = useRef(pathname);
+  latestPathnameRef.current = pathname;
+
   useEffect(() => {
-    if (open) {
-      // Drawer just opened — remember where we were
-      pathnameWhenOpenedRef.current = pathname;
-      return;
-    }
-    
-    // Drawer is closed — reset the tracker
-    pathnameWhenOpenedRef.current = null;
+    // Remember where we were when it opened; forget it once it closes.
+    pathnameWhenOpenedRef.current = open ? latestPathnameRef.current : null;
   }, [open]);
-  
+
   useEffect(() => {
-    // Only close if the drawer is open AND the pathname changed from
-    // when it opened (real navigation, not a re-render)
+    // Close only on a REAL navigation while open. A re-render keeps the same
+    // pathname, so it leaves the drawer exactly where the user put it.
     if (
       open &&
       pathnameWhenOpenedRef.current !== null &&
@@ -123,7 +123,7 @@ export function useMobileDrawer(open: boolean, close: () => void) {
     ) {
       close();
     }
-  }, [pathname]); // Intentionally only depends on pathname
+  }, [pathname, open, close]);
 
   // Swipe-left to close. The threshold ignores ordinary vertical scrolling
   // and small accidental horizontal jitter.

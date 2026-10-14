@@ -1,6 +1,23 @@
 import { query } from '../db/client.js';
 
 /**
+ * Number of rows a DELETE affected, for EITHER injectable client shape.
+ *
+ * The `client` parameter on the functions below defaults to the pool helper
+ * from `db/client.ts`, whose `query` resolves the rows array DIRECTLY, while
+ * an injected transaction client resolves the `pg` result object. Reading
+ * `result.rowCount` alone silently reported 0 when the helper was used — the
+ * DELETE still ran, but the operator-facing count (the whole point of these
+ * functions) was wrong. Same root cause as the data-export defect: one
+ * implementation handed to two different client contracts.
+ */
+function affectedCount(result: unknown): number {
+  if (Array.isArray(result)) return result.length;
+  const rowCount = (result as { rowCount?: unknown } | null | undefined)?.rowCount;
+  return typeof rowCount === 'number' ? rowCount : 0;
+}
+
+/**
  * Retention / data-lifecycle operations (Task 28.3E).
  *
  * ---------------------------------------------------------------------------
@@ -56,7 +73,7 @@ export async function purgeExpiredSessions(
         AND (revoked_at IS NOT NULL OR expires_at < NOW())`,
     [String(days)],
   );
-  return result.rowCount ?? 0;
+  return affectedCount(result);
 }
 
 /**
@@ -80,7 +97,7 @@ export async function purgeOldNotifications(
         AND created_at < NOW() - ($1 || ' days')::interval`,
     [String(days)],
   );
-  return result.rowCount ?? 0;
+  return affectedCount(result);
 }
 
 /**

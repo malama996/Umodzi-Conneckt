@@ -147,10 +147,15 @@ await app.register(cors, {
   // with /auth/refresh requests from the frontend origin.
   credentials: true,
   // Explicit allow-list: the frontend uses GET (reads), POST (creates and
-  // explicit prototype outcomes), PATCH (request status transitions), and
-  // DELETE (Task 26: withdrawing a verification document before review).
-  // Anything else (PUT/…) stays blocked by the preflight response.
-  methods: ["GET", "HEAD", "POST", "PATCH", "DELETE", "OPTIONS"],
+  // explicit prototype outcomes), PATCH (request status transitions), PUT
+  // (Task 28.4B: replacing the account's own contact number at
+  // /api/v1/me/phone), and DELETE (Task 26: withdrawing a verification
+  // document before review). Anything else stays blocked by the preflight.
+  //
+  // PUT must stay in this list: browser preflights rejected the phone-number
+  // save while the endpoint itself was working, so the form failed in the app
+  // and succeeded from curl/tests — the classic CORS-only failure mode.
+  methods: ["GET", "HEAD", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
 });
 
 // HttpOnly refresh-token cookie support (parse request.cookies + reply.setCookie).
@@ -790,10 +795,48 @@ app.patch(
     }
     const owned = await loadRequestForUser(id, authUser); // 400/404 → error handler
     assertRequestStatusWriteScope(status, authUser); // 403 → error handler
+
+    // Awarded-work guard (completion workflow): recording progress or
+    // completion is a statement about work THIS technician was awarded, so it
+    // requires their own ACCEPTED offer on this request. Holding an offer that
+    // is still pending (or rejected/timed out) is not enough — without this, a
+    // technician Smart Dispatch merely offered the job to could close another
+    // technician's work. Enforced here, on the server, so hiding a button in
+    // the UI is never the only thing standing in the way.
+    if (
+      authUser.role === "technician" &&
+      (status === "in_progress" || status === "completed")
+    ) {
+      const awarded = await query<{ id: string }>(
+        `SELECT o.id FROM dispatch_offers o
+           JOIN technicians t ON t.id = o.technician_id
+          WHERE o.request_id = $1 AND t.user_id = $2 AND o.status = 'accepted'
+          LIMIT 1`,
+        [owned.id, authUser.id],
+      );
+      if (awarded.length === 0) {
+        return jsonResponse(reply, 403, {
+          error:
+            "Forbidden: only the technician awarded this request may record progress or completion",
+        });
+      }
+    }
+
     // Task 28.2D4: capture the previous status for the transition guard.
     // The UPDATE below stays unconditional (existing API semantics); only
     // the notification is gated on an actual change.
     const previousStatus = owned.status;
+
+    // Closed-request guard: a completed or cancelled request is a closed
+    // record, and re-opening it would rewrite history (and detach the review,
+    // completion and notification trail from the state they describe).
+    // Re-sending the SAME status stays a successful no-op, so an idempotent
+    // retry from a flaky connection is never turned into an error.
+    if (previousStatus !== status && (previousStatus === "completed" || previousStatus === "cancelled")) {
+      return jsonResponse(reply, 409, {
+        error: `This request is ${previousStatus} and cannot be reopened`,
+      });
+    }
 
     try {
       const result = await query<{

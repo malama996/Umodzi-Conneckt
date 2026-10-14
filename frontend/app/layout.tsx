@@ -3,13 +3,11 @@ import './globals.css';
 import { ServiceWorkerRegistration } from '@/components/ServiceWorkerRegistration';
 import NotificationCenter from '@/components/NotificationCenter';
 
-/* Theme B typography: Using system font stack for reliable builds.
-   These match the visual weight of Manrope/Inter while avoiding
-   network dependencies during Netlify deployment. */
-const fontFamilies = {
-  heading: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-  body: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-};
+/* Theme B typography: the system font stack, applied in globals.css on
+   `body` (and inherited by headings and inputs). It matches the visual weight
+   of the previous webfont while avoiding a network dependency during the
+   Netlify build — a `next/font` declaration here would have been dead code,
+   so it is deliberately not duplicated. */
 
 export const metadata: Metadata = {
   title: 'Umodzi Connect',

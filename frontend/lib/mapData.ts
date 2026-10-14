@@ -92,6 +92,28 @@ export function getCustomerLocation(city: string): MapPoint {
   return MOCK_CITY_COORDINATES[city] ?? MOCK_CITY_COORDINATES[DEFAULT_CITY];
 }
 
+/**
+ * Is this a usable WGS84 point?
+ *
+ * The range check is not decoration: a geolocation provider, a stored value or
+ * a URL parameter that yields an out-of-range or non-finite coordinate must be
+ * rejected BEFORE it reaches Leaflet (which would throw or silently render a
+ * marker in the wrong hemisphere) or any distance calculation. `null`,
+ * `undefined` and the `(0, 0)` null-island placeholder are rejected too — a
+ * placeholder is not a position, and treating one as a fix is how a map ends up
+ * confidently pointing at the Gulf of Guinea.
+ */
+export function isValidMapPoint(point: unknown): point is MapPoint {
+  if (!point || typeof point !== 'object') return false;
+  const { latitude, longitude } = point as Partial<MapPoint>;
+  if (typeof latitude !== 'number' || typeof longitude !== 'number') return false;
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return false;
+  if (latitude < -90 || latitude > 90) return false;
+  if (longitude < -180 || longitude > 180) return false;
+  if (latitude === 0 && longitude === 0) return false;
+  return true;
+}
+
 const toRadians = (degrees: number): number => (degrees * Math.PI) / 180;
 
 /**
@@ -124,10 +146,8 @@ export function toTechnicianMapMarkers(
   ranked: RankedTechnician[],
   customerLocation: MapPoint,
 ): TechnicianMapMarker[] {
-  const markers: TechnicianMapMarker[] = [];
-  for (const { technician, matchedCategory } of ranked) {
-    const area = getServiceAreaPoint(technician.serviceArea);
-    markers.push({
+  return toServiceAreaMarkers(
+    ranked.map(({ technician, matchedCategory }) => ({
       id: technician.name,
       name: technician.name,
       category: matchedCategory,
@@ -136,12 +156,68 @@ export function toTechnicianMapMarkers(
       verified: technician.verified,
       availability: technician.availability,
       serviceArea: technician.serviceArea,
+    })),
+    customerLocation,
+  );
+}
+
+/**
+ * The minimum a technician record must expose to appear on the map. The real
+ * platform listing (`GET /technicians`) already satisfies this shape, as does a
+ * ranked dispatch candidate.
+ */
+export interface MapMarkerSource {
+  id: string;
+  name: string;
+  category: string;
+  serviceArea: string;
+  rating: number;
+  jobs: number;
+  verified: boolean;
+  availability: string;
+}
+
+/**
+ * Markers for the LIVE technician listing (production-fix Task 5).
+ *
+ * This is the single marker-building implementation; `toTechnicianMapMarkers`
+ * (ranked dispatch candidates) delegates here so the two entry points can never
+ * disagree about what a pin means.
+ *
+ * ---------------------------------------------------------------------------
+ * What a technician pin IS, and what it is not
+ * ---------------------------------------------------------------------------
+ * A pin marks the CENTRE OF THE SERVICE AREA THE TECHNICIAN DECLARED — the
+ * coarsest honest position available. It is deliberately NOT the technician's
+ * live or stored precise coordinate: the platform does not expose one (the
+ * backend omits coordinates from every public technician response, G-01), and
+ * publishing a person's whereabouts to anyone browsing the marketplace would
+ * be a real-world safety problem, not a feature. The UI labels this plainly, so
+ * nobody is led to believe the pin follows a technician around.
+ *
+ * The distance shown is therefore an AREA-LEVEL figure (customer point → area
+ * centre), not a distance to a person.
+ */
+export function toServiceAreaMarkers(
+  technicians: readonly MapMarkerSource[],
+  customerLocation: MapPoint,
+): TechnicianMapMarker[] {
+  return technicians.map((technician) => {
+    const area = getServiceAreaPoint(technician.serviceArea);
+    return {
+      id: technician.id,
+      name: technician.name,
+      category: technician.category,
+      rating: technician.rating,
+      jobs: technician.jobs,
+      verified: technician.verified,
+      availability: technician.availability,
+      serviceArea: technician.serviceArea,
       latitude: area.latitude,
       longitude: area.longitude,
       distanceKm: haversineKm(customerLocation, area),
-    });
-  }
-  return markers;
+    };
+  });
 }
 
 /**

@@ -1,41 +1,36 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import { useCallback, useState, type ReactNode } from 'react';
+import { Fragment, useCallback, useState, type ReactNode } from 'react';
 import {
   LuArrowRight,
-  LuBell,
   LuBriefcaseBusiness,
-  LuClipboardList,
   LuClock,
   LuHouse,
   LuInfo,
-  LuLayoutDashboard,
   LuLayoutGrid,
   LuListChecks,
   LuLogOut,
   LuMapPin,
   LuMenu,
-  LuMessageCircle,
-  LuPlus,
-  LuSettings,
   LuShieldCheck,
   LuStar,
-  LuUser,
-  LuUsers,
-  LuWrench,
   LuX,
 } from 'react-icons/lu';
 
 import type { TechnicianCategory } from '@/lib/categories';
-import { logout, useAuth } from '@/lib/auth';
-import type { AuthUser, UserRole } from '@/lib/auth/authTypes';
+import { useAuth } from '@/lib/auth';
+import { displayNameFor, initialsFor } from '@/lib/auth/initials';
+import { roleLabel } from '@/lib/auth/roleLabels';
+import { useLogoutAction } from '@/lib/auth/useLogoutAction';
+import { navGroupsForRole, type NavBadge } from '@/lib/nav/roleNav';
 import { useUnreadNotificationCount } from '@/lib/privacy/useUnreadNotificationCount';
 import { useMobileDrawer } from '@/lib/ui/useMobileDrawer';
 import { usePendingOffersCount } from '@/lib/offers/usePendingOffersCount';
 import { UI_V2 } from '@/lib/uiFlags';
+import AccountMenu from './AccountMenu';
 import AuthNav from './AuthNav';
+import LogoutConfirm from './LogoutConfirm';
 
 /**
  * Approved Umodzi Connect brand asset (Task 24).
@@ -130,20 +125,9 @@ const PUBLIC_NAV_LINKS: { label: string; href: string; icon: ReactNode }[] = [
   { label: 'About', href: '/#about', icon: <LuInfo size={17} aria-hidden="true" /> },
 ];
 
-/** Initials badge: first+last name initial (one letter for a single name),
- * uppercased, falling back to the email local part, then '?'. */
-function initialsFor(user: Pick<AuthUser, 'firstName' | 'lastName' | 'email'> | null): string {
-  const fullName = user ? `${user.firstName} ${user.lastName}`.trim() : '';
-  return (
-    (fullName || user?.email || '')
-      .split(/[\s@.]+/)
-      .filter(Boolean)
-      .map((part) => part[0])
-      .join('')
-      .slice(0, 2)
-      .toUpperCase() || '?'
-  );
-}
+/* Initials and display names come from ONE shared helper
+   (lib/auth/initials) so the drawer identity header, the topbar avatar and
+   the avatar menu can never disagree about what a user is called. */
 
 export function PublicHeader() {
   const [navOpen, setNavOpen] = useState(false);
@@ -213,7 +197,9 @@ export function PublicHeader() {
               >
                 Find a Technician <LuArrowRight size={13} aria-hidden="true" />
               </Link>
-              <AuthNav />
+              {/* Compact: the drawer's action column has no room for the name,
+                  and the drawer's identity is already shown above. */}
+              <AuthNav compact />
             </div>
           </nav>
         </>
@@ -337,154 +323,18 @@ export function Sidebar({
   const { user } = useAuth();
   const unread = useUnreadNotificationCount();
   const pendingOffers = usePendingOffersCount();
-  const router = useRouter();
-  const pathname = usePathname();
-  const consumerItems: [string, string, ReactNode][] = [
-    ['Dashboard', '/dashboard', <LuLayoutDashboard key="dashboard" size={14} aria-hidden="true" />],
-    ['New Request', '/matching', <LuPlus key="new" size={14} aria-hidden="true" />],
-    [
-      'My Requests',
-      '/dashboard/requests',
-      <LuClipboardList key="requests" size={14} aria-hidden="true" />,
-    ],
-    [
-      'Messages',
-      '/dashboard/messages',
-      <LuMessageCircle key="messages" size={14} aria-hidden="true" />,
-    ],
-    [
-      'Notifications',
-      '/dashboard/notifications',
-      <LuBell key="notifications" size={14} aria-hidden="true" />,
-    ],
-    ['Settings', '/dashboard/privacy', <LuSettings key="settings" size={14} aria-hidden="true" />],
-  ];
-  /**
-   * Phase 3: technicians previously fell through to `consumerItems`, so their
-   * sidebar offered "New Request" and "My Requests" — customer-only actions —
-   * while their own profile, verification and offer pages stayed unreachable
-   * from navigation. They now get their own list, built only from routes that
-   * really exist.
-   *
-   * The consumer "Profile" item is gone too: it pointed at
-   * `/technicians/Chanda%20M.`, a fabricated name that resolved to the retired
-   * prototype route and redirected to /matching. There is no customer profile
-   * page (§9), so the entry is removed rather than left broken.
-   */
-  const technicianItems: [string, string, ReactNode][] = [
-    [
-      'Offers',
-      '/technician/offers',
-      <LuBriefcaseBusiness key="offers" size={14} aria-hidden="true" />,
-    ],
-    [
-      'My Requests',
-      '/dashboard/requests',
-      <LuClipboardList key="requests" size={14} aria-hidden="true" />,
-    ],
-    ['Profile', '/technician/profile', <LuUser key="profile" size={14} aria-hidden="true" />],
-    [
-      'Messages',
-      '/dashboard/messages',
-      <LuMessageCircle key="messages" size={14} aria-hidden="true" />,
-    ],
-    [
-      'Notifications',
-      '/dashboard/notifications',
-      <LuBell key="notifications" size={14} aria-hidden="true" />,
-    ],
-    ['Settings', '/dashboard/privacy', <LuSettings key="settings" size={14} aria-hidden="true" />],
-  ];
-  /**
-   * Task 31: administrators get the same two-level structure the other
-   * roles have implicitly — platform work grouped together, the
-   * administrator's own account entry separate. Every href below resolves
-   * to a route that exists and that an administrator may open:
-   *   - Platform → the five Task 25/Phase 6 screens (all real, all
-   *     server-authorized);
-   *   - Account → /dashboard/privacy, the existing own-account page
-   *     (contact phone, data export, deletion preview) that the consumer
-   *     and technician lists already call "Settings". It has no role
-   *     gate because it only ever touches the signed-in account, so it
-   *     is equally correct for an administrator. There is deliberately
-   *     no "System management" group: the backend exposes no platform
-   *     configuration endpoints, and a link to an empty page would be
-   *     worse than no link (see STATE.md Task 31 gaps).
-   */
-  const adminGroups: { heading: string; items: [string, string, ReactNode][] }[] = [
-    {
-      heading: 'Platform',
-      items: [
-        [
-          'Overview',
-          '/dashboard',
-          <LuLayoutDashboard key="overview" size={14} aria-hidden="true" />,
-        ],
-        ['Users', '/admin/users', <LuUsers key="users" size={14} aria-hidden="true" />],
-        [
-          'Technicians',
-          '/admin/technicians',
-          <LuWrench key="technicians" size={14} aria-hidden="true" />,
-        ],
-        [
-          'Requests',
-          '/admin/requests',
-          <LuClipboardList key="requests" size={14} aria-hidden="true" />,
-        ],
-        ['Audit log', '/admin/audit', <LuShieldCheck key="audit" size={14} aria-hidden="true" />],
-      ],
-    },
-    {
-      heading: 'Account',
-      items: [
-        [
-          'Settings',
-          '/dashboard/privacy',
-          <LuSettings key="settings" size={14} aria-hidden="true" />,
-        ],
-      ],
-    },
-  ];
-  const isAdmin = user?.role === 'administrator';
-  const items = isAdmin
-    ? adminGroups.flatMap((group) => group.items)
-    : user?.role === 'technician'
-      ? technicianItems
-      : consumerItems;
-  const [loggingOut, setLoggingOut] = useState(false);
+  /* The item list is the SHARED role → menu mapping (lib/nav/roleNav), the
+     same array the avatar menu renders — a route can therefore never be in
+     the drawer and missing from the menu, or vice versa. */
+  const groups = navGroupsForRole(user?.role);
   const [confirmLogout, setConfirmLogout] = useState(false);
-  const fullName = user ? `${user.firstName} ${user.lastName}`.trim() : '';
+  const { busy, run } = useLogoutAction();
+  const fullName = displayNameFor(user);
   const initials = initialsFor(user);
 
-  /**
-   * Real logout (Phase 2 P0 fix).
-   *
-   * This used to be `<Link href="/">`, which only changed the URL — the
-   * HttpOnly refresh cookie survived, so the user believed they had signed
-   * out while the session was still fully usable. The store's `logout()`
-   * revokes the refresh session SERVER-SIDE first, then we navigate.
-   *
-   * On gated pages the RequireAuth transition owns the single navigation
-   * (a second one races it and stalls the router — see AuthNav); on any
-   * ungated page we return to the landing page ourselves.
-   */
-  const handleLogout = async () => {
-    if (loggingOut) return;
-    setLoggingOut(true);
-    try {
-      await logout();
-    } finally {
-      setLoggingOut(false);
-    }
-    const onGatedPage =
-      pathname === '/matching' ||
-      pathname.startsWith('/dashboard') ||
-      pathname.startsWith('/admin') ||
-      pathname.startsWith('/technician');
-    if (!onGatedPage) {
-      router.replace('/');
-    }
-  };
+  /** Live owner-scoped count for a badge; zero hides it (never a literal). */
+  const countFor = (badge?: NavBadge) =>
+    badge === 'offers' ? pendingOffers : badge === 'notifications' ? unread : 0;
 
   return (
     <aside className="sidebar" data-drawer-panel>
@@ -498,124 +348,77 @@ export function Sidebar({
           </span>
           <span className="sidebar-user-meta">
             <b>{fullName || user.email}</b>
-            <small>{IDENTITY_LABELS[user.role]}</small>
+            <small>{roleLabel(user.role)}</small>
           </span>
         </div>
       )}
       <nav id="sidebar-nav" className="sidebar-nav" aria-label="Primary navigation">
-        {isAdmin
-          ? adminGroups.map((group) => (
-              <div key={group.heading} className="sidebar-group">
-                <p className="sidebar-heading">{group.heading}</p>
-                {group.items.map(([label, href, icon]) => (
-                  <Link
-                    key={label}
-                    href={href}
-                    className={active === label ? 'sidebar-active' : ''}
-                    onClick={onNavigate}
-                  >
-                    <span>{icon}</span>
-                    {label}
-                  </Link>
-                ))}
-              </div>
-            ))
-          : items.map(([label, href, icon]) => (
+        {groups.map((group) => {
+          const links = group.items.map((item) => {
+            const count = countFor(item.badge);
+            return (
               <Link
-                key={label}
-                href={href}
-                className={active === label ? 'sidebar-active' : ''}
+                key={item.label}
+                href={item.href}
+                className={active === item.label ? 'sidebar-active' : ''}
                 onClick={onNavigate}
               >
-                <span>{icon}</span>
-                {label}
-                {label === 'Offers' && pendingOffers > 0 && (
-                  <b className="sidebar-count">{pendingOffers}</b>
-                )}
-                {label === 'Notifications' && unread > 0 && (
-                  <b className="sidebar-count">{unread}</b>
-                )}
+                <span>{item.icon}</span>
+                {item.label}
+                {count > 0 && <b className="sidebar-count">{count}</b>}
               </Link>
-            ))}
+            );
+          });
+          // Only administrators have named groups; the other roles render
+          // their single group flat, exactly as before.
+          return group.heading ? (
+            <div key={group.heading} className="sidebar-group">
+              <p className="sidebar-heading">{group.heading}</p>
+              {links}
+            </div>
+          ) : (
+            <Fragment key="items">{links}</Fragment>
+          );
+        })}
       </nav>
       <button
         type="button"
         className="sidebar-logout"
-        aria-label={loggingOut ? 'Signing out' : 'Log out'}
+        aria-label={busy ? 'Signing out' : 'Log out'}
         title="Log out"
         onClick={() => setConfirmLogout(true)}
-        disabled={loggingOut}
+        disabled={busy}
       >
         <LuLogOut size={13} className="ic" aria-hidden="true" />{' '}
-        <span>{loggingOut ? 'Signing out…' : 'Log Out'}</span>
+        <span>{busy ? 'Signing out…' : 'Log Out'}</span>
       </button>
-      {/* Log-out confirmation (§3): the existing server-side logout runs
-          only after explicit confirmation. */}
-      {confirmLogout && (
-        <div
-          className="confirm-backdrop"
-          role="presentation"
-          onClick={() => setConfirmLogout(false)}
-        >
-          <div
-            className="confirm-dialog"
-            role="alertdialog"
-            aria-modal="true"
-            aria-labelledby="logout-confirm-title"
-            aria-describedby="logout-confirm-desc"
-            onClick={(event) => event.stopPropagation()}
-            onKeyDown={(event) => {
-              if (event.key === 'Escape') {
-                event.stopPropagation();
-                setConfirmLogout(false);
-              }
-            }}
-          >
-            <p id="logout-confirm-title">Log out of Umodzi Connect?</p>
-            <p id="logout-confirm-desc" className="confirm-desc">
-              You will need your email and password to sign back in.
-            </p>
-            <div className="confirm-actions">
-              <button
-                type="button"
-                className="outline-button"
-                autoFocus
-                onClick={() => setConfirmLogout(false)}
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                className="button button-coral"
-                disabled={loggingOut}
-                onClick={() => {
-                  setConfirmLogout(false);
-                  void handleLogout();
-                }}
-              >
-                {loggingOut ? 'Signing out…' : 'Log out'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Log-out confirmation (§3) — the shared dialog, so the drawer, the
+          avatar menu and the public header can never word it differently. */}
+      <LogoutConfirm
+        open={confirmLogout}
+        busy={busy}
+        onCancel={() => setConfirmLogout(false)}
+        onConfirm={() => {
+          setConfirmLogout(false);
+          void run();
+        }}
+      />
     </aside>
   );
 }
-
-/** Display label for each backend role, used in the topbar identity chip. */
-const IDENTITY_LABELS: Record<UserRole, string> = {
-  customer: 'Consumer',
-  technician: 'Technician',
-  administrator: 'Administrator',
-};
 
 /**
  * Dashboard chrome: sidebar + topbar + children.
  *
  * Task 25: the topbar identity chip shows the REAL signed-in administrator
- * (name + "Administrator" label) on admin pages; every other role keeps the
- * original static chip, so consumer/technician dashboards are unchanged.
+ * (name + role label) on admin pages; every other role keeps the original
+ * chip, so customer/technician dashboards are unchanged in appearance.
+ *
+ * §4: that chip is now the interactive avatar menu (`AccountMenu`) for every
+ * role — same size, same position, same identity data, but tapping it opens
+ * the account menu instead of doing nothing. It replaces the hardcoded
+ * "Arnold Malama / AM / Consumer" values that used to appear in every
+ * customer's and technician's own header.
  */
 export function DashboardLayout({
   children,
@@ -624,21 +427,9 @@ export function DashboardLayout({
   children: ReactNode;
   active?: string;
 }) {
-  const { user } = useAuth();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const closeMobileNav = useCallback(() => setMobileNavOpen(false), []);
   const { panelRef, onTouchStart, onTouchEnd } = useMobileDrawer(mobileNavOpen, closeMobileNav);
-
-  /**
-   * The identity chip previously rendered HARDCODED values for every
-   * non-administrator — the name "Arnold Malama", the initials "AM" and the
-   * label "Consumer" — so every signed-in customer and technician saw
-   * somebody else's name in their own header. It now shows the real session
-   * identity, and the label reflects the account's actual backend role.
-   */
-  const fullName = user ? `${user.firstName} ${user.lastName}`.trim() : '';
-  const displayName = fullName || user?.email || '…';
-  const initials = initialsFor(user);
 
   return (
     <div className="dashboard-shell">
@@ -687,13 +478,7 @@ export function DashboardLayout({
           {/* The former global search box had no handler, no state and no
               destination — it accepted typing and did nothing. Removed rather
               than left as a control that only looks functional. */}
-          <div className="profile-chip">
-            <span className="mini-avatar">{initials}</span>
-            <span>
-              <b>{displayName}</b>
-              <small>{user ? IDENTITY_LABELS[user.role] : ''}</small>
-            </span>
-          </div>
+          <AccountMenu />
         </div>
         {children}
       </div>

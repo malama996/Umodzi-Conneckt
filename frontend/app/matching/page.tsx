@@ -1,11 +1,12 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import Link from 'next/link';
-import { LuArrowRight, LuCircleAlert, LuMapPin, LuSparkles, LuStar } from 'react-icons/lu';
+import { LuCircleAlert, LuSparkles } from 'react-icons/lu';
 import RequireAuth from '@/components/RequireAuth';
 import ServiceRequestForm from '@/components/ServiceRequestForm';
-import { PublicFooter, PublicHeader, Badge, VerifiedBadge } from '@/components/ui';
+import TechnicianMapPanel from '@/components/TechnicianMapPanel';
+import { PublicFooter, PublicHeader } from '@/components/ui';
+import { getCustomerLocation } from '@/lib/mapData';
 import { technicianCategories, type TechnicianCategory } from '@/lib/categories';
 import { getTechnicians, type ApiTechnician } from '@/lib/api/techniciansApi';
 import {
@@ -114,6 +115,14 @@ function MatchingContent() {
       ),
     [category, technicians],
   );
+
+  /**
+   * Honest fallback centre for the map (Task 5): the service area the customer
+   * chose for this request, or the pilot default before a request exists. It is
+   * used ONLY until the customer shares their device location, and the panel
+   * labels it "Approx." so a fallback is never mistaken for a GPS fix.
+   */
+  const fallbackCity = createdRequest?.city ?? 'Kitwe';
 
   return (
     <>
@@ -236,61 +245,25 @@ function MatchingContent() {
             )}
           </section>
 
-          <section id="matches" className="results" aria-live="polite">
-            <div className="result-head">
-              <div>
-                <span className="eyebrow eyebrow-dark">AVAILABLE TECHNICIANS</span>
-                <h2>
-                  {loading ? 'Loading technicians…' : `${visibleTechnicians.length} available`}
-                </h2>
-              </div>
-              <span className="result-rule">Live platform listings</span>
-            </div>
+          {/* Live listing + location map (Task 5). The map panel owns the
+              technician list as well, so the same technicians are never
+              rendered twice. Every row and pin is real platform data; only
+              the customer marker becomes a GPS fix, and only on request. */}
+          <section id="matches" aria-live="polite">
             {loadError ? (
               <p className="request-form-error" role="alert">
                 <LuCircleAlert size={12} className="ic" aria-hidden="true" /> {loadError}
               </p>
-            ) : !loading && visibleTechnicians.length === 0 ? (
-              <p className="form-note">No available technicians match this category right now.</p>
+            ) : loading ? (
+              <p className="panel-sub" role="status">
+                Loading technicians…
+              </p>
             ) : (
-              visibleTechnicians.map((technician) => (
-                <article className="match-card" key={technician.id}>
-                  <div className="avatar">
-                    {technician.name
-                      .split(' ')
-                      .map((part) => part[0])
-                      .join('')}
-                  </div>
-                  <div className="match-main">
-                    <div className="match-title">
-                      <div>
-                        <h3>{technician.name}</h3>
-                        <p>{[technician.category, ...technician.skills].join(' • ')}</p>
-                      </div>
-                      {technician.verified && <VerifiedBadge />}
-                    </div>
-                    <div className="match-meta">
-                      <span>
-                        <LuMapPin size={10} className="ic" aria-hidden="true" />{' '}
-                        {technician.serviceArea}
-                      </span>
-                      <span>
-                        <LuStar size={10} fill="currentColor" className="ic" aria-hidden="true" />{' '}
-                        {technician.rating}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="match-action">
-                    <Badge tone="success">{technician.availability}</Badge>
-                    <Link
-                      href={`/technicians/profile/${encodeURIComponent(technician.id)}`}
-                      className="outline-button"
-                    >
-                      Profile <LuArrowRight size={10} aria-hidden="true" />
-                    </Link>
-                  </div>
-                </article>
-              ))
+              <TechnicianMapPanel
+                technicians={visibleTechnicians}
+                fallbackLocation={getCustomerLocation(fallbackCity)}
+                fallbackLabel={fallbackCity}
+              />
             )}
           </section>
         </div>
