@@ -58,10 +58,19 @@ export const decideVerification = (
 
 /* ------------------------- display helpers ------------------------- */
 
+/**
+ * Upload/review labels for each verification document type.
+ *
+ * The two documents policy asks for are named explicitly and unambiguously:
+ * the National Registration Card (NRC) is the identity document, and the
+ * certificate is the professional-qualification evidence. Both are uploaded
+ * independently and both are listed to the reviewing administrator with these
+ * same labels, so what the technician submitted is what the reviewer sees.
+ */
 export const DOCUMENT_TYPE_LABELS: Record<VerificationDocumentType, string> = {
-  national_id: 'National ID',
-  certificate: 'Trade certificate',
-  other: 'Supporting document',
+  national_id: 'National Registration Card (NRC)',
+  certificate: 'Certificate / proof of qualification',
+  other: 'Other supporting document',
 };
 
 export interface VerificationDisplay {

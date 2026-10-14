@@ -5,11 +5,13 @@ import Link from 'next/link';
 import { LuClipboardList, LuMapPin, LuMessageCircle, LuPlus } from 'react-icons/lu';
 
 import RequireAuth from '@/components/RequireAuth';
+import ReviewCard from '@/components/ReviewCard';
 import { DashboardLayout, Button, Badge, type BadgeTone } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
 import {
   listMyServiceRequests,
   requestErrorMessage,
+  updateServiceRequestStatus,
   type MyServiceRequest,
 } from '@/lib/api/serviceRequestsApi';
 import type { ServiceRequestStatus } from '@/lib/types';
@@ -89,6 +91,98 @@ function canMessage(request: MyServiceRequest): boolean {
     (request.status === 'matched' ||
       request.status === 'in_progress' ||
       request.status === 'completed')
+  );
+}
+
+/**
+ * Progress → completion → rating for ONE request row.
+ *
+ * The lifecycle was previously reachable through the API but through no
+ * screen: a request could be created and an offer accepted, yet nothing in
+ * the UI could record progress, close the job or collect the rating — so the
+ * cycle could never actually finish. This wires the EXISTING endpoints
+ * (PATCH /requests/:id/status and the review route) into the screens the
+ * roles already use; no new API surface was added.
+ *
+ * Permissions are decided by the SERVER, not here: the route requires the
+ * ACCEPTED offer for a technician's progress/completion writes, rejects
+ * writes to a closed request, and recomputes review eligibility itself. The
+ * controls below are a convenience, never the guard.
+ */
+function RequestWorkflow({
+  request,
+  isTechnician,
+  onChanged,
+}: {
+  request: MyServiceRequest;
+  isTechnician: boolean;
+  onChanged: () => Promise<void> | void;
+}) {
+  const [busy, setBusy] = useState<'in_progress' | 'completed' | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  // A job that was never awarded to anybody has no progress to record.
+  const awarded = request.assignedTechnicianName !== null;
+  const canStartWork = isTechnician && awarded && request.status === 'matched';
+  const canComplete =
+    (isTechnician ? awarded : true) &&
+    (request.status === 'matched' || request.status === 'in_progress');
+
+  const advance = async (status: 'in_progress' | 'completed') => {
+    setBusy(status);
+    setError(null);
+    try {
+      await updateServiceRequestStatus(request.id, status);
+      await onChanged();
+    } catch (err) {
+      setError(requestErrorMessage(err));
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  if (!canStartWork && !canComplete && request.status !== 'completed') {
+    return null;
+  }
+
+  return (
+    <div className="request-workflow">
+      {(canStartWork || canComplete) && (
+        <div className="request-workflow-actions">
+          {canStartWork && (
+            <Button
+              type="button"
+              className="outline-button"
+              disabled={busy !== null}
+              onClick={() => void advance('in_progress')}
+            >
+              {busy === 'in_progress' ? 'Starting…' : 'Start work'}
+            </Button>
+          )}
+          {canComplete && (
+            <Button
+              type="button"
+              className="button button-teal"
+              disabled={busy !== null}
+              onClick={() => void advance('completed')}
+            >
+              {busy === 'completed' ? 'Saving…' : 'Mark service as completed'}
+            </Button>
+          )}
+        </div>
+      )}
+      {error && (
+        <p className="inline-error" role="alert">
+          {error}
+        </p>
+      )}
+      {/* Rating and written review, offered only once the request is
+          completed — ReviewCard asks the server for eligibility and renders
+          nothing when the account may not review. */}
+      {request.status === 'completed' && (
+        <ReviewCard requestId={request.id} technicianName={request.assignedTechnicianName} />
+      )}
+    </div>
   );
 }
 
@@ -238,6 +332,11 @@ function MyRequestsList() {
                       <LuMessageCircle size={13} className="ic" aria-hidden="true" /> Message
                     </Link>
                   )}
+                  <RequestWorkflow
+                    request={request}
+                    isTechnician={isTechnician}
+                    onChanged={load}
+                  />
                 </li>
               ))}
             </ul>

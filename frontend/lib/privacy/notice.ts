@@ -188,4 +188,4 @@ export const PRIVACY_NOTICE_SECTIONS: NoticeSection[] = [
 ];
 
 /** Flat document version stamp. Not a compliance claim. */
-export const PRIVACY_NOTICE_VERSION = 'Draft 0.3 — prepared for Task 28.3 (academic prototype)';
+export const PRIVACY_NOTICE_VERSION = ' (academic prototype)';

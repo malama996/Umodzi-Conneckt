@@ -99,7 +99,7 @@ export default function ConsumerDashboard() {
       <main className="dashboard-page">
         <div className="dashboard-heading">
           <div>
-            <div className="eyebrow eyebrow-dark">CONSUMER DASHBOARD</div>
+            <div className="eyebrow eyebrow-dark">CUSTOMER DASHBOARD</div>
             <h1>
               {firstName ? `Welcome back, ${firstName}` : 'Your service workspace'} <span>👋</span>
             </h1>

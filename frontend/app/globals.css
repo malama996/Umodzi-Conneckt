@@ -2413,6 +2413,58 @@ h2 {
 .confirm-actions .outline-button {
   min-height: 44px;
 }
+/* Request progress → completion → review (production-fix Task 4). New classes
+   only: the controls reuse the existing button/error styles, so nothing that
+   already renders changes appearance. */
+.request-workflow {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+.request-workflow-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.request-workflow-actions .button,
+.request-workflow-actions .outline-button {
+  /* 44px floor: these are the primary thumb targets on a phone. */
+  min-height: 44px;
+}
+/* Location-permission row above the technician map (production-fix Task 5).
+   New class only; reuses the existing line/muted/teal tokens and button
+   styles, and keeps the control at the 44px touch floor. */
+.map-location {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--control-radius);
+  background: #f7fbfb;
+}
+.map-location-text {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.map-location-text .ic {
+  flex: none;
+  margin-top: 2px;
+  color: var(--teal2);
+}
+.map-location-actions .outline-button {
+  min-height: 44px;
+}
 .sidebar-logout:disabled {
   opacity: 0.6;
   cursor: progress;
@@ -2461,33 +2513,258 @@ h2 {
   font-size: 10px;
   color: var(--text);
 }
-.profile-chip {
-  display: flex;
+/* ------------------------------------------------------------------
+   Interactive avatar + account menu (§4)
+   ------------------------------------------------------------------
+   The top-right initials badge was a static label for every role. It is now
+   a real button: same position, same size, same tokens — only tappable.
+   The menu itself is portaled to <body> (see AccountMenu.tsx) so it is never
+   clipped by the header's backdrop-filter or the drawer's transform. */
+.avatar-button {
+  display: inline-flex;
   align-items: center;
   gap: 9px;
-  font-size: 9px;
+  /* 44px touch floor — the primary thumb target in the corner. */
+  min-height: 44px;
+  padding: 4px 6px;
+  border: 1px solid transparent;
+  border-radius: var(--control-radius);
+  background: transparent;
   color: var(--muted);
-}
-.profile-chip b,
-.profile-chip small {
-  display: block;
-}
-.profile-chip b {
   font-size: 9px;
-  color: var(--navy);
+  text-align: left;
+  /* Feedback without layout movement: colour only, no transform. */
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease;
 }
-.profile-chip small {
-  margin-top: 3px;
+.avatar-button:hover,
+.avatar-button[aria-expanded='true'] {
+  background: #f2f7f8;
+  border-color: var(--line);
 }
-.mini-avatar {
+.avatar-circle {
   width: 32px;
   height: 32px;
+  flex: none;
   border-radius: 50%;
   display: grid;
   place-items: center;
   background: #dff3f1;
   color: var(--navy);
   font-weight: 900;
+  font-size: 11px;
+}
+.avatar-name {
+  display: grid;
+  min-width: 0;
+}
+.avatar-name b {
+  display: block;
+  max-width: 15ch;
+  overflow: hidden;
+  font-size: 9px;
+  color: var(--navy);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.avatar-name small {
+  display: block;
+  margin-top: 3px;
+}
+.avatar-chevron {
+  flex: none;
+  color: currentColor;
+}
+/* Dark trigger for the translucent public header. */
+.avatar-button-dark {
+  color: #b9cbd1;
+}
+.avatar-button-dark:hover,
+.avatar-button-dark[aria-expanded='true'] {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.28);
+}
+.avatar-button-dark .avatar-name b {
+  color: #fff;
+}
+.avatar-button-dark .avatar-name small {
+  color: #b7c9cf;
+}
+/* Session still resolving: the shape, not a guess at the content. */
+.avatar-button.is-skeleton {
+  pointer-events: none;
+}
+.skeleton-block {
+  background: #eef2f4;
+  animation: umodzi-skeleton-pulse 1.3s ease-in-out infinite;
+}
+@keyframes umodzi-skeleton-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+/* Above both drawers (1200) and below the logout confirmation (1300). */
+.account-menu-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 1250;
+  background: rgba(8, 20, 32, 0.42);
+}
+.account-menu-panel {
+  position: fixed;
+  z-index: 1251;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: grid;
+  gap: 2px;
+  max-height: min(86dvh, 640px);
+  overflow-y: auto;
+  padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
+  background: var(--white);
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  box-shadow: var(--shadow-lg);
+  animation: umodzi-sheet-in 0.18s ease-out;
+}
+@keyframes umodzi-sheet-in {
+  from {
+    transform: translateY(14px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes umodzi-pop-in {
+  from {
+    transform: translateY(-6px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+.account-menu-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 6px 12px;
+  border-bottom: 1px solid var(--line);
+}
+.account-menu-avatar {
+  width: 40px;
+  height: 40px;
+  font-size: 13px;
+}
+.account-menu-identity {
+  display: grid;
+  min-width: 0;
+  margin-right: auto;
+}
+.account-menu-identity b {
+  font-size: 12px;
+  color: var(--navy);
+  overflow-wrap: anywhere;
+}
+.account-menu-identity small {
+  margin-top: 2px;
+  font-size: 10px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.account-menu-role {
+  flex-shrink: 0;
+}
+.account-menu-items {
+  display: grid;
+  gap: 2px;
+  padding: 8px 0;
+}
+.account-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--navy);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+.account-menu-item:hover {
+  background: #f2f7f8;
+}
+.account-menu-icon {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  flex: none;
+  color: var(--teal2);
+}
+.account-menu-count {
+  margin-left: auto;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--coral);
+  color: #fff;
+  font-size: 10px;
+  line-height: 18px;
+  text-align: center;
+}
+.account-menu-logout {
+  margin-top: 6px;
+  border-top: 1px solid var(--line);
+  border-radius: 0 0 10px 10px;
+  color: var(--coral);
+}
+.account-menu-logout .account-menu-icon {
+  color: var(--coral);
+}
+/* Tablet and desktop: a popover anchored under the avatar (both headers are
+   ~67-72px tall, plus the notch inset) instead of a phone bottom sheet. */
+@media (min-width: 651px) {
+  .account-menu-scrim {
+    background: transparent;
+  }
+  .account-menu-panel {
+    left: auto;
+    right: 18px;
+    top: calc(80px + env(safe-area-inset-top));
+    bottom: auto;
+    width: 296px;
+    padding: 12px;
+    border: 1px solid var(--line);
+    border-radius: var(--card-radius);
+    max-height: min(72vh, 560px);
+    animation: umodzi-pop-in 0.16s ease-out;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .account-menu-panel,
+  .skeleton-block {
+    animation: none;
+  }
+  .avatar-button,
+  .account-menu-item {
+    transition: none;
+  }
 }
 .dashboard-page {
   padding: 30px;
@@ -2692,6 +2969,15 @@ h2 {
 }
 @media (max-width: 950px) {
   .desktop-nav {
+    display: none;
+  }
+  /* The header's session controls (Login + Get Started, or the signed-in
+     chip) move INTO the drawer at this breakpoint. Without this the same
+     "Get Started" call-to-action rendered twice on a phone — once in the
+     header and once inside the menu. The drawer renders the identical
+     <AuthNav /> component, so no anonymous or signed-in action is lost,
+     and every entry point is now reachable from the hamburger alone. */
+  .header-actions {
     display: none;
   }
   .hero {

@@ -475,7 +475,11 @@ function VerificationCard({
   const display = verificationDisplay(profile.verificationStatus);
   const editable =
     profile.verificationStatus === 'unverified' || profile.verificationStatus === 'rejected';
+  // The two policy documents are tracked separately so the technician is told
+  // exactly which one is missing, rather than being blocked by a generic
+  // "document required" message (production-fix Task 6).
   const hasNationalId = profile.documents.some((doc) => doc.documentType === 'national_id');
+  const hasCertificate = profile.documents.some((doc) => doc.documentType === 'certificate');
 
   return (
     <section className="t26-card t26-verify" aria-label="Verification">
@@ -520,7 +524,14 @@ function VerificationCard({
           <SubmitButton profile={profile} hasNationalId={hasNationalId} onChanged={onChanged} />
           {!hasNationalId && (
             <small className="admin-note">
-              A National ID document is required before submitting.
+              A National Registration Card (NRC) is required before submitting.
+            </small>
+          )}
+          {hasNationalId && !hasCertificate && (
+            <small className="admin-note">
+              Your NRC is attached. Add a certificate or other proof of qualification so the
+              reviewer can confirm the trade you registered for — both documents are shown to the
+              reviewer.
             </small>
           )}
         </div>
@@ -649,7 +660,10 @@ function DocumentsBlock({
     <div className="t26-docs">
       <h3>Documents</h3>
       {profile.documents.length === 0 ? (
-        <p className="admin-note">No documents yet — start with your National ID.</p>
+        <p className="admin-note">
+          No documents yet — start with your National Registration Card (NRC), then add your
+          certificate or proof of qualification.
+        </p>
       ) : (
         <ul className="t26-doc-list">
           {profile.documents.map((doc) => (

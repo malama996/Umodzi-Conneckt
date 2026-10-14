@@ -117,4 +117,4 @@ export const TERMS_SECTIONS: NoticeSection[] = [
 ];
 
 /** Flat document version stamp. Not a compliance claim. */
-export const TERMS_VERSION = 'Draft 0.1 — prepared for Task 32 (academic prototype)';
+export const TERMS_VERSION = '(academic prototype)';
