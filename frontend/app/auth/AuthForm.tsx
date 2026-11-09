@@ -140,9 +140,10 @@ export default function AuthForm({ mode }: { mode: 'login' | 'register' }) {
     setBusy(true);
     try {
       if (mode === 'login') {
-        // Redirect happens in the status effect above once the store flips
-        // to 'authenticated' (uses ?next= or the role home).
         await loginAction(email.trim(), password);
+        // Instant redirect right after login resolves without waiting for extra render cycles
+        const destination = nextPath ?? '/dashboard';
+        router.replace(destination);
       } else {
         const nameParts = fullName.trim().split(/\s+/);
         const firstName = nameParts[0];

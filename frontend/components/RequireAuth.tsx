@@ -7,22 +7,13 @@ import { HOME_FOR_ROLE } from '@/lib/auth/homeForRole';
 import type { UserRole } from '@/lib/auth/authTypes';
 
 /**
- * Protected-route gate (Task 23).
+ * Protected-route gate.
  *
  * Behaviour:
- *   - status 'loading'  → render ONLY a "checking session" placeholder
- *                         (protected content is never flashed before the
- *                         authentication state is known, §33);
- *   - status 'anonymous' → redirect to /login?next=<path> (the login page
- *                         returns to the original destination);
- *   - role mismatch      → render an explicit access-denied panel (no
- *                         protected children are rendered) — an
- *                         authenticated but wrong-role user is BLOCKED
- *                         rather than silently redirected;
- *   - authenticated + role match → render children unchanged.
- *
- * The role comes from the backend (GET /auth/me-style session user), never
- * from anything the URL or client storage claims.
+ *   - status 'loading'   → subtle brand-tinted loading state (no stark white screen)
+ *   - status 'anonymous' → instantly redirects to /login?next=<path>
+ *   - role mismatch     → displays polite role alert
+ *   - authenticated     → renders protected children immediately
  */
 
 const ROLE_LABELS: Record<UserRole, string> = {
@@ -44,8 +35,8 @@ export default function RequireAuth({ role, children }: { role?: UserRole; child
 
   if (status !== 'authenticated') {
     return (
-      <main className="auth-gate" role="status" aria-live="polite">
-        <p>Checking your session…</p>
+      <main className="auth-gate auth-gate-loading" role="status" aria-live="polite">
+        <div className="auth-gate-spinner" aria-hidden="true" />
       </main>
     );
   }
