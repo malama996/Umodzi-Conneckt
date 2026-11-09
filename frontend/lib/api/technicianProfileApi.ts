@@ -9,9 +9,24 @@ import { del, get, patch, post, postForm, getBlob } from './client';
  * backend (components reference the public photo URL directly).
  */
 
-export type TechnicianVerificationStatus = 'unverified' | 'pending' | 'verified' | 'rejected';
+export type TechnicianVerificationStatus =
+  | 'unverified'
+  | 'pending'
+  | 'partially_verified'
+  | 'verified'
+  | 'rejected';
 
-export type VerificationDocumentType = 'national_id' | 'certificate' | 'other';
+export type VerificationDocumentType =
+  | 'national_id'
+  | 'trade_qualification'
+  | 'professional_licence'
+  | 'business_registration'
+  | 'training_certificate'
+  | 'certificate'
+  | 'other';
+
+/** Per-document review outcome (migration 011). */
+export type VerificationDocumentStatus = 'pending' | 'approved' | 'rejected';
 
 export interface TechnicianDocument {
   id: string;
@@ -19,6 +34,20 @@ export interface TechnicianDocument {
   fileName: string;
   contentType: string;
   sizeBytes: number;
+  createdAt: string;
+  status: VerificationDocumentStatus;
+  reviewReason: string | null;
+  reviewedAt: string | null;
+  reviewedBy: string | null;
+}
+
+/** One entry in a document's review history (admin bundle only). */
+export interface VerificationReview {
+  id: string;
+  documentId: string;
+  decision: 'approved' | 'rejected';
+  reason: string | null;
+  reviewerEmail: string | null;
   createdAt: string;
 }
 
@@ -144,6 +173,8 @@ export interface AdminTechnicianVerification {
   userId: string | null;
   userEmail: string | null;
   documents: TechnicianDocument[];
+  /** Full per-document decision history, newest first (migration 011). */
+  reviews: VerificationReview[];
   createdAt: string;
   updatedAt: string;
 }
@@ -165,6 +196,24 @@ export async function decideTechnicianVerification(
 ): Promise<AdminTechnicianVerification> {
   const body = await patch<Envelope<AdminTechnicianVerification>>(
     `/admin/technicians/${encodeURIComponent(technicianId)}/verification`,
+    decision,
+  );
+  return body.data;
+}
+
+/**
+ * PATCH /admin/technicians/:id/verification/documents/:docId — decide ONE
+ * evidence document (migration 011). The backend recomputes the technician's
+ * overall verification status from the per-document outcomes and returns the
+ * refreshed review bundle. A rejection requires a reason (min 8 chars).
+ */
+export async function decideVerificationDocument(
+  technicianId: string,
+  documentId: string,
+  decision: { decision: 'approved' } | { decision: 'rejected'; reason: string },
+): Promise<AdminTechnicianVerification> {
+  const body = await patch<Envelope<AdminTechnicianVerification>>(
+    `/admin/technicians/${encodeURIComponent(technicianId)}/verification/documents/${encodeURIComponent(documentId)}`,
     decision,
   );
   return body.data;

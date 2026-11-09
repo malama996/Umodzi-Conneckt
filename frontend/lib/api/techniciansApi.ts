@@ -30,6 +30,14 @@ export interface ApiTechnician {
   bio?: string | null;
   /** Task 26: true when a profile photo exists (bytes via GET /technicians/:id/photo). */
   hasPhoto?: boolean;
+  /**
+   * §5 trust indicators: the document categories an administrator has
+   * APPROVED for this technician (e.g. 'national_id', 'trade_qualification').
+   * Empty/absent until at least one document is approved. Values are plain
+   * strings on the wire; the profile page maps known categories to labels and
+   * ignores anything unrecognised, so a future category never breaks render.
+   */
+  verifiedCategories?: string[];
   createdAt: string;
   updatedAt: string;
 }

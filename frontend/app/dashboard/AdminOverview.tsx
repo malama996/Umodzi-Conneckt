@@ -56,7 +56,6 @@ export default function AdminOverview() {
       <main className="dashboard-page admin-page">
         <div className="dashboard-heading">
           <div>
-            <div className="eyebrow eyebrow-dark">ADMINISTRATOR</div>
             <h1>Platform overview</h1>
             <p>Real counts from users, technicians, and service requests.</p>
           </div>

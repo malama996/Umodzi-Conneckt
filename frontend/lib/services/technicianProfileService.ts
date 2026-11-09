@@ -3,6 +3,7 @@ import type { BadgeTone } from '@/components/ui';
 import {
   deleteVerificationDocument,
   decideTechnicianVerification,
+  decideVerificationDocument,
   downloadVerificationDocument,
   getAdminTechnicianVerification,
   getOwnProfile,
@@ -15,6 +16,7 @@ import {
   type OwnTechnicianProfile,
   type TechnicianDocument,
   type TechnicianVerificationStatus,
+  type VerificationDocumentStatus,
   type VerificationDocumentType,
 } from '@/lib/api/technicianProfileApi';
 
@@ -56,6 +58,14 @@ export const decideVerification = (
   decision: { decision: 'verified' } | { decision: 'rejected'; reason: string },
 ): Promise<AdminTechnicianVerification> => decideTechnicianVerification(technicianId, decision);
 
+/** Per-document decision (migration 011) — returns the refreshed bundle. */
+export const decideDocument = (
+  technicianId: string,
+  documentId: string,
+  decision: { decision: 'approved' } | { decision: 'rejected'; reason: string },
+): Promise<AdminTechnicianVerification> =>
+  decideVerificationDocument(technicianId, documentId, decision);
+
 /* ------------------------- display helpers ------------------------- */
 
 /**
@@ -69,9 +79,28 @@ export const decideVerification = (
  */
 export const DOCUMENT_TYPE_LABELS: Record<VerificationDocumentType, string> = {
   national_id: 'National Registration Card (NRC)',
+  trade_qualification: 'Trade qualification',
+  professional_licence: 'Professional licence',
+  business_registration: 'Business registration',
+  training_certificate: 'Training certificate',
   certificate: 'Certificate / proof of qualification',
   other: 'Other supporting document',
 };
+
+/** Per-document review outcome → badge label + tone (migration 011). */
+export function documentStatusDisplay(status: VerificationDocumentStatus): {
+  label: string;
+  tone: BadgeTone;
+} {
+  switch (status) {
+    case 'approved':
+      return { label: 'Approved', tone: 'success' };
+    case 'rejected':
+      return { label: 'Rejected', tone: 'coral' };
+    case 'pending':
+      return { label: 'Awaiting review', tone: 'warning' };
+  }
+}
 
 export interface VerificationDisplay {
   heading: string;
@@ -92,6 +121,12 @@ export function verificationDisplay(status: TechnicianVerificationStatus): Verif
       return {
         heading: 'Pending review',
         copy: 'Your documents are with the platform team. You will see the outcome here.',
+        tone: 'warning',
+      };
+    case 'partially_verified':
+      return {
+        heading: 'Partially verified',
+        copy: 'Some of your documents are approved and others still need attention. Check each document below to see what the reviewer decided.',
         tone: 'warning',
       };
     case 'rejected':
@@ -118,6 +153,8 @@ export function verificationLabel(status: TechnicianVerificationStatus): string 
   switch (status) {
     case 'verified':
       return 'Verified';
+    case 'partially_verified':
+      return 'Partially verified';
     case 'pending':
       return 'Pending review';
     case 'rejected':

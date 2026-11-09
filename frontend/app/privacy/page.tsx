@@ -33,7 +33,6 @@ export default function PrivacyPage() {
           </nav>
 
           <header className="privacy-header">
-            <div className="eyebrow eyebrow-dark">YOUR DATA</div>
             <h1>Privacy notice</h1>
             <p className="privacy-lede">
               This notice explains what Umodzi Connect actually does with your information. It

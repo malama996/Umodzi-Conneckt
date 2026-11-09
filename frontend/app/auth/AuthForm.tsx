@@ -171,7 +171,6 @@ export default function AuthForm({ mode }: { mode: 'login' | 'register' }) {
         <div className="auth-visual-overlay">
           <Logo light />
           <div className="auth-visual-copy">
-            <div className="eyebrow">UMODZI CONNECT</div>
             <h1>{mode === 'login' ? 'Welcome back.' : 'Join the connection.'}</h1>
             <p>Skilled people. Stronger communities.</p>
             <div className="auth-location">
@@ -188,7 +187,6 @@ export default function AuthForm({ mode }: { mode: 'login' | 'register' }) {
           <LuArrowLeft size={11} className="ic" aria-hidden="true" /> Back to Umodzi Connect
         </Link>
         <form className="auth-card" onSubmit={(e) => void onSubmit(e)} noValidate>
-          <div className="eyebrow eyebrow-dark">UMODZI CONNECT</div>
           <h2>{mode === 'login' ? 'Sign in' : 'Create your account'}</h2>
           <p>
             {mode === 'login'
@@ -345,7 +343,9 @@ export default function AuthForm({ mode }: { mode: 'login' | 'register' }) {
               <label className="remember">
                 <input type="checkbox" /> Remember me
               </label>
-              <span>Recovery flow not yet connected</span>
+              <Link href="/forgot-password" className="forgot-link">
+                Forgot password?
+              </Link>
             </div>
           )}
           <button className="button button-coral auth-submit" type="submit" disabled={busy}>

@@ -48,3 +48,28 @@ export async function getCurrentUser(): Promise<AuthUser> {
   const response = await get<UserEnvelope>('/auth/me');
   return response.data.user;
 }
+
+/**
+ * Request a password-recovery link (audit §3). The backend response is
+ * enumeration-safe and identical whether or not the email exists, so the
+ * caller always shows the same "check your email" message.
+ */
+export async function forgotPassword(email: string): Promise<string> {
+  const response = await post<{ data: { ok: boolean; message: string } }>(
+    '/auth/forgot-password',
+    { email },
+  );
+  return response.data.message;
+}
+
+/**
+ * Complete recovery with the single-use token from the emailed link plus a
+ * new password. Throws ApiError(400) for an invalid/expired/used token.
+ */
+export async function resetPassword(token: string, password: string): Promise<string> {
+  const response = await post<{ data: { ok: boolean; message: string } }>(
+    '/auth/reset-password',
+    { token, password },
+  );
+  return response.data.message;
+}

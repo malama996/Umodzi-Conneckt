@@ -1,6 +1,6 @@
 # Umodzi Connect — STATE LEDGER
 
-_Last updated: V0.2 Task 28.4C (communication - chat UI, realtime transport & phone contact). Written for the next coding agent._
+_Last updated: Production Audit Sprint (2026-11-09) — per-document verification review, password recovery (Resend), focused UI cleanup, auth-aware nav & matching presentation. Written for the next coding agent._
 
 ## Current version
 
@@ -2084,3 +2084,89 @@ The repository is safe to push to GitHub. User should follow DEPLOYMENT.md for m
 2. Configured all environment variables in Render and Netlify dashboards
 3. Run initial database migrations manually
 4. Tested staging deployment before sharing with users
+
+## Production Audit Sprint (2026-11-09)
+
+Master 14-section production audit. Owner constraints honored throughout: **no git push** (owner deploys manually after local testing), no production/live-config changes, no destructive migrations, no fake data, no weakened auth, no removed RLS, no exposed secrets/phone numbers, architecture and brand colors preserved. All work below is local and **NOT committed/pushed**.
+
+### Scope decisions (owner-approved via AskUserQuestion)
+
+- **D-1 — Password recovery email:** Resend API (dependency-free `fetch`; no new SDK).
+- **D-2 — Verification rework:** FULL per-document review. Migration 011 adds per-document `status`/`reviewed_by`/`review_reason`/`reviewed_at`, an append-only `verification_reviews` history table, 7 document categories, and a derived `partially_verified` lifecycle state. Admin approves/rejects EACH document; the overall status is DERIVED from document outcomes (an upload alone can never confer trust). Customers see per-category trust indicators.
+- **D-3 — UI/UX:** FOCUSED cleanup only (remove eyebrow labels, reconcile tokens, fix contrast/microcopy, fix matching hero). NO layout redesigns.
+- **Sprint scope:** §9 (matching presentation) & §10 (auth-aware nav) only from the multiselect.
+- **§2 SKIPPED** (already working). **§8 PRESERVED untouched** (Mark All as Read). **§6 (message delivery status), §7/§4 (session UX / auth performance) DEFERRED** — not started.
+
+### A. Per-document verification review (D-2)
+
+**Migration `backend/src/db/migrations/011_verification_review_and_password_reset.sql`** (additive, idempotent, backward-compatible):
+- Expands `document_type` CHECK to 7 categories (national_id, certificate, trade_qualification, professional_licence, business_registration, training_certificate, other) via `DROP CONSTRAINT IF EXISTS chk_verification_documents_type` + re-ADD. **Constraint name verified to MATCH migration 003 (line 84)** so the old restrictive CHECK does not survive.
+- Adds `technician_verification_documents.status TEXT NOT NULL DEFAULT 'pending'` (CHECK pending/approved/rejected), `reviewed_by UUID` (FK users ON DELETE SET NULL), `review_reason TEXT`, `reviewed_at TIMESTAMPTZ`.
+- Expands `technicians.verification_status` CHECK with `partially_verified` via DROP+re-ADD `chk_technicians_verification_status` (**name MATCHES 003 line 38**).
+- Creates `verification_reviews` (append-only: document_id FK CASCADE, technician_id FK CASCADE, reviewer_id FK SET NULL, decision CHECK approved/rejected, reason, created_at) + indexes.
+- Creates `password_reset_tokens` (see B) + indexes.
+- One-time backfill: documents of already-`verified` technicians → `status='approved'`; all other pre-existing documents → `pending`. **Never touches `technicians.verification_status`** — overall status stays as-is until an admin acts under the new model.
+- Final guarded DO block: `GRANT SELECT/INSERT/UPDATE/DELETE` to `umodzi_app` + `ENABLE ROW LEVEL SECURITY` + `p_app_all` policy for BOTH new tables (guarded by pg_roles/pg_policies existence checks so plain-PostgreSQL CI is a no-op). Mirrors 009/010 runtime-reachability contract.
+
+**Backend `backend/src/server.ts`:**
+- `recomputeVerificationStatus(technicianId, reviewerId)` (~line 2729): derives overall status from per-document outcomes and persists it, keeping the legacy invariant `verified ⟺ verification_status='verified'`. Policy: no docs→`unverified`; national_id rejected→`rejected`; national_id approved + all approved→`verified`(verified=true); national_id approved + any pending/rejected→`partially_verified`; approved>0→`partially_verified`; else→`pending`. **Verified: an upload alone can never auto-approve.** Called after every per-document decision.
+- `PATCH /api/v1/admin/technicians/:id/verification/documents/:docId` (~line 3662): `requireRole('administrator')`, RATE_LIMIT_ADMIN, owner-scoped document lookup (404 if not found), `documentDecisionSchema` (approved|rejected + reason min 8 chars on reject). UPDATEs the document, INSERTs a `verification_reviews` row, calls `recomputeVerificationStatus`, writes an audit event, and notifies the technician.
+- `DOCUMENT_TYPE_LABELS` (~line 3625): 7 categories → short labels for notifications.
+- Upload blocked when status is pending/verified (~line 3078); submit blocked when pending/verified and requires national_id (~line 3235).
+- Added `TechnicianVerificationStatus` to the `./types/api.js` import block (was used but not imported — fixed a real type error).
+
+**Backend `backend/src/privacy/auditService.ts`:** added 3 event types to `AUDIT_EVENT_TYPES`: `auth.password_reset_requested`, `auth.password_reset_completed`, `admin.verification_document_decision` (rejection reason is deliberately NOT copied into audit metadata).
+
+**Frontend types/services:**
+- `frontend/lib/api/technicianProfileApi.ts`: `TechnicianVerificationStatus` → 5 values (+partially_verified); `VerificationDocumentType` → 7 values; new `VerificationDocumentStatus`; `TechnicianDocument` += status/reviewReason/reviewedAt/reviewedBy; new `VerificationReview` interface; `AdminTechnicianVerification` += `reviews`; new `decideVerificationDocument()`.
+- `frontend/lib/api/adminApi.ts`: AUDIT_EVENT_TYPES += the same 3 events.
+- `frontend/lib/api/techniciansApi.ts`: `ApiTechnician` += `verifiedCategories?: string[]` (approved document categories; plain strings; forward-compatible).
+- `frontend/lib/services/technicianProfileService.ts`: `decideDocument()` wrapper; DOCUMENT_TYPE_LABELS expanded to 7; `documentStatusDisplay(status)`→{label,tone}; `partially_verified` added to verificationDisplay/verificationLabel.
+
+**Frontend UI:**
+- `frontend/app/technician/profile/page.tsx`: VerificationCard editable for unverified|rejected|partially_verified; canSubmit for unverified|rejected; qualification check spans the 4 credential categories; per-document list shows status Badge + rejection feedback.
+- `frontend/app/admin/technicians/[id]/page.tsx`: new `DocumentRow` (View + Approve + Reject-with-reason inline, calls `decideDocument`, refreshes bundle) and `ReviewHistory` (renders `bundle.reviews`); DecisionPanel relabeled "Overall decision (shortcut)" pointing to per-doc controls.
+- `frontend/components/ui.tsx`: new `VerificationTrustIndicators({verifiedCategories})` (teal badges + plain-language trust note; returns null when none approved).
+- `frontend/app/technicians/profile/[id]/page.tsx`: "Verification" section rendering `VerificationTrustIndicators` when categories are approved.
+
+### B. Password recovery via Resend (D-1)
+
+- `backend/src/auth/emailService.ts`: Resend HTTP API via `fetch` (no SDK).
+- `backend/src/auth/passwordResetService.ts`: enumeration-safe `requestPasswordReset` + `resetPassword` (sha256-hashed single-use time-limited token; argon2id rehash; `revokeAllSessions` on success). Raw token never stored — only the hash, in `password_reset_tokens`.
+- `backend/src/auth/routes.ts`: `POST /forgot-password` (rate limit 5/min) + `POST /reset-password` (10/min), both audited.
+- `frontend/app/forgot-password/page.tsx`, `frontend/app/reset-password/page.tsx`, `frontend/app/auth/AuthForm.tsx`, `frontend/lib/api/authApi.ts` (`forgotPassword()`/`resetPassword()`).
+
+### C. Focused UI cleanup (D-3)
+
+- Removed ALL eyebrow/kicker labels: `frontend/app/page.tsx` (hero eyebrow + dot), `frontend/app/matching/page.tsx` (hero eyebrow), and the `.eyebrow`/`.eyebrow i`/`.eyebrow-dark` CSS from `globals.css`. (Owner rule: no decorative kickers — "looks AI generated".)
+- Token reconciliation: `frontend/lib/theme.ts` `muted` `#647786`→`#5A6E7D` to match the WCAG-corrected `--muted` in globals.css. (`umodziTheme` is dead code — zero imports — but kept non-destructively.)
+- Accessibility floor: lifted ALL sub-10px `font-size` declarations to 10px across globals.css (52× 9px + ~10× 8px, plus manual 7px→10px on `.logo-word` small and `.hero-bottom` mobile). Verified 0 sub-10px remain. `#68d9d2` retained only on dark backgrounds (.steps article > span) where contrast is correct.
+- Matching hero (§9): `.matching-page` padding-top → `calc(72px + env(safe-area-inset-top) + 32px)`; `.matching-hero h1` → clamp(31px,4vw,46px)/900/-1.5px; `.matching-hero p` → #3f5364/14px/1.6/62ch.
+
+### D. Auth-aware navigation (§10)
+
+- `frontend/components/ui.tsx` PublicHeader: `const { status, user } = useAuth(); const showMarketingNav = status !== 'authenticated' || user?.role !== 'customer';` gates BOTH desktop-nav and mobile-nav-links — marketing anchors are hidden for signed-in customers only (anonymous users and technician/admin accounts still see them).
+
+### New environment variables (backend / Render)
+
+- `RESEND_API_KEY` — Resend secret key (server-only; never in frontend).
+- `RESEND_FROM_EMAIL` — verified sender address.
+- `PUBLIC_APP_URL` — base URL for the reset link in emails.
+- `PASSWORD_RESET_TTL` — token lifetime (ms; optional, has a default).
+
+### Migration 011 deploy note
+
+**Migration 011 MUST run BEFORE the backend deploy.** The new endpoints read/write `verification_reviews`, `password_reset_tokens`, and the new document columns; deploying code before the schema will break those routes. Migration is additive/idempotent/non-destructive — safe to re-run. Run via the existing runner (`backend/src/db/migrate.ts`, auto-discovers `^\d{3}_[a-z0-9_]+\.sql$`).
+
+### Verification performed (this session)
+
+- **Frontend `tsc --noEmit`: CLEAN** — TSC_EXIT=0, 0 bytes of output (authoritative; run via `node ../node_modules/typescript/lib/tsc.js` from `frontend/`).
+- **Backend `tsc --noEmit`: CLEAN** — TSC_EXIT=0, 0 bytes of output (run from `backend/`).
+- The 3 "pre-existing" implicit-any errors noted earlier (authService.ts:45 ×2, server.ts:2903 — a zod inference quirk) **no longer reproduce** after a clean dependency install; they were node_modules-dehydration artifacts, not source defects. Both workspaces now typecheck with zero errors.
+- **Toolchain instability encountered:** OneDrive Files-On-Demand repeatedly dehydrated/evicted `node_modules` (notably `next` and `typescript`), producing false "Cannot find module 'next/link'" / "tsc.js MODULE_NOT_FOUND" errors and hanging `npm install` on file locks (ENOTEMPTY/EPERM). Resolved by a full `npm install` (restored `next` package.json + `.d.ts` files) and a targeted `typescript@5.9.3` reinstall. **This is an environment issue, not a code issue.** Owner should keep the repo out of OneDrive sync scope or disable Files-On-Demand for `node_modules` to avoid recurrence.
+- **No test suite exists** in the repo (confirmed) — typecheck is the available static gate.
+- **Full `next build` / backend emit build NOT re-run this session** due to the OneDrive-induced toolchain instability above. Type-level gates pass clean on both workspaces. **Owner should run `npm run build` (frontend) and `npm run build -w backend` locally as part of manual pre-deploy testing.**
+
+### Status
+
+**NOT committed, NOT pushed.** Owner deploys manually after local testing, per standing instruction. Recommended owner pre-deploy checklist: (1) run migration 011 against Supabase; (2) set the 4 new env vars in Render; (3) run both builds locally; (4) smoke-test forgot/reset-password and the admin per-document review flow.

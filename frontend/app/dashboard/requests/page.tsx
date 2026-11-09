@@ -223,7 +223,6 @@ function MyRequestsList() {
         <div className="panel">
           <div className="panel-head">
             <div>
-              <div className="eyebrow eyebrow-dark">SERVICE REQUESTS</div>
               <h2>
                 <LuClipboardList size={16} className="ic" aria-hidden="true" /> My requests
               </h2>

@@ -2,6 +2,7 @@ import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import fastifyRateLimit from '@fastify/rate-limit';
 import { requireAuth } from './authMiddleware.js';
 import { getCurrentUser, login, registerAccount, toAuthUserApi } from './authService.js';
+import { requestPasswordReset, resetPassword } from './passwordResetService.js';
 import { HttpError } from './httpError.js';
 import { signAccessToken } from './jwt.js';
 import {
@@ -235,4 +236,70 @@ export default async function authRoutes(app: FastifyInstance): Promise<void> {
     }
     return reply.send({ data: { user } });
   });
+
+  // -------------------------------------------------------------------------
+  // POST /api/v1/auth/forgot-password — begin recovery (audit §3).
+  //
+  // ENUMERATION-SAFE: the response is byte-identical whether or not the
+  // email maps to an active account, and delivery failures are swallowed.
+  // Strictly rate limited (5/min) to bound abuse. The audit record stores no
+  // email and no user id, so the log itself cannot be mined for accounts.
+  // -------------------------------------------------------------------------
+  app.post(
+    '/forgot-password',
+    { config: { rateLimit: { max: 5, timeWindow: '1 minute' } } },
+    async (request, reply) => {
+      const body = (request.body ?? {}) as { email?: unknown };
+      const email = typeof body.email === 'string' ? body.email : '';
+      try {
+        await requestPasswordReset(email);
+      } catch (error) {
+        // Never let a delivery/DB error distinguish this account from any
+        // other; the caller always sees the same generic success.
+        request.log.error(error);
+      }
+      await recordAuditEvent({
+        eventType: 'auth.password_reset_requested',
+        actorUserId: null,
+        actorRole: null,
+        metadata: { route: '/api/v1/auth/forgot-password' },
+      });
+      return reply.send({
+        data: {
+          ok: true,
+          message:
+            'If an account exists for that email, a password recovery link is on its way.',
+        },
+      });
+    },
+  );
+
+  // -------------------------------------------------------------------------
+  // POST /api/v1/auth/reset-password — complete recovery (audit §3).
+  // Validates the single-use, time-limited token, rotates the password, and
+  // revokes every existing session. Invalid/expired/used tokens all yield the
+  // same generic 400 (thrown inside resetPassword). Rate limited.
+  // -------------------------------------------------------------------------
+  app.post(
+    '/reset-password',
+    { config: { rateLimit: { max: 10, timeWindow: '1 minute' } } },
+    async (request, reply) => {
+      const body = (request.body ?? {}) as { token?: unknown; password?: unknown };
+      const token = typeof body.token === 'string' ? body.token : '';
+      const password = typeof body.password === 'string' ? body.password : '';
+      const { userId } = await resetPassword(token, password);
+      await recordAuditEvent({
+        eventType: 'auth.password_reset_completed',
+        actorUserId: userId,
+        actorRole: null,
+        targetUserId: userId,
+        targetEntityType: 'user',
+        targetEntityId: userId,
+        metadata: { route: '/api/v1/auth/reset-password' },
+      });
+      return reply.send({
+        data: { ok: true, message: 'Your password has been reset. Please sign in.' },
+      });
+    },
+  );
 }

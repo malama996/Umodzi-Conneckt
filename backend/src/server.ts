@@ -73,8 +73,11 @@ import {
   type TechnicianDocumentApi,
   type TechnicianOwnProfileApi,
   type TechnicianReviewsApi,
+  type TechnicianVerificationStatus,
   type UserRole,
+  type VerificationDocumentStatus,
   type VerificationDocumentType,
+  type VerificationReviewApi,
 } from "./types/api.js";
 import crypto from "crypto";
 import type { PoolClient } from "pg";
@@ -393,6 +396,18 @@ app.get("/api/v1/technicians/:id", async (request, reply) => {
     if (rows.length === 0) {
       return jsonResponse(reply, 404, { error: "Technician not found" });
     }
+    // Audit §5.D — customer-facing trust indicators. Only document CATEGORIES
+    // an authorised reviewer has individually APPROVED are exposed (distinct
+    // category names — no images, identity numbers, filenames, keys or notes).
+    const catRows = await query<{ document_type: string }>(
+      `SELECT DISTINCT document_type
+       FROM technician_verification_documents
+       WHERE technician_id = $1 AND status = 'approved'`,
+      [id],
+    );
+    const verifiedCategories = catRows.map(
+      (c) => c.document_type as VerificationDocumentType,
+    );
     const tech: TechnicianApi = {
       id: rows[0].id,
       name: rows[0].name,
@@ -407,6 +422,7 @@ app.get("/api/v1/technicians/:id", async (request, reply) => {
       accountStatus: rows[0].account_status,
       bio: rows[0].bio,
       hasPhoto: rows[0].has_photo,
+      verifiedCategories,
       createdAt: rows[0].created_at,
       updatedAt: rows[0].updated_at,
     };
@@ -2606,6 +2622,10 @@ const EXT_MIME: Record<string, string> = {
 const VERIFICATION_DOCUMENT_TYPES: readonly VerificationDocumentType[] = [
   "national_id",
   "certificate",
+  "trade_qualification",
+  "professional_licence",
+  "business_registration",
+  "training_certificate",
   "other",
 ];
 
@@ -2655,6 +2675,10 @@ interface DocumentRow {
   file_name: string;
   content_type: string;
   size_bytes: number;
+  status: string;
+  review_reason: string | null;
+  reviewed_at: string | null;
+  reviewed_by: string | null;
   created_at: string;
 }
 
@@ -2665,20 +2689,102 @@ function toDocumentApi(row: DocumentRow): TechnicianDocumentApi {
     fileName: row.file_name,
     contentType: row.content_type,
     sizeBytes: row.size_bytes,
+    status: row.status as VerificationDocumentStatus, // DB CHECK constraint
+    reviewReason: row.review_reason,
+    reviewedAt: row.reviewed_at,
+    reviewedBy: row.reviewed_by,
     createdAt: row.created_at,
   };
 }
+
+const DOCUMENT_COLUMNS = `id, document_type, file_name, content_type, size_bytes,
+  status, review_reason, reviewed_at, reviewed_by, created_at`;
 
 async function listDocuments(
   technicianId: string,
 ): Promise<TechnicianDocumentApi[]> {
   const rows = await query<DocumentRow>(
-    `SELECT id, document_type, file_name, content_type, size_bytes, created_at
+    `SELECT ${DOCUMENT_COLUMNS}
      FROM technician_verification_documents WHERE technician_id = $1
      ORDER BY created_at ASC`,
     [technicianId],
   );
   return rows.map(toDocumentApi);
+}
+
+/**
+ * Audit §5.C — derive the technician's OVERALL verification status from the
+ * individual document review outcomes, then persist it (keeping the legacy
+ * invariant verified ⟺ verification_status='verified'). Called after every
+ * per-document decision so an upload alone can never confer trust.
+ *
+ * Policy:
+ *   - no documents                                   → 'unverified'
+ *   - identity (national_id) rejected                → 'rejected'
+ *   - identity approved + every document approved    → 'verified'
+ *   - identity approved + anything pending/rejected  → 'partially_verified'
+ *   - identity missing/pending + something approved  → 'partially_verified'
+ *   - otherwise (awaiting first review)              → 'pending'
+ */
+async function recomputeVerificationStatus(
+  technicianId: string,
+  reviewerId: string,
+): Promise<{ status: TechnicianVerificationStatus; verified: boolean }> {
+  const docs = await query<{
+    document_type: string;
+    status: string;
+    review_reason: string | null;
+  }>(
+    `SELECT document_type, status, review_reason
+     FROM technician_verification_documents WHERE technician_id = $1`,
+    [technicianId],
+  );
+
+  let status: TechnicianVerificationStatus;
+  let verified = false;
+  let rejectionReason: string | null = null;
+
+  if (docs.length === 0) {
+    status = "unverified";
+  } else {
+    const identity = docs.find((d) => d.document_type === "national_id");
+    const approved = docs.filter((d) => d.status === "approved").length;
+    const pending = docs.filter((d) => d.status === "pending").length;
+    const rejectedDocs = docs.filter((d) => d.status === "rejected");
+    const firstReason =
+      rejectedDocs[0]?.review_reason ??
+      (identity?.status === "rejected" ? identity.review_reason : null);
+
+    if (identity && identity.status === "rejected") {
+      status = "rejected";
+      rejectionReason = identity.review_reason;
+    } else if (identity && identity.status === "approved") {
+      if (rejectedDocs.length === 0 && pending === 0) {
+        status = "verified";
+        verified = true;
+      } else {
+        status = "partially_verified";
+        rejectionReason = firstReason;
+      }
+    } else if (approved > 0) {
+      status = "partially_verified";
+      rejectionReason = firstReason;
+    } else {
+      status = "pending";
+      rejectionReason = firstReason;
+    }
+  }
+
+  await query(
+    `UPDATE technicians
+     SET verification_status = $1, verified = $2,
+         verification_rejection_reason = $3,
+         verification_reviewed_at = NOW(), verification_reviewed_by = $4,
+         updated_at = NOW()
+     WHERE id = $5`,
+    [status, verified, rejectionReason, reviewerId, technicianId],
+  );
+  return { status, verified };
 }
 
 function toOwnProfile(
@@ -2988,7 +3094,7 @@ app.post(
       part?.file.resume();
       return jsonResponse(reply, 400, {
         error:
-          "A valid documentType is required (national_id, certificate, other).",
+          "A valid documentType is required (national_id, certificate, trade_qualification, professional_licence, business_registration, training_certificate, other).",
       });
     }
     if (!part) {
@@ -3029,7 +3135,7 @@ app.post(
         `INSERT INTO technician_verification_documents
            (id, technician_id, document_type, file_name, content_type, size_bytes, storage_key, created_at)
          VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
-         RETURNING id, document_type, file_name, content_type, size_bytes, created_at`,
+         RETURNING ${DOCUMENT_COLUMNS}`,
         [
           id,
           tech.id,
@@ -3308,6 +3414,30 @@ async function loadAdminVerification(
   const t = rows[0];
   if (!t) return null;
   const documents = await listDocuments(technicianId);
+  const reviewRows = await query<{
+    id: string;
+    document_id: string;
+    decision: string;
+    reason: string | null;
+    reviewer_email: string | null;
+    created_at: string;
+  }>(
+    `SELECT r.id, r.document_id, r.decision, r.reason,
+            reviewer.email AS reviewer_email, r.created_at
+     FROM verification_reviews r
+     LEFT JOIN users reviewer ON reviewer.id = r.reviewer_id
+     WHERE r.technician_id = $1
+     ORDER BY r.created_at DESC`,
+    [technicianId],
+  );
+  const reviews: VerificationReviewApi[] = reviewRows.map((r) => ({
+    id: r.id,
+    documentId: r.document_id,
+    decision: r.decision as "approved" | "rejected",
+    reason: r.reason,
+    reviewerEmail: r.reviewer_email,
+    createdAt: r.created_at,
+  }));
   return {
     id: t.id,
     name: t.name,
@@ -3332,6 +3462,7 @@ async function loadAdminVerification(
     userId: t.user_id,
     userEmail: t.user_email,
     documents,
+    reviews,
     createdAt: t.created_at,
     updatedAt: t.updated_at,
   };
@@ -3473,6 +3604,162 @@ app.patch(
               title: "Verification rejected",
               message: `Your technician verification was rejected: ${decision.reason}`,
             };
+      await recordAndDeliverEvent(
+        {
+          userId: bundle.userId,
+          type: decided.type,
+          title: decided.title,
+          message: decided.message,
+          referenceType: "technician",
+          referenceId: id,
+          channel: "in_app",
+        },
+        (error) => app.log.error(error),
+      );
+    }
+    return jsonResponse(reply, 200, { data: bundle });
+  },
+);
+
+/** Human-readable document category labels (notifications/UI only). */
+const DOCUMENT_TYPE_LABELS: Record<VerificationDocumentType, string> = {
+  national_id: "National ID",
+  certificate: "Certificate",
+  trade_qualification: "Trade qualification",
+  professional_licence: "Professional licence",
+  business_registration: "Business registration",
+  training_certificate: "Training certificate",
+  other: "Supporting document",
+};
+
+const documentDecisionSchema = z.discriminatedUnion("decision", [
+  z.object({ decision: z.literal("approved") }),
+  z.object({
+    decision: z.literal("rejected"),
+    reason: z
+      .string()
+      .trim()
+      .min(
+        8,
+        "Give the technician a clear correction reason (min 8 characters)",
+      )
+      .max(500),
+  }),
+]);
+
+/**
+ * PATCH /api/v1/admin/technicians/:id/verification/documents/:docId
+ * Audit §5.C — approve or reject ONE evidence document. Records the
+ * decision on the document, appends an immutable row to verification_reviews,
+ * then RE-DERIVES the technician's overall verification status from every
+ * document's outcome (recomputeVerificationStatus). This is the mechanism
+ * that makes verification evidence-based: the overall status is a function
+ * of individual reviews, never of upload.
+ *
+ * The document must belong to the technician in the path (owner-scoped join,
+ * uniform 404 otherwise — no IDOR leak). Availability is never touched.
+ */
+app.patch(
+  "/api/v1/admin/technicians/:id/verification/documents/:docId",
+  {
+    preHandler: requireRole("administrator"),
+    config: { rateLimit: routeRateLimit("RATE_LIMIT_ADMIN", 60) },
+  },
+  async (request, reply) => {
+    const { id, docId } = request.params as { id: string; docId: string };
+    const authUser = request.authUser;
+    if (!authUser) {
+      return jsonResponse(reply, 401, { error: "Authentication required" });
+    }
+    assertUuid(id);
+    assertUuid(docId);
+    const parsed = documentDecisionSchema.safeParse(request.body);
+    if (!parsed.success) {
+      return jsonResponse(reply, 400, {
+        error: "Validation failed",
+        details: parsed.error.flatten(),
+      });
+    }
+    const docRows = await query<{
+      id: string;
+      document_type: string;
+      status: string;
+    }>(
+      `SELECT id, document_type, status
+       FROM technician_verification_documents
+       WHERE id = $1 AND technician_id = $2`,
+      [docId, id],
+    );
+    const doc = docRows[0];
+    if (!doc) {
+      return jsonResponse(reply, 404, { error: "Document not found" });
+    }
+    const decision = parsed.data;
+    const approved = decision.decision === "approved";
+    const reason = approved ? null : decision.reason;
+    try {
+      await query(
+        `UPDATE technician_verification_documents
+         SET status = $1, reviewed_by = $2, review_reason = $3, reviewed_at = NOW()
+         WHERE id = $4`,
+        [approved ? "approved" : "rejected", authUser.id, reason, docId],
+      );
+      await query(
+        `INSERT INTO verification_reviews
+           (document_id, technician_id, reviewer_id, decision, reason)
+         VALUES ($1, $2, $3, $4, $5)`,
+        [
+          docId,
+          id,
+          authUser.id,
+          approved ? "approved" : "rejected",
+          reason,
+        ],
+      );
+    } catch (error) {
+      app.log.error(error);
+      return jsonResponse(reply, 500, {
+        error: "Failed to record the document decision",
+      });
+    }
+    const derived = await recomputeVerificationStatus(id, authUser.id);
+    const bundle = await loadAdminVerification(id);
+    // Privileged per-document decision. As with the whole-profile decision,
+    // the admin-authored rejection REASON is deliberately NOT copied into the
+    // audit row (free text may quote document content); only opaque ids and
+    // the derived status are recorded.
+    await recordAuditEvent({
+      eventType: "admin.verification_document_decision",
+      actorUserId: authUser.id,
+      actorRole: authUser.role,
+      targetUserId: bundle?.userId ?? null,
+      targetEntityType: "verification_document",
+      targetEntityId: docId,
+      metadata: {
+        decision: decision.decision,
+        document_type: doc.document_type,
+        previous_status: doc.status,
+        derived_verification_status: derived.status,
+        route: "/api/v1/admin/technicians/:id/verification/documents/:docId",
+      },
+    });
+    // Notify the affected technician (linked account only; NULL safely skips).
+    // A notification failure is logged but never fails the recorded decision.
+    if (bundle?.userId) {
+      const label =
+        DOCUMENT_TYPE_LABELS[doc.document_type as VerificationDocumentType] ??
+        "document";
+      const decided = approved
+        ? {
+            type: "technician_verification_approved",
+            title: "Document approved",
+            message: `Your ${label} was approved.`,
+          }
+        : {
+            type: "technician_verification_rejected",
+            title: "Document rejected",
+            message: `Your ${label} was rejected: ${decision.reason}`,
+          };
       await recordAndDeliverEvent(
         {
           userId: bundle.userId,

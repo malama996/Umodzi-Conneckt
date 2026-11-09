@@ -8,7 +8,11 @@ export const umodziTheme = {
     background: '#F5F8FA',
     white: '#FFFFFF',
     text: '#243746',
-    muted: '#647786',
+    // Reconciled with globals.css `--muted` (the live source of truth, applied
+    // via CSS variables). Was #647786, which is 4.15:1 on --bg — below WCAG AA;
+    // globals.css already darkened it to #5a6e7d (4.99:1). Kept in sync here so
+    // this mirror never reintroduces the low-contrast value.
+    muted: '#5A6E7D',
     border: '#DCE5EA',
     success: '#16845B',
     warning: '#D99100',

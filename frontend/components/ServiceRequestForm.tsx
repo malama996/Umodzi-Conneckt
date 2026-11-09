@@ -143,7 +143,6 @@ export default function ServiceRequestForm({
     return (
       <section className="request-review" aria-label="Review your request">
         <div className="request-form-header">
-          <span className="eyebrow eyebrow-dark">REVIEW YOUR REQUEST</span>
         </div>
         <dl className="request-review-details">
           <div>
@@ -195,7 +194,6 @@ export default function ServiceRequestForm({
   return (
     <form className="request-form" onSubmit={handleReview} aria-label="Create service request">
       <div className="request-form-header">
-        <span className="eyebrow eyebrow-dark">CREATE SERVICE REQUEST</span>
         <p className="form-note">
           Your request is saved securely. When an eligible verified technician is available, the
           platform sends them an offer automatically.

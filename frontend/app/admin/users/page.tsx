@@ -120,7 +120,6 @@ function AdminUsersView() {
     <main className="dashboard-page admin-page">
       <div className="dashboard-heading">
         <div>
-          <div className="eyebrow eyebrow-dark">ADMINISTRATOR</div>
           <h1>User management</h1>
           <p>Every registered account — identity, role, and account status.</p>
         </div>

@@ -116,7 +116,6 @@ export default function ProfileEditor({
 
   return (
     <section className="profile-editor" aria-label="Prototype profile editor">
-      <div className="eyebrow eyebrow-dark">PROFILE EDITOR · LOCAL PROTOTYPE</div>
       <p className="form-note">
         Changes are stored in this browser only (localStorage) and survive refresh. No account or
         backend is involved. When storage is unavailable, edits are kept in memory for the session.

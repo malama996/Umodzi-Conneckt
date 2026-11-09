@@ -103,7 +103,6 @@ export default function TechnicianMapPanel({
       <section className="map-section" aria-label="Nearby technicians map">
         <div className="result-head">
           <div>
-            <span className="eyebrow eyebrow-dark">NEARBY TECHNICIANS</span>
             <h2>No available technicians</h2>
           </div>
           <span className="result-rule">Service-area locations</span>
@@ -126,7 +125,6 @@ export default function TechnicianMapPanel({
     <section className="map-section" aria-label="Technician locations map and list">
       <div className="result-head">
         <div>
-          <span className="eyebrow eyebrow-dark">NEARBY TECHNICIANS</span>
           <h2>{countLabel}</h2>
         </div>
         <span className="result-rule">Service-area locations</span>

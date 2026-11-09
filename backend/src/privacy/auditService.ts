@@ -37,12 +37,19 @@ export const AUDIT_EVENT_TYPES = [
   'auth.login_failed',
   'auth.login_succeeded',
   'auth.account_locked',
+  // Self-service password recovery (Task: §3). Recorded WITHOUT the email or
+  // user id so the log cannot be used to enumerate which addresses exist.
+  'auth.password_reset_requested',
+  'auth.password_reset_completed',
   // Self-service privacy actions
   'privacy.data_exported',
   'privacy.account_deleted',
   // Administrative / privileged actions
   'admin.user_status_changed',
   'admin.verification_decision',
+  // Per-document verification decision (Task: §5). The rejection reason is
+  // deliberately NOT copied into audit metadata; only the decision is logged.
+  'admin.verification_document_decision',
   // Administrator conversation-METADATA inspection (Task 33.2). Recorded on
   // every admin read of GET /admin/conversations/:id. Message CONTENT is
   // never auditable because it is never exposed to administrators, and no

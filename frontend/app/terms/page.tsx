@@ -34,7 +34,6 @@ export default function TermsPage() {
           </nav>
 
           <header className="privacy-header">
-            <div className="eyebrow eyebrow-dark">THE RULES</div>
             <h1>Terms and Conditions</h1>
             <p className="privacy-lede">
               The rules for using Umodzi Connect, written to describe the service as it is built

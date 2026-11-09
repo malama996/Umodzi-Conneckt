@@ -53,7 +53,6 @@ export default function RequireAuth({ role, children }: { role?: UserRole; child
   if (role && user && user.role !== role) {
     return (
       <main className="auth-gate" role="alert">
-        <p className="eyebrow eyebrow-dark">ACCESS DENIED</p>
         <h1>This page is for {ROLE_LABELS[role]} accounts.</h1>
         <p>
           You are signed in as {user.email} ({ROLE_LABELS[user.role]}).

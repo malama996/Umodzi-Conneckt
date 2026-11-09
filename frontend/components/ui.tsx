@@ -133,16 +133,28 @@ export function PublicHeader() {
   const [navOpen, setNavOpen] = useState(false);
   const close = useCallback(() => setNavOpen(false), []);
   const { panelRef, onTouchStart, onTouchEnd } = useMobileDrawer(navOpen, close);
+  // §10: the marketing anchors (Home / Services / How It Works / About) exist
+  // for visitors who are still deciding whether to use the platform. A
+  // signed-in customer is already past that point — usually mid-request on
+  // /matching — so offering links back to the landing sections only pulls them
+  // out of the task. They are hidden for customers; the account menu (avatar)
+  // still reaches their dashboard. Technicians and administrators navigate via
+  // the dashboard sidebar and are deliberately untouched here, and anonymous
+  // visitors keep the full public nav.
+  const { status, user } = useAuth();
+  const showMarketingNav = status !== 'authenticated' || user?.role !== 'customer';
   return (
     <header className="public-header">
       <Logo light />
-      <nav className="desktop-nav" aria-label="Primary navigation">
-        {PUBLIC_NAV_LINKS.map((link, index) => (
-          <Link key={link.label} className={index === 0 ? 'nav-active' : ''} href={link.href}>
-            {link.label}
-          </Link>
-        ))}
-      </nav>
+      {showMarketingNav && (
+        <nav className="desktop-nav" aria-label="Primary navigation">
+          {PUBLIC_NAV_LINKS.map((link, index) => (
+            <Link key={link.label} className={index === 0 ? 'nav-active' : ''} href={link.href}>
+              {link.label}
+            </Link>
+          ))}
+        </nav>
+      )}
       <div className="header-actions">
         <AuthNav />
       </div>
@@ -175,19 +187,21 @@ export function PublicHeader() {
             <div className="mobile-nav-head">
               <Logo light />
             </div>
-            <div className="mobile-nav-links">
-              {PUBLIC_NAV_LINKS.map((link) => (
-                <Link
-                  key={link.label}
-                  href={link.href}
-                  onClick={close}
-                  tabIndex={navOpen ? 0 : -1}
-                >
-                  <span className="mobile-nav-icon">{link.icon}</span>
-                  {link.label}
-                </Link>
-              ))}
-            </div>
+            {showMarketingNav && (
+              <div className="mobile-nav-links">
+                {PUBLIC_NAV_LINKS.map((link) => (
+                  <Link
+                    key={link.label}
+                    href={link.href}
+                    onClick={close}
+                    tabIndex={navOpen ? 0 : -1}
+                  >
+                    <span className="mobile-nav-icon">{link.icon}</span>
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
+            )}
             <div className="mobile-nav-actions">
               <Link
                 href="/matching"
@@ -277,6 +291,53 @@ export function VerifiedBadge() {
     <Badge tone="success">
       <LuShieldCheck size={10} aria-hidden="true" /> Verified
     </Badge>
+  );
+}
+
+/**
+ * §5 customer trust indicators.
+ *
+ * Turns the APPROVED document categories (verifiedCategories) into plain
+ * language so a customer sees WHAT was actually checked — identity, trade
+ * qualification, licence, business registration — instead of a single opaque
+ * "verified". Only administrator-approved categories appear; the value is a
+ * plain string on the wire, so an unrecognised future category is ignored
+ * rather than rendered as a broken label. Returns null when nothing is
+ * approved yet, so the generic VerifiedBadge remains the only signal.
+ */
+const VERIFIED_CATEGORY_LABELS: Record<string, string> = {
+  national_id: 'Identity verified',
+  trade_qualification: 'Trade qualification verified',
+  professional_licence: 'Professional licence verified',
+  business_registration: 'Business registration verified',
+  training_certificate: 'Training certificate verified',
+  certificate: 'Certificate verified',
+};
+
+export function VerificationTrustIndicators({
+  verifiedCategories,
+}: {
+  verifiedCategories?: string[];
+}) {
+  const labels = (verifiedCategories ?? [])
+    .map((category) => VERIFIED_CATEGORY_LABELS[category])
+    .filter((label): label is string => Boolean(label));
+  if (labels.length === 0) return null;
+  return (
+    <div className="trust-indicators">
+      <div className="trust-badges">
+        {labels.map((label) => (
+          <Badge key={label} tone="teal">
+            <LuShieldCheck size={10} aria-hidden="true" /> {label}
+          </Badge>
+        ))}
+      </div>
+      <p className="trust-note">
+        Each badge is a document our team personally reviewed and approved — never a self-declared
+        claim. Verification confirms who the technician is and the qualifications they hold; it does
+        not guarantee a specific job outcome.
+      </p>
+    </div>
   );
 }
 

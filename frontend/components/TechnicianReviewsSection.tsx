@@ -41,7 +41,6 @@ export default function TechnicianReviewsSection({
 
   return (
     <section className="t27-reputation" aria-label="Ratings and reviews">
-      <div className="eyebrow eyebrow-dark">RATINGS &amp; REVIEWS</div>
       <h2>{heading}</h2>
 
       {error ? (

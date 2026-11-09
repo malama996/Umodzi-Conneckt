@@ -21,10 +21,15 @@ import {
 import { Badge, BrandAsset, DashboardLayout } from '@/components/ui';
 import { notifyError, notifySuccess } from '@/lib/notifications/store';
 import { apiBaseUrl } from '@/lib/api/client';
-import type { AdminTechnicianVerification } from '@/lib/api/technicianProfileApi';
+import type {
+  AdminTechnicianVerification,
+  TechnicianDocument,
+} from '@/lib/api/technicianProfileApi';
 import {
   DOCUMENT_TYPE_LABELS,
+  decideDocument,
   decideVerification,
+  documentStatusDisplay,
   fetchAdminVerification,
   fetchDocumentBlob,
   formatBytes,
@@ -115,7 +120,6 @@ function VerificationBundle({
     <>
       <div className="dashboard-heading">
         <div>
-          <div className="eyebrow eyebrow-dark">ADMINISTRATOR · VERIFICATION REVIEW</div>
           <h1>{bundle.name}</h1>
           <p>
             {bundle.category} · {bundle.serviceArea}
@@ -125,7 +129,8 @@ function VerificationBundle({
         <Badge tone={verificationTone(bundle.verificationStatus)}>
           {bundle.verificationStatus === 'verified' ? (
             <LuShieldCheck size={10} aria-hidden="true" />
-          ) : bundle.verificationStatus === 'pending' ? (
+          ) : bundle.verificationStatus === 'pending' ||
+            bundle.verificationStatus === 'partially_verified' ? (
             <LuClock size={10} aria-hidden="true" />
           ) : (
             <LuCircleAlert size={10} aria-hidden="true" />
@@ -226,7 +231,8 @@ function VerificationBundle({
               Rejection reason: {bundle.verificationRejectionReason}
             </p>
           )}
-          <DocumentsList bundle={bundle} />
+          <DocumentsList bundle={bundle} onChanged={onChanged} />
+          <ReviewHistory bundle={bundle} />
           <DecisionPanel bundle={bundle} onChanged={onChanged} />
         </section>
 
@@ -238,10 +244,58 @@ function VerificationBundle({
   );
 }
 
-function DocumentsList({ bundle }: { bundle: AdminTechnicianVerification }) {
-  const view = async (id: string) => {
+function DocumentsList({
+  bundle,
+  onChanged,
+}: {
+  bundle: AdminTechnicianVerification;
+  onChanged: (next: AdminTechnicianVerification) => void;
+}) {
+  return (
+    <div className="t26-docs">
+      <h3>Submitted documents ({bundle.documents.length})</h3>
+      {bundle.documents.length === 0 ? (
+        <p className="admin-note">No documents submitted.</p>
+      ) : (
+        <>
+          <ul className="t26-doc-list">
+            {bundle.documents.map((doc) => (
+              <DocumentRow
+                key={doc.id}
+                technicianId={bundle.id}
+                doc={doc}
+                onChanged={onChanged}
+              />
+            ))}
+          </ul>
+          <p className="admin-note t26-decision-note">
+            Review each document on its own. The overall status is derived from these decisions —
+            approve the National Registration Card (NRC) plus every qualification document to fully
+            verify.
+          </p>
+        </>
+      )}
+    </div>
+  );
+}
+
+function DocumentRow({
+  technicianId,
+  doc,
+  onChanged,
+}: {
+  technicianId: string;
+  doc: TechnicianDocument;
+  onChanged: (next: AdminTechnicianVerification) => void;
+}) {
+  const [reason, setReason] = useState('');
+  const [rejecting, setRejecting] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const status = documentStatusDisplay(doc.status);
+
+  const view = async () => {
     try {
-      const blob = await fetchDocumentBlob(id);
+      const blob = await fetchDocumentBlob(doc.id);
       const url = URL.createObjectURL(blob);
       window.open(url, '_blank', 'noopener');
       window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
@@ -250,33 +304,143 @@ function DocumentsList({ bundle }: { bundle: AdminTechnicianVerification }) {
     }
   };
 
+  const decide = async (decision: 'approved' | 'rejected') => {
+    if (decision === 'rejected' && reason.trim().length < 8) return;
+    setBusy(true);
+    try {
+      const fresh = await decideDocument(
+        technicianId,
+        doc.id,
+        decision === 'approved'
+          ? { decision: 'approved' }
+          : { decision: 'rejected', reason: reason.trim() },
+      );
+      onChanged(fresh);
+      setRejecting(false);
+      setReason('');
+      notifySuccess({
+        title: decision === 'approved' ? 'Document approved' : 'Document rejected',
+        message: `${DOCUMENT_TYPE_LABELS[doc.documentType]} — ${decision}.`,
+      });
+    } catch (error) {
+      notifyError({ title: 'Could not record the decision', message: profileErrorMessage(error) });
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
-    <div className="t26-docs">
-      <h3>Submitted documents ({bundle.documents.length})</h3>
-      {bundle.documents.length === 0 ? (
-        <p className="admin-note">No documents submitted.</p>
-      ) : (
-        <ul className="t26-doc-list">
-          {bundle.documents.map((doc) => (
-            <li key={doc.id}>
-              <span className="t26-doc-icon" aria-hidden="true">
-                <LuFileText size={14} />
-              </span>
-              <span className="t26-doc-meta">
-                <b>{DOCUMENT_TYPE_LABELS[doc.documentType]}</b>
-                <small>
-                  {doc.fileName} · {formatBytes(doc.sizeBytes)} · {formatTimestamp(doc.createdAt)}
-                </small>
-              </span>
-              <span className="t26-doc-actions">
-                <button type="button" className="admin-action" onClick={() => void view(doc.id)}>
-                  View
-                </button>
-              </span>
-            </li>
-          ))}
-        </ul>
-      )}
+    <li className="t26-doc-row">
+      <div className="t26-doc-main">
+        <span className="t26-doc-icon" aria-hidden="true">
+          <LuFileText size={14} />
+        </span>
+        <span className="t26-doc-meta">
+          <span className="t26-doc-title">
+            <b>{DOCUMENT_TYPE_LABELS[doc.documentType]}</b>
+            <Badge tone={status.tone}>{status.label}</Badge>
+          </span>
+          <small>
+            {doc.fileName} · {formatBytes(doc.sizeBytes)} · {formatTimestamp(doc.createdAt)}
+          </small>
+          {doc.status === 'rejected' && doc.reviewReason && (
+            <small className="t26-doc-reason">Feedback given: {doc.reviewReason}</small>
+          )}
+          {doc.reviewedAt && (
+            <small className="t26-doc-reviewed">Reviewed {formatTimestamp(doc.reviewedAt)}</small>
+          )}
+        </span>
+        <span className="t26-doc-actions">
+          <button type="button" className="admin-action" onClick={() => void view()}>
+            View
+          </button>
+        </span>
+      </div>
+      <div className="t26-doc-decide">
+        {rejecting ? (
+          <div className="t26-doc-reject">
+            <label className="t26-reason">
+              <span>Rejection reason (required — the technician sees this)</span>
+              <textarea
+                value={reason}
+                rows={2}
+                maxLength={500}
+                placeholder="Example: The photo is unreadable — please upload a clearer scan."
+                onChange={(event) => setReason(event.target.value)}
+              />
+            </label>
+            <div className="admin-confirm-actions">
+              <button
+                type="button"
+                className="admin-action admin-action-confirm"
+                disabled={busy || reason.trim().length < 8}
+                onClick={() => void decide('rejected')}
+              >
+                {busy ? 'Saving…' : 'Confirm rejection'}
+              </button>
+              <button
+                type="button"
+                className="admin-action"
+                disabled={busy}
+                onClick={() => {
+                  setRejecting(false);
+                  setReason('');
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="admin-actions">
+            <button
+              type="button"
+              className="admin-action"
+              disabled={busy}
+              onClick={() => void decide('approved')}
+            >
+              <LuShieldCheck size={12} aria-hidden="true" /> {busy ? 'Saving…' : 'Approve'}
+            </button>
+            <button
+              type="button"
+              className="admin-action admin-action-confirm"
+              disabled={busy}
+              onClick={() => setRejecting(true)}
+            >
+              <LuCircleAlert size={12} aria-hidden="true" /> Reject
+            </button>
+          </div>
+        )}
+      </div>
+    </li>
+  );
+}
+
+function ReviewHistory({ bundle }: { bundle: AdminTechnicianVerification }) {
+  if (bundle.reviews.length === 0) return null;
+  const docLabel = (documentId: string) => {
+    const doc = bundle.documents.find((candidate) => candidate.id === documentId);
+    return doc ? DOCUMENT_TYPE_LABELS[doc.documentType] : 'a document';
+  };
+  return (
+    <div className="t26-history">
+      <h3>Review history ({bundle.reviews.length})</h3>
+      <ul className="t26-history-list">
+        {bundle.reviews.map((review) => (
+          <li key={review.id}>
+            <Badge tone={review.decision === 'approved' ? 'success' : 'coral'}>
+              {review.decision === 'approved' ? 'Approved' : 'Rejected'}
+            </Badge>
+            <span className="t26-history-meta">
+              <b>{docLabel(review.documentId)}</b>
+              <small>
+                {review.reviewerEmail ?? 'Reviewer'} · {formatTimestamp(review.createdAt)}
+              </small>
+              {review.reason && <small className="t26-doc-reason">{review.reason}</small>}
+            </span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
@@ -296,8 +460,10 @@ function DecisionPanel({
   if (bundle.verificationStatus !== 'pending') {
     return (
       <p className="admin-note t26-decision-note">
-        <LuCircleCheck size={11} aria-hidden="true" /> Only a pending verification can be reviewed —
-        this one is {verificationLabel(bundle.verificationStatus).toLowerCase()}.
+        <LuCircleCheck size={11} aria-hidden="true" /> The overall shortcut below applies only while
+        a verification is pending — this one is{' '}
+        {verificationLabel(bundle.verificationStatus).toLowerCase()}. Use the per-document controls
+        above to review individual documents at any time.
       </p>
     );
   }
@@ -334,7 +500,11 @@ function DecisionPanel({
 
   return (
     <div className="t26-decision">
-      <h3>Review decision</h3>
+      <h3>Overall decision (shortcut)</h3>
+      <p className="admin-note">
+        Approving here verifies the technician in one step; rejecting sends the same feedback for
+        every document. Prefer the per-document controls above for a precise review.
+      </p>
       <label className="t26-reason">
         <span>Rejection reason (required to reject — the technician sees this)</span>
         <textarea

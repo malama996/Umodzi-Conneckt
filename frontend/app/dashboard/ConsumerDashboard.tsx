@@ -99,7 +99,6 @@ export default function ConsumerDashboard() {
       <main className="dashboard-page">
         <div className="dashboard-heading">
           <div>
-            <div className="eyebrow eyebrow-dark">CUSTOMER DASHBOARD</div>
             <h1>
               {firstName ? `Welcome back, ${firstName}` : 'Your service workspace'} <span>👋</span>
             </h1>
@@ -162,7 +161,6 @@ export default function ConsumerDashboard() {
           <div className="dashboard-left">
             <article className="request-banner">
               <div>
-                <div className="eyebrow">NEW SERVICE REQUEST</div>
                 <h2>Need a technician?</h2>
                 <p>Describe your issue and we’ll help you find a relevant local skill.</p>
                 <Link href="/matching" className="button button-coral">

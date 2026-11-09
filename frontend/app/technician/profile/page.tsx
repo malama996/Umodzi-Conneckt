@@ -26,6 +26,7 @@ import type {
 } from '@/lib/api/technicianProfileApi';
 import {
   DOCUMENT_TYPE_LABELS,
+  documentStatusDisplay,
   fetchDocumentBlob,
   fetchOwnProfile,
   formatBytes,
@@ -90,7 +91,6 @@ function TechnicianProfileView() {
       <main className="t26-page">
         <div className="dashboard-heading">
           <div>
-            <div className="eyebrow eyebrow-dark">TECHNICIAN</div>
             <h1>Profile &amp; verification</h1>
             <p>Keep your public profile current and complete your verification review.</p>
           </div>
@@ -473,13 +473,28 @@ function VerificationCard({
   onChanged: (next: OwnTechnicianProfile) => void;
 }) {
   const display = verificationDisplay(profile.verificationStatus);
+  // Documents can be added or replaced whenever the backend allows it:
+  // unverified, rejected, or partially_verified. 'pending' and 'verified'
+  // are locked server-side (409), so the upload/remove UI is hidden too.
   const editable =
+    profile.verificationStatus === 'unverified' ||
+    profile.verificationStatus === 'rejected' ||
+    profile.verificationStatus === 'partially_verified';
+  // The whole-profile "submit" only applies before any per-document review
+  // has happened. Once partially_verified, the reviewer decides each document
+  // individually, so the technician simply replaces any rejected one.
+  const canSubmit =
     profile.verificationStatus === 'unverified' || profile.verificationStatus === 'rejected';
-  // The two policy documents are tracked separately so the technician is told
-  // exactly which one is missing, rather than being blocked by a generic
-  // "document required" message (production-fix Task 6).
   const hasNationalId = profile.documents.some((doc) => doc.documentType === 'national_id');
-  const hasCertificate = profile.documents.some((doc) => doc.documentType === 'certificate');
+  // "Proof of qualification" spans every trade/qualification category, not
+  // just the legacy 'certificate', so the guidance matches what was uploaded.
+  const hasQualification = profile.documents.some(
+    (doc) =>
+      doc.documentType === 'certificate' ||
+      doc.documentType === 'trade_qualification' ||
+      doc.documentType === 'professional_licence' ||
+      doc.documentType === 'training_certificate',
+  );
 
   return (
     <section className="t26-card t26-verify" aria-label="Verification">
@@ -488,7 +503,8 @@ function VerificationCard({
         <Badge tone={display.tone}>
           {profile.verificationStatus === 'verified' ? (
             <LuShieldCheck size={10} aria-hidden="true" />
-          ) : profile.verificationStatus === 'pending' ? (
+          ) : profile.verificationStatus === 'pending' ||
+            profile.verificationStatus === 'partially_verified' ? (
             <LuClock size={10} aria-hidden="true" />
           ) : (
             <LuCircleAlert size={10} aria-hidden="true" />
@@ -521,20 +537,28 @@ function VerificationCard({
 
       {editable && (
         <div className="t26-submit-row">
-          <SubmitButton profile={profile} hasNationalId={hasNationalId} onChanged={onChanged} />
+          {canSubmit && (
+            <SubmitButton profile={profile} hasNationalId={hasNationalId} onChanged={onChanged} />
+          )}
           {!hasNationalId && (
             <small className="admin-note">
               A National Registration Card (NRC) is required before submitting.
             </small>
           )}
-          {hasNationalId && !hasCertificate && (
+          {hasNationalId && !hasQualification && (
             <small className="admin-note">
-              Your NRC is attached. Add a certificate or other proof of qualification so the
-              reviewer can confirm the trade you registered for — both documents are shown to the
-              reviewer.
+              Your NRC is attached. Add a trade qualification, professional licence, or certificate
+              so the reviewer can confirm the trade you registered for — every document is reviewed
+              individually.
             </small>
           )}
         </div>
+      )}
+      {profile.verificationStatus === 'partially_verified' && (
+        <p className="admin-note">
+          Some documents are approved and others still need attention. Replace any rejected
+          document below — the review team checks each one individually.
+        </p>
       )}
       {profile.verificationStatus === 'pending' && (
         <p className="admin-note">
@@ -661,40 +685,52 @@ function DocumentsBlock({
       <h3>Documents</h3>
       {profile.documents.length === 0 ? (
         <p className="admin-note">
-          No documents yet — start with your National Registration Card (NRC), then add your
-          certificate or proof of qualification.
+          No documents yet — start with your National Registration Card (NRC), then add your trade
+          qualification, professional licence, or certificate.
         </p>
       ) : (
         <ul className="t26-doc-list">
-          {profile.documents.map((doc) => (
-            <li key={doc.id}>
-              <span className="t26-doc-icon" aria-hidden="true">
-                <LuFileText size={14} />
-              </span>
-              <span className="t26-doc-meta">
-                <b>{DOCUMENT_TYPE_LABELS[doc.documentType]}</b>
-                <small>
-                  {doc.fileName} · {formatBytes(doc.sizeBytes)} · {formatTimestamp(doc.createdAt)}
-                </small>
-              </span>
-              <span className="t26-doc-actions">
-                <button type="button" className="admin-action" onClick={() => void view(doc.id)}>
-                  View
-                </button>
-                {editable && (
-                  <button
-                    type="button"
-                    className="admin-action"
-                    aria-label={`Remove ${DOCUMENT_TYPE_LABELS[doc.documentType]}`}
-                    disabled={busy}
-                    onClick={() => void remove(doc.id)}
-                  >
-                    <LuTrash2 size={11} aria-hidden="true" />
+          {profile.documents.map((doc) => {
+            const docStatus = documentStatusDisplay(doc.status);
+            return (
+              <li key={doc.id}>
+                <span className="t26-doc-icon" aria-hidden="true">
+                  <LuFileText size={14} />
+                </span>
+                <span className="t26-doc-meta">
+                  <span className="t26-doc-title">
+                    <b>{DOCUMENT_TYPE_LABELS[doc.documentType]}</b>
+                    <Badge tone={docStatus.tone}>{docStatus.label}</Badge>
+                  </span>
+                  <small>
+                    {doc.fileName} · {formatBytes(doc.sizeBytes)} ·{' '}
+                    {formatTimestamp(doc.createdAt)}
+                  </small>
+                  {doc.status === 'rejected' && doc.reviewReason && (
+                    <small className="t26-doc-reason" role="alert">
+                      Reviewer feedback: {doc.reviewReason}
+                    </small>
+                  )}
+                </span>
+                <span className="t26-doc-actions">
+                  <button type="button" className="admin-action" onClick={() => void view(doc.id)}>
+                    View
                   </button>
-                )}
-              </span>
-            </li>
-          ))}
+                  {editable && (
+                    <button
+                      type="button"
+                      className="admin-action"
+                      aria-label={`Remove ${DOCUMENT_TYPE_LABELS[doc.documentType]}`}
+                      disabled={busy}
+                      onClick={() => void remove(doc.id)}
+                    >
+                      <LuTrash2 size={11} aria-hidden="true" />
+                    </button>
+                  )}
+                </span>
+              </li>
+            );
+          })}
         </ul>
       )}
       {editable && (

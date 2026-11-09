@@ -100,7 +100,6 @@ function AdminAuditView() {
     <main className="dashboard-page admin-page">
       <div className="dashboard-heading">
         <div>
-          <div className="eyebrow eyebrow-dark">ADMINISTRATOR</div>
           <h1>Audit log</h1>
           <p>
             Privileged and security-sensitive activity recorded by the server: account changes,

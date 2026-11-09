@@ -48,9 +48,6 @@ export default function Home() {
           <div className="hero-curve hero-curve-one" />
           <div className="hero-curve hero-curve-two" />
           <div className="hero-content">
-            <div className="eyebrow">
-              <i /> LOCAL SKILLS. REAL SOLUTIONS.
-            </div>
             <h1>
               Local Skills.
               <br />
@@ -135,7 +132,6 @@ export default function Home() {
         <section className="section white" id="services">
           <div className="section-head">
             <div>
-              <div className="eyebrow eyebrow-dark">POPULAR SERVICES</div>
               <h2>
                 Find the right skill
                 <br />
@@ -168,7 +164,6 @@ export default function Home() {
         </section>
 
         <section className="section dark-section" id="how">
-          <div className="eyebrow">HOW IT WORKS</div>
           <h2 className="light-heading">
             From problem to
             <br />
@@ -218,7 +213,6 @@ export default function Home() {
         <section className="section white" id="technicians">
           <div className="section-head">
             <div>
-              <div className="eyebrow eyebrow-dark">FEATURED TECHNICIANS</div>
               <h2>
                 Skills in your
                 <br />
@@ -237,7 +231,6 @@ export default function Home() {
 
         <section className="section split-section" id="about">
           <div>
-            <div className="eyebrow eyebrow-dark">WHY UMODZI CONNECT</div>
             <h2>
               Good work builds
               <br />
@@ -291,7 +284,6 @@ export default function Home() {
         <section className="city-band">
           <div className="city-band-overlay">
             <div>
-              <div className="eyebrow">SERVICE AREAS</div>
               <h2 className="light-heading">
                 Local support starts
                 <br />
@@ -314,7 +306,6 @@ export default function Home() {
         </section>
         <section className="cta-band">
           <div>
-            <div className="eyebrow">READY TO START?</div>
             <h2 className="light-heading">Tell us what needs fixing.</h2>
           </div>
           <Link href="/matching" className="button button-coral">

@@ -130,7 +130,6 @@ function MatchingContent() {
       <main className="matching-page">
         <div className="matching-hero">
           <div>
-            <div className="eyebrow">SERVICE REQUESTS</div>
             <h1>Tell us what needs fixing.</h1>
             <p>Eligible verified technicians are selected by the server and notified securely.</p>
           </div>

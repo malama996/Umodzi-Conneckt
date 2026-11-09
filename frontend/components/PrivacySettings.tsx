@@ -164,7 +164,6 @@ export default function PrivacySettings() {
       <div className="panel">
         <div className="panel-head">
           <div>
-            <div className="eyebrow eyebrow-dark">YOUR DATA</div>
             <h2>Privacy settings</h2>
             <p className="panel-sub">
               View a copy of your data, or delete your account permanently.

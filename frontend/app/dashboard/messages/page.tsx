@@ -85,7 +85,6 @@ function ConversationsList() {
         <div className="panel">
           <div className="panel-head">
             <div>
-              <div className="eyebrow eyebrow-dark">COMMUNICATION</div>
               <h2>
                 <LuMessageSquare size={16} className="ic" aria-hidden="true" /> Messages
               </h2>

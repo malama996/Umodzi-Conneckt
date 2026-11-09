@@ -158,7 +158,6 @@ export default function NotificationInbox() {
     <section className="panel" aria-labelledby="inbox-heading">
       <div className="panel-head">
         <div>
-          <div className="eyebrow eyebrow-dark">YOUR ACTIVITY</div>
           <h2 id="inbox-heading">
             <LuBell size={16} className="ic" aria-hidden="true" /> Notifications
           </h2>

@@ -41,6 +41,15 @@ export interface TechnicianApi {
   bio?: string | null;
   /** Task 26: true when a retrievable profile photo exists (photo bytes are served by GET /technicians/:id/photo; storage keys are never exposed). */
   hasPhoto?: boolean;
+  /**
+   * Audit §5.D — customer-facing trust indicators. The document CATEGORIES
+   * whose evidence an authorised reviewer has individually APPROVED. Only
+   * genuinely approved categories appear; this is derived from real review
+   * records, never from upload. Contains no document images, identity
+   * numbers, filenames, storage keys, or reviewer notes. Optional because
+   * public list projections may omit it (detail profiles populate it).
+   */
+  verifiedCategories?: VerificationDocumentType[];
   createdAt: string;
   updatedAt: string;
 }
@@ -263,19 +272,61 @@ export interface AdminOverviewApi {
 // part of any wire shape — files are streamed by authorized endpoints.
 // ---------------------------------------------------------------------------
 
-/** Verification lifecycle for account-linked technicians. */
-export type TechnicianVerificationStatus = 'unverified' | 'pending' | 'verified' | 'rejected';
+/**
+ * Verification lifecycle for account-linked technicians.
+ *
+ * 'partially_verified' (audit §5) means some evidence documents have been
+ * approved but the required identity evidence and/or other submitted
+ * documents are still outstanding, pending, or rejected. The overall status
+ * is DERIVED from the individual document review outcomes by the backend
+ * (recomputeVerificationStatus) — it is never conferred by upload alone.
+ */
+export type TechnicianVerificationStatus =
+  | 'unverified'
+  | 'pending'
+  | 'partially_verified'
+  | 'verified'
+  | 'rejected';
 
-/** Evidence document categories a technician can submit. */
-export type VerificationDocumentType = 'national_id' | 'certificate' | 'other';
+/** Evidence document categories a technician can submit (audit §5.B). */
+export type VerificationDocumentType =
+  | 'national_id'
+  | 'certificate'
+  | 'trade_qualification'
+  | 'professional_licence'
+  | 'business_registration'
+  | 'training_certificate'
+  | 'other';
 
-/** Safe document metadata (no storage key, no file bytes). */
+/** Per-document review outcome (audit §5.C). */
+export type VerificationDocumentStatus = 'pending' | 'approved' | 'rejected';
+
+/**
+ * Safe document metadata (no storage key, no file bytes). Carries the
+ * individual review outcome so a technician can see which of their own
+ * documents are approved, rejected (with the correction reason), or still
+ * pending, and an administrator can review each document separately.
+ */
 export interface TechnicianDocumentApi {
   id: string;
   documentType: VerificationDocumentType;
   fileName: string;
   contentType: string;
   sizeBytes: number;
+  status: VerificationDocumentStatus;
+  reviewReason: string | null;
+  reviewedAt: string | null;
+  reviewedBy: string | null;
+  createdAt: string;
+}
+
+/** One entry in a document's append-only review history (admin view). */
+export interface VerificationReviewApi {
+  id: string;
+  documentId: string;
+  decision: 'approved' | 'rejected';
+  reason: string | null;
+  reviewerEmail: string | null;
   createdAt: string;
 }
 
@@ -327,6 +378,8 @@ export interface AdminTechnicianVerificationApi {
   userId: string | null;
   userEmail: string | null;
   documents: TechnicianDocumentApi[];
+  /** Append-only per-document review history, newest first (audit §5.C). */
+  reviews: VerificationReviewApi[];
   createdAt: string;
   updatedAt: string;
 }

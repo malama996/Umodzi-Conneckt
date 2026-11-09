@@ -76,7 +76,6 @@ function AdminTechniciansView() {
     <main className="dashboard-page admin-page">
       <div className="dashboard-heading">
         <div>
-          <div className="eyebrow eyebrow-dark">ADMINISTRATOR</div>
           <h1>Technician management</h1>
           <p>Profiles, skills, service areas, availability, and verification at a glance.</p>
         </div>

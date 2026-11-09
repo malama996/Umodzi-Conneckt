@@ -101,8 +101,9 @@ p {
 }
 .logo-word small {
   display: block;
-  font-size: 7px;
-  letter-spacing: 1px;
+  font-size: 10px;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
   color: var(--muted);
   margin-top: 5px;
 }
@@ -285,24 +286,6 @@ button:focus-visible {
   position: relative;
   z-index: 3;
 }
-.eyebrow {
-  font-size: 9px;
-  font-weight: 900;
-  letter-spacing: 1.8px;
-  color: #68d9d2;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.eyebrow i {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--coral);
-}
-.eyebrow-dark {
-  color: var(--teal2);
-}
 .hero h1 {
   font-size: clamp(47px, 6vw, 76px);
   line-height: 1.04;
@@ -338,7 +321,7 @@ h2 em {
 }
 .hero-trust-grid b {
   color: #e2edef;
-  font-size: 9px;
+  font-size: 10px;
   line-height: 1.25;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -431,7 +414,7 @@ h2 em {
   font-size: 11px;
 }
 .hero-location-card small {
-  font-size: 9px;
+  font-size: 10px;
   color: var(--muted);
   margin-top: 3px;
 }
@@ -445,7 +428,7 @@ h2 em {
   justify-content: space-between;
   border-top: 1px solid rgba(255, 255, 255, 0.15);
   color: #b9cbd1;
-  font-size: 8px;
+  font-size: 10px;
   letter-spacing: 1.4px;
   z-index: 4;
 }
@@ -523,7 +506,7 @@ h2 {
   display: block;
 }
 .service-card small {
-  font-size: 9px;
+  font-size: 10px;
   color: var(--muted);
   margin-top: 5px;
 }
@@ -617,7 +600,7 @@ h2 {
   color: var(--navy);
 }
 .tech-card-heading p {
-  font-size: 9px;
+  font-size: 10px;
   color: var(--muted);
   margin: 5px 0 0;
 }
@@ -632,7 +615,7 @@ h2 {
   flex-wrap: wrap;
   margin: 13px 0;
   color: var(--muted);
-  font-size: 9px;
+  font-size: 10px;
 }
 .tech-card-footer {
   display: flex;
@@ -641,7 +624,7 @@ h2 {
   gap: 8px;
 }
 .availability-dot {
-  font-size: 9px;
+  font-size: 10px;
   color: var(--success);
   font-weight: 800;
 }
@@ -655,7 +638,7 @@ h2 {
   justify-content: space-between;
   align-items: center;
   gap: 10px;
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 800;
 }
 .outline-button span {
@@ -667,7 +650,7 @@ h2 {
   gap: 5px;
   padding: 5px 8px;
   border-radius: 6px;
-  font-size: 8px;
+  font-size: 10px;
   font-weight: 900;
   white-space: nowrap;
 }
@@ -804,7 +787,7 @@ h2 {
 }
 .footer-heading {
   margin: 0;
-  font-size: 8px;
+  font-size: 10px;
   font-weight: 800;
   letter-spacing: 1.5px;
   text-transform: uppercase;
@@ -838,7 +821,7 @@ h2 {
   display: flex;
   justify-content: space-between;
   color: #8fa6b1;
-  font-size: 9px;
+  font-size: 10px;
 }
 .auth-page {
   min-height: 100vh;
@@ -982,7 +965,7 @@ h2 {
   border: 0;
   background: transparent;
   color: var(--teal2);
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 800;
 }
 .terms {
@@ -997,7 +980,7 @@ h2 {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 9px;
+  font-size: 10px;
   color: var(--muted);
 }
 .remember {
@@ -1022,12 +1005,36 @@ h2 {
   color: var(--teal2);
   font-weight: 800;
 }
+.forgot-link {
+  color: var(--teal2);
+  font-weight: 800;
+  font-size: 10px;
+  text-decoration: none;
+}
+.forgot-link:hover {
+  text-decoration: underline;
+}
+/* Password-recovery pages reuse the auth panel/card but render a single
+   centered column instead of the split visual+form layout. */
+.recovery-page {
+  grid-template-columns: 1fr;
+}
+.recovery-page .auth-panel {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+.recovery-note {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.6;
+  margin: 0;
+}
 .inline-success {
   padding: 10px;
   background: #e7f6ef;
   color: var(--success);
   border-radius: 8px;
-  font-size: 9px;
+  font-size: 10px;
   line-height: 1.5;
 }
 .app-page {
@@ -1095,7 +1102,7 @@ h2 {
 .suggestion span {
   display: block;
   color: var(--muted);
-  font-size: 9px;
+  font-size: 10px;
   margin-top: 4px;
 }
 .suggestion-no-match {
@@ -1105,7 +1112,7 @@ h2 {
 .classification-confidence {
   display: block;
   color: var(--navy);
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 700;
   margin-top: 5px;
 }
@@ -1114,20 +1121,20 @@ h2 {
   align-items: center;
   gap: 5px;
   color: var(--warning);
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 800;
   margin-top: 5px;
 }
 .classification-evidence {
   display: block;
   color: var(--muted);
-  font-size: 9px;
+  font-size: 10px;
   margin-top: 4px;
 }
 .classification-alternatives {
   display: block;
   color: var(--muted);
-  font-size: 9px;
+  font-size: 10px;
   margin-top: 4px;
 }
 .request-form {
@@ -1251,7 +1258,7 @@ h2 {
   border-bottom: 0;
 }
 .request-review-details dt {
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 800;
   color: var(--muted);
   text-transform: uppercase;
@@ -1328,7 +1335,7 @@ h2 {
   border-bottom: 0;
 }
 .dispatch-scores dt {
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 800;
   color: var(--muted);
   text-transform: uppercase;
@@ -1342,7 +1349,7 @@ h2 {
 }
 .dispatch-candidate {
   display: block;
-  font-size: 9px;
+  font-size: 10px;
   color: var(--muted);
   font-weight: 700;
   text-align: center;
@@ -1391,7 +1398,7 @@ h2 {
   border-bottom: 0;
 }
 .technician-offer-details dt {
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 800;
   color: var(--muted);
   text-transform: uppercase;
@@ -1563,7 +1570,7 @@ h2 {
   background: var(--teal);
   border: 2px solid #fff;
   color: #fff;
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 800;
   box-shadow: 0 4px 10px rgba(11, 31, 58, 0.3);
 }
@@ -1577,7 +1584,7 @@ h2 {
   background: #fff;
   border: 1px solid var(--line);
   color: var(--navy);
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 800;
   box-shadow: 0 2px 8px rgba(11, 31, 58, 0.16);
 }
@@ -1730,7 +1737,7 @@ h2 {
   gap: 4px;
 }
 .map-result-rank {
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -1741,7 +1748,7 @@ h2 {
   border-radius: 999px;
   background: var(--coral);
   color: #fff;
-  font-size: 8px;
+  font-size: 10px;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -1807,7 +1814,7 @@ h2 {
   font-size: 25px;
 }
 .result-rule {
-  font-size: 8px;
+  font-size: 10px;
   color: var(--muted);
   background: #eaf1f3;
   padding: 7px 9px;
@@ -1848,7 +1855,7 @@ h2 {
   color: var(--navy);
 }
 .match-card p {
-  font-size: 9px;
+  font-size: 10px;
   color: var(--muted);
   margin: 5px 0;
 }
@@ -1857,7 +1864,7 @@ h2 {
   gap: 10px;
   margin-top: 11px;
   color: var(--muted);
-  font-size: 9px;
+  font-size: 10px;
   flex-wrap: wrap;
 }
 .match-action {
@@ -1869,19 +1876,30 @@ h2 {
    description textarea inherited only the global font rule. Same
    palette and radii as the request cards; no decorative gradients. */
 .matching-page {
-  padding: 24px clamp(16px, 4vw, 48px) 64px;
+  /* PublicHeader is position:absolute (out of flow, 72px tall + safe area),
+     so the page needs its own top clearance or the hero renders underneath
+     it (§9). 72px header + 32px breathing room. */
+  padding: calc(72px + env(safe-area-inset-top) + 32px) clamp(16px, 4vw, 48px) 64px;
 }
 .matching-hero {
   max-width: 1080px;
-  margin: 0 auto 18px;
+  margin: 0 auto 22px;
 }
 .matching-hero h1 {
   color: var(--navy);
-  margin: 6px 0;
+  font-size: clamp(31px, 4vw, 46px);
+  line-height: 1.06;
+  font-weight: 900;
+  letter-spacing: -1.5px;
+  margin: 0 0 10px;
 }
 .matching-hero p {
-  color: var(--muted);
-  font-size: 11px;
+  /* §9: the supporting line was 11px muted — too small and too light to read
+     as the page's one explanation of what happens next. Enlarged and darkened. */
+  color: #3f5364;
+  font-size: 14px;
+  line-height: 1.6;
+  max-width: 62ch;
   margin: 0;
 }
 .matching-layout {
@@ -1935,7 +1953,7 @@ h2 {
 }
 .fault-hint {
   margin: 0;
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 500;
   line-height: 1.6;
   color: var(--muted);
@@ -1945,7 +1963,7 @@ h2 {
   justify-content: space-between;
   align-items: center;
   gap: 10px;
-  font-size: 9px;
+  font-size: 10px;
   color: var(--muted);
 }
 .fault-count {
@@ -2068,6 +2086,22 @@ h2 {
   display: flex;
   gap: 7px;
 }
+.trust-indicators {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 27px;
+}
+.trust-badges {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+.trust-note {
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--muted);
+  margin: 0;
+}
 .profile-columns {
   padding: 34px 42px;
   display: grid;
@@ -2089,7 +2123,7 @@ h2 {
   border-radius: 7px;
   background: #eaf7f6;
   color: var(--teal2);
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 800;
 }
 .profile-columns aside {
@@ -2105,7 +2139,7 @@ h2 {
 }
 .score span,
 .jobs span {
-  font-size: 9px;
+  font-size: 10px;
   color: var(--muted);
   display: block;
   margin-top: 3px;
@@ -2171,7 +2205,7 @@ h2 {
   border-radius: 50%;
   display: grid;
   place-items: center;
-  font-size: 8px;
+  font-size: 10px;
 }
 /* Task 31: grouped administrator navigation. The heading is a plain muted
    label, never a link — it only names the group that follows. */
@@ -2185,7 +2219,7 @@ h2 {
 .sidebar-heading {
   margin: 0;
   padding: 0 12px 5px;
-  font-size: 8px;
+  font-size: 10px;
   font-weight: 800;
   letter-spacing: 1.5px;
   text-transform: uppercase;
@@ -2531,7 +2565,7 @@ h2 {
   border-radius: var(--control-radius);
   background: transparent;
   color: var(--muted);
-  font-size: 9px;
+  font-size: 10px;
   text-align: left;
   /* Feedback without layout movement: colour only, no transform. */
   transition:
@@ -2563,7 +2597,7 @@ h2 {
   display: block;
   max-width: 15ch;
   overflow: hidden;
-  font-size: 9px;
+  font-size: 10px;
   color: var(--navy);
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -2811,7 +2845,7 @@ h2 {
   color: var(--navy);
 }
 .stat-grid article small {
-  font-size: 8px;
+  font-size: 10px;
   color: var(--muted);
   margin-top: 3px;
 }
@@ -2889,7 +2923,7 @@ h2 {
   margin: 0;
 }
 .dashboard-section-head a {
-  font-size: 9px;
+  font-size: 10px;
   color: var(--teal2);
   font-weight: 800;
 }
@@ -2917,7 +2951,7 @@ h2 {
   color: var(--navy);
   display: grid;
   place-items: center;
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 900;
 }
 .recent-list article b,
@@ -2925,18 +2959,18 @@ h2 {
   display: block;
 }
 .recent-list article b {
-  font-size: 9px;
+  font-size: 10px;
   color: var(--navy);
 }
 .recent-list article small {
-  font-size: 8px;
+  font-size: 10px;
   color: var(--muted);
   margin-top: 3px;
 }
 .recent-list article strong {
   margin-left: auto;
   color: #b47700;
-  font-size: 9px;
+  font-size: 10px;
 }
 .quick-actions {
   background: #fff;
@@ -2950,7 +2984,7 @@ h2 {
   gap: 9px;
   padding: 12px 8px;
   border-top: 1px solid var(--line);
-  font-size: 9px;
+  font-size: 10px;
   color: var(--navy);
   font-weight: 700;
 }
@@ -3122,7 +3156,7 @@ h2 {
     font-size: 15px;
   }
   .hero-trust-grid b {
-    font-size: 9px;
+    font-size: 10px;
   }
   .hero-search {
     max-width: 100%;
@@ -3136,7 +3170,7 @@ h2 {
     display: none;
   }
   .hero-bottom {
-    font-size: 7px;
+    font-size: 10px;
     padding: 16px 20px;
   }
   .hero-curve {
@@ -3412,7 +3446,7 @@ h2 {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -3490,7 +3524,7 @@ h2 {
   background: #fdecec;
   color: var(--warning, #b45309);
   border-radius: 8px;
-  font-size: 9px;
+  font-size: 10px;
   line-height: 1.5;
 }
 .auth-gate {
@@ -3703,7 +3737,7 @@ h2 {
 .admin-field {
   display: grid;
   gap: 5px;
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 800;
   color: var(--navy);
 }
@@ -3739,7 +3773,7 @@ h2 {
   font-weight: 700;
 }
 .admin-note {
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 700;
   color: var(--muted);
 }
@@ -3753,11 +3787,11 @@ h2 {
 }
 .admin-footnote {
   margin-top: 16px;
-  font-size: 9px;
+  font-size: 10px;
   color: var(--muted);
 }
 .admin-mono {
-  font-size: 9px;
+  font-size: 10px;
   color: var(--muted);
   overflow-wrap: anywhere;
 }
@@ -3787,7 +3821,7 @@ h2 {
   border-radius: 5px;
   background: #eef2f4;
   color: var(--muted);
-  font-size: 9px;
+  font-size: 10px;
 }
 .admin-chip:hover {
   border-color: var(--teal);
@@ -3826,7 +3860,7 @@ h2 {
   padding: 10px 14px;
   border-bottom: 1px solid var(--line);
   text-align: left;
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 0.4px;
@@ -3854,7 +3888,7 @@ h2 {
 .admin-cell-sub {
   display: block;
   margin-top: 2px;
-  font-size: 9px;
+  font-size: 10px;
   color: var(--muted);
   overflow-wrap: anywhere;
 }
@@ -3951,7 +3985,7 @@ h2 {
 }
 .admin-detail-grid dt {
   margin-bottom: 3px;
-  font-size: 8px;
+  font-size: 10px;
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 0.4px;
@@ -3982,7 +4016,7 @@ h2 {
 }
 .admin-offers li small {
   margin-left: auto;
-  font-size: 9px;
+  font-size: 10px;
   color: var(--muted);
 }
 
@@ -4100,7 +4134,7 @@ h2 {
     content: attr(data-label);
     flex-shrink: 0;
     text-align: left;
-    font-size: 8px;
+    font-size: 10px;
     font-weight: 900;
     text-transform: uppercase;
     letter-spacing: 0.4px;
@@ -4374,8 +4408,19 @@ h2 {
   color: var(--navy);
 }
 .t26-doc-meta small {
-  font-size: 9px;
+  font-size: 10px;
   color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.t26-doc-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+.t26-doc-reason {
+  font-size: 10px;
+  color: var(--coral);
   overflow-wrap: anywhere;
 }
 .t26-doc-actions {
@@ -4388,6 +4433,66 @@ h2 {
   align-items: flex-end;
   gap: 10px;
   flex-wrap: wrap;
+}
+
+/* --- Admin per-document review rows (migration 011). --- */
+.t26-doc-list .t26-doc-row {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 9px;
+}
+.t26-doc-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.t26-doc-decide {
+  border-top: 1px dashed var(--line);
+  padding-top: 9px;
+}
+.t26-doc-reject {
+  display: grid;
+  gap: 8px;
+}
+.t26-doc-reviewed {
+  font-size: 10px;
+  color: var(--muted);
+}
+.t26-history {
+  display: grid;
+  gap: 8px;
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+}
+.t26-history-list {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.t26-history-list li {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: #fff;
+}
+.t26-history-meta {
+  display: grid;
+  min-width: 0;
+}
+.t26-history-meta b {
+  font-size: 11px;
+  color: var(--navy);
+}
+.t26-history-meta small {
+  font-size: 10px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
 }
 
 /* --- Admin decision panel. --- */
@@ -5321,7 +5426,7 @@ h2 {
 }
 .inbox-dot {
   color: var(--teal);
-  font-size: 9px;
+  font-size: 10px;
 }
 .inbox-read .inbox-item-title {
   color: var(--muted);

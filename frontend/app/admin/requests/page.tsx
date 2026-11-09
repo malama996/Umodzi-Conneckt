@@ -86,7 +86,6 @@ function AdminRequestsView() {
     <main className="dashboard-page admin-page">
       <div className="dashboard-heading">
         <div>
-          <div className="eyebrow eyebrow-dark">ADMINISTRATOR</div>
           <h1>Request monitoring</h1>
           <p>Every service request with its matching, offering, and no-match state.</p>
         </div>

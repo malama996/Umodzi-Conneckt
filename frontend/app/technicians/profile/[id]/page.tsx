@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { use, useCallback, useEffect, useState } from 'react';
 import { LuArrowLeft, LuArrowRight, LuClock, LuMapPin, LuStar } from 'react-icons/lu';
 import { AdminEmpty, AdminError, AdminLoading } from '@/components/admin/AdminStates';
-import { Badge, BrandAsset, PublicFooter, PublicHeader, VerifiedBadge } from '@/components/ui';
+import { Badge, BrandAsset, PublicFooter, PublicHeader, VerificationTrustIndicators, VerifiedBadge } from '@/components/ui';
 import { ApiError, apiBaseUrl } from '@/lib/api/client';
 import { getTechnicianById } from '@/lib/api/techniciansApi';
 import type { ApiTechnician } from '@/lib/api/techniciansApi';
@@ -91,7 +91,6 @@ export default function BackendTechnicianProfile({ params }: { params: Promise<{
                   </div>
                 )}
                 <div>
-                  <div className="eyebrow eyebrow-dark">TECHNICIAN PROFILE</div>
                   <h1>{tech.name}</h1>
                   <p>{[tech.category, ...tech.skills].join(' • ')}</p>
                   <div className="profile-badges">
@@ -120,6 +119,12 @@ export default function BackendTechnicianProfile({ params }: { params: Promise<{
                   <p>
                     <LuMapPin size={12} className="ic" aria-hidden="true" /> {tech.serviceArea}
                   </p>
+                  {tech.verifiedCategories && tech.verifiedCategories.length > 0 && (
+                    <>
+                      <h2>Verification</h2>
+                      <VerificationTrustIndicators verifiedCategories={tech.verifiedCategories} />
+                    </>
+                  )}
                 </div>
                 <aside>
                   {tech.verified && (

@@ -281,7 +281,6 @@ function TechnicianOffersContent() {
         <div className="page-wrap">
           <div className="page-intro">
             <div>
-              <div className="eyebrow eyebrow-dark">TECHNICIAN OFFERS</div>
               <h1>Your service offers</h1>
               <p>View and respond to the service requests Smart Dispatch has offered to you.</p>
             </div>
@@ -339,7 +338,6 @@ function TechnicianOffersContent() {
           <section className="results" aria-live="polite">
             <div className="result-head">
               <div>
-                <span className="eyebrow eyebrow-dark">PENDING OFFERS</span>
                 <h2>{offers.length} awaiting your response</h2>
               </div>
               <span className="result-rule">Smart Dispatch</span>
