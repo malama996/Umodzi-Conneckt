@@ -4,11 +4,19 @@ import Link from 'next/link';
 import { use, useCallback, useEffect, useState } from 'react';
 import { LuArrowLeft, LuArrowRight, LuClock, LuMapPin, LuStar } from 'react-icons/lu';
 import { AdminEmpty, AdminError, AdminLoading } from '@/components/admin/AdminStates';
-import { Badge, BrandAsset, PublicFooter, PublicHeader, VerificationTrustIndicators, VerifiedBadge } from '@/components/ui';
+import {
+  Badge,
+  BrandAsset,
+  PublicFooter,
+  PublicHeader,
+  VerificationTrustIndicators,
+  VerifiedBadge,
+} from '@/components/ui';
 import { ApiError, apiBaseUrl } from '@/lib/api/client';
 import { getTechnicianById } from '@/lib/api/techniciansApi';
 import type { ApiTechnician } from '@/lib/api/techniciansApi';
 import TechnicianReviewsSection from '@/components/TechnicianReviewsSection';
+import Reveal from '@/components/Reveal';
 
 /**
  * Public technician profile for backend-registered technicians (Task 26
@@ -72,53 +80,59 @@ export default function BackendTechnicianProfile({ params }: { params: Promise<{
             <AdminLoading label="Loading technician profile…" />
           ) : (
             <section className="profile-card">
-              <div className="profile-hero">
-                {photoUrl ? (
-                  <span className="profile-avatar profile-avatar-photo">
-                    <BrandAsset
-                      src={photoUrl}
-                      alt={`${tech.name} profile photo`}
-                      width={96}
-                      height={96}
-                    />
-                  </span>
-                ) : (
-                  <div className="profile-avatar">
-                    {tech.name
-                      .split(' ')
-                      .map((part) => part[0])
-                      .join('')}
-                  </div>
-                )}
-                <div>
-                  <h1>{tech.name}</h1>
-                  <p>{[tech.category, ...tech.skills].join(' • ')}</p>
-                  <div className="profile-badges">
-                    {tech.verified && <VerifiedBadge />}
-                    <Badge tone="success">
-                      <LuClock size={10} aria-hidden="true" /> {tech.availability}
-                    </Badge>
+              <Reveal>
+                <div className="profile-hero">
+                  {photoUrl ? (
+                    <span className="profile-avatar profile-avatar-photo">
+                      <BrandAsset
+                        src={photoUrl}
+                        alt={`${tech.name} profile photo`}
+                        width={96}
+                        height={96}
+                      />
+                    </span>
+                  ) : (
+                    <div className="profile-avatar">
+                      {tech.name
+                        .split(' ')
+                        .map((part) => part[0])
+                        .join('')}
+                    </div>
+                  )}
+                  <div>
+                    <h1>{tech.name}</h1>
+                    <p>{[tech.category, ...tech.skills].join(' • ')}</p>
+                    <div className="profile-badges">
+                      {tech.verified && <VerifiedBadge />}
+                      <Badge tone="success">
+                        <LuClock size={10} aria-hidden="true" /> {tech.availability}
+                      </Badge>
+                    </div>
                   </div>
                 </div>
-              </div>
+              </Reveal>
               <div className="profile-columns">
                 <div>
-                  <h2>Skills</h2>
-                  <div className="skill-list">
-                    {[tech.category, ...tech.skills].map((skill) => (
-                      <span key={skill}>{skill}</span>
-                    ))}
-                  </div>
-                  {tech.bio && (
-                    <>
-                      <h2>About</h2>
-                      <p className="profile-about">{tech.bio}</p>
-                    </>
-                  )}
-                  <h2>Service area</h2>
-                  <p>
-                    <LuMapPin size={12} className="ic" aria-hidden="true" /> {tech.serviceArea}
-                  </p>
+                  <Reveal>
+                    <div className="profile-details">
+                      <h2>Skills</h2>
+                      <div className="skill-list">
+                        {[tech.category, ...tech.skills].map((skill) => (
+                          <span key={skill}>{skill}</span>
+                        ))}
+                      </div>
+                      {tech.bio && (
+                        <>
+                          <h2>About</h2>
+                          <p className="profile-about">{tech.bio}</p>
+                        </>
+                      )}
+                      <h2>Service area</h2>
+                      <p>
+                        <LuMapPin size={12} className="ic" aria-hidden="true" /> {tech.serviceArea}
+                      </p>
+                    </div>
+                  </Reveal>
                   {tech.verifiedCategories && tech.verifiedCategories.length > 0 && (
                     <>
                       <h2>Verification</h2>
@@ -126,29 +140,31 @@ export default function BackendTechnicianProfile({ params }: { params: Promise<{
                     </>
                   )}
                 </div>
-                <aside>
-                  {tech.verified && (
-                    <BrandAsset
-                      className="profile-art"
-                      src="/illustrations/verified-technician.svg"
-                      alt="Illustration: a verified Umodzi Connect technician profile"
-                      width={640}
-                      height={480}
-                    />
-                  )}
-                  <div className="score">
-                    <LuStar fill="currentColor" className="ic" aria-hidden="true" />{' '}
-                    <b>{tech.rating}</b>
-                    <span>rating</span>
-                  </div>
-                  <div className="jobs">
-                    <b>{tech.jobs}</b>
-                    <span>completed jobs</span>
-                  </div>
-                  <Link href="/matching" className="button button-coral">
-                    Request this skill <LuArrowRight size={14} aria-hidden="true" />
-                  </Link>
-                </aside>
+                <Reveal delay={120}>
+                  <aside>
+                    {tech.verified && (
+                      <BrandAsset
+                        className="profile-art"
+                        src="/illustrations/verified-technician.svg"
+                        alt="Illustration: a verified Umodzi Connect technician profile"
+                        width={640}
+                        height={480}
+                      />
+                    )}
+                    <div className="score">
+                      <LuStar fill="currentColor" className="ic" aria-hidden="true" />{' '}
+                      <b>{tech.rating}</b>
+                      <span>rating</span>
+                    </div>
+                    <div className="jobs">
+                      <b>{tech.jobs}</b>
+                      <span>completed jobs</span>
+                    </div>
+                    <Link href="/matching" className="button button-coral">
+                      Request this skill <LuArrowRight size={14} aria-hidden="true" />
+                    </Link>
+                  </aside>
+                </Reveal>
               </div>
             </section>
           )}

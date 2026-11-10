@@ -16,6 +16,7 @@ import {
 } from 'react-icons/lu';
 import { PublicFooter, PublicHeader, BrandAsset } from '@/components/ui';
 import HomeAuthRedirect from '@/components/HomeAuthRedirect';
+import Reveal from '@/components/Reveal';
 import { landingPageConfig, services } from '@/lib/data';
 
 const serviceIcons = [
@@ -47,71 +48,73 @@ export default function Home() {
         >
           <div className="hero-curve hero-curve-one" />
           <div className="hero-curve hero-curve-two" />
-          <div className="hero-content">
-            <h1>
-              Local Skills.
-              <br />
-              <em>Real Solutions.</em>
-            </h1>
-            <p>Connect with verified technicians in Ndola and Kitwe. Fast. Safe. Reliable.</p>
-            <div className="hero-trust-grid">
-              <span>
-                <LuShieldCheck aria-hidden="true" />
-                <b>
-                  Verified
-                  <br />
-                  Profiles
-                </b>
-              </span>
-              <span>
-                <LuSparkles aria-hidden="true" />
-                <b>
-                  Smart
-                  <br />
-                  Matching
-                </b>
-              </span>
-              <span>
-                <LuMapPin aria-hidden="true" />
-                <b>
-                  Live
-                  <br />
-                  Location
-                </b>
-              </span>
-              <span>
-                <LuStar aria-hidden="true" />
-                <b>
-                  Trusted
-                  <br />
-                  Reviews
-                </b>
-              </span>
-            </div>
-            <div className="hero-search">
-              <span aria-hidden="true">
-                <LuSearch />
-              </span>
-              <input
-                aria-label="Search for a service"
-                placeholder="Search for a service (e.g. electrician, plumber...)"
-              />
-              <Link href="/matching" className="search-button">
-                Search
-              </Link>
-            </div>
-            <div className="hero-actions">
-              <Link href="/matching" className="button button-coral">
-                Find a Technician <LuArrowRight size={14} aria-hidden="true" />
-              </Link>
-              <Link href="/register?role=technician" className="text-action">
-                Become a Technician{' '}
+          <Reveal>
+            <div className="hero-content">
+              <h1>
+                Local Skills.
+                <br />
+                <em>Real Solutions.</em>
+              </h1>
+              <p>Connect with verified technicians in Ndola and Kitwe. Fast. Safe. Reliable.</p>
+              <div className="hero-trust-grid">
                 <span>
-                  <LuArrowRight size={11} aria-hidden="true" />
+                  <LuShieldCheck aria-hidden="true" />
+                  <b>
+                    Verified
+                    <br />
+                    Profiles
+                  </b>
                 </span>
-              </Link>
+                <span>
+                  <LuSparkles aria-hidden="true" />
+                  <b>
+                    Smart
+                    <br />
+                    Matching
+                  </b>
+                </span>
+                <span>
+                  <LuMapPin aria-hidden="true" />
+                  <b>
+                    Live
+                    <br />
+                    Location
+                  </b>
+                </span>
+                <span>
+                  <LuStar aria-hidden="true" />
+                  <b>
+                    Trusted
+                    <br />
+                    Reviews
+                  </b>
+                </span>
+              </div>
+              <div className="hero-search">
+                <span aria-hidden="true">
+                  <LuSearch />
+                </span>
+                <input
+                  aria-label="Search for a service"
+                  placeholder="Search for a service (e.g. electrician, plumber...)"
+                />
+                <Link href="/matching" className="search-button">
+                  Search
+                </Link>
+              </div>
+              <div className="hero-actions">
+                <Link href="/matching" className="button button-coral">
+                  Find a Technician <LuArrowRight size={14} aria-hidden="true" />
+                </Link>
+                <Link href="/register?role=technician" className="text-action">
+                  Become a Technician{' '}
+                  <span>
+                    <LuArrowRight size={11} aria-hidden="true" />
+                  </span>
+                </Link>
+              </div>
             </div>
-          </div>
+          </Reveal>
           <div className="hero-location-card">
             <span className="hero-location-pin">
               <LuMapPin aria-hidden="true" />
@@ -130,46 +133,51 @@ export default function Home() {
         </section>
 
         <section className="section white" id="services">
-          <div className="section-head">
-            <div>
-              <h2>
-                Find the right skill
-                <br />
-                for the job.
-              </h2>
+          <Reveal>
+            <div className="section-head">
+              <div>
+                <h2>
+                  Find the right skill
+                  <br />
+                  for the job.
+                </h2>
+              </div>
+              <p>
+                Start with a service category or describe the problem and let Umodzi Connect assist
+                with classification.
+              </p>
             </div>
-            <p>
-              Start with a service category or describe the problem and let Umodzi Connect assist
-              with classification.
-            </p>
-          </div>
-          <div className="service-grid">
+          </Reveal>
+          <div className="service-grid reveal-group">
             {services.slice(0, 6).map((service, i) => (
-              <Link
-                className="service-card"
-                href={`/matching?service=${encodeURIComponent(service)}`}
-                key={service}
-              >
-                <span className="service-icon">{serviceIcons[i]}</span>
-                <span>
-                  <b>{service}</b>
-                  <small>Find local specialists</small>
-                </span>
-                <span className="arrow">
-                  <LuArrowUpRight aria-hidden="true" />
-                </span>
-              </Link>
+              <Reveal key={service}>
+                <Link
+                  className="service-card"
+                  href={`/matching?service=${encodeURIComponent(service)}`}
+                >
+                  <span className="service-icon">{serviceIcons[i]}</span>
+                  <span>
+                    <b>{service}</b>
+                    <small>Find local specialists</small>
+                  </span>
+                  <span className="arrow">
+                    <LuArrowUpRight aria-hidden="true" />
+                  </span>
+                </Link>
+              </Reveal>
             ))}
           </div>
         </section>
 
         <section className="section dark-section" id="how">
-          <h2 className="light-heading">
-            From problem to
-            <br />
-            <em>peace of mind.</em>
-          </h2>
-          <div className="steps">
+          <Reveal>
+            <h2 className="light-heading">
+              From problem to
+              <br />
+              <em>peace of mind.</em>
+            </h2>
+          </Reveal>
+          <div className="steps reveal-group">
             {[
               [
                 '01',
@@ -193,125 +201,145 @@ export default function Home() {
                 'Illustration: a technician receives and responds to a service offer on a phone',
               ],
             ].map(([n, t, d, art, artAlt]) => (
-              <article key={n}>
-                <span>{n}</span>
-                <h3>{t}</h3>
-                <p>{d}</p>
-                <BrandAsset
-                  className="step-art"
-                  src={art}
-                  alt={artAlt}
-                  width={640}
-                  height={480}
-                  loading="lazy"
-                />
-              </article>
+              <Reveal key={n}>
+                <article>
+                  <span>{n}</span>
+                  <h3>{t}</h3>
+                  <p>{d}</p>
+                  <BrandAsset
+                    className="step-art"
+                    src={art}
+                    alt={artAlt}
+                    width={640}
+                    height={480}
+                    loading="lazy"
+                  />
+                </article>
+              </Reveal>
             ))}
           </div>
         </section>
 
         <section className="section white" id="technicians">
-          <div className="section-head">
-            <div>
-              <h2>
-                Skills in your
-                <br />
-                community.
-              </h2>
+          <Reveal>
+            <div className="section-head">
+              <div>
+                <h2>
+                  Skills in your
+                  <br />
+                  community.
+                </h2>
+              </div>
+              <Link href="/matching" className="section-link">
+                Browse all technicians <LuArrowRight size={12} className="ic" aria-hidden="true" />
+              </Link>
             </div>
-            <Link href="/matching" className="section-link">
-              Browse all technicians <LuArrowRight size={12} className="ic" aria-hidden="true" />
-            </Link>
-          </div>
-          <p className="form-note">
-            Technician availability is shown from live platform records after you sign in. We do not
-            display demo profiles or browser-stored availability on the public site.
-          </p>
+          </Reveal>
+          <Reveal>
+            <p className="form-note">
+              Technician availability is shown from live platform records after you sign in. We do
+              not display demo profiles or browser-stored availability on the public site.
+            </p>
+          </Reveal>
         </section>
 
         <section className="section split-section" id="about">
-          <div>
-            <h2>
-              Good work builds
-              <br />
-              <em>stronger communities.</em>
-            </h2>
-            <BrandAsset
-              className="about-wordmark"
-              src="/branding/umodzi-connect-wordmark.svg"
-              alt="Umodzi Connect"
-              width={414}
-              height={86}
-              loading="lazy"
-            />
-            <BrandAsset
-              className="split-art"
-              src="/illustrations/trust-reviews.svg"
-              alt="Illustration: a verified technician profile with ratings and customer reviews"
-              width={640}
-              height={480}
-              loading="lazy"
-            />
-          </div>
-          <div className="principles">
-            <p>
-              Umodzi Connect makes technician discovery clearer, more accessible and more
-              accountable while keeping the final decision with the user.
-            </p>
+          <Reveal>
             <div>
-              <b>01 / Trust with transparency</b>
-              <span>
-                Verification, ratings and completed-job signals are visible as part of the decision
-                context.
-              </span>
+              <h2>
+                Good work builds
+                <br />
+                <em>stronger communities.</em>
+              </h2>
+              <BrandAsset
+                className="about-wordmark"
+                src="/branding/umodzi-connect-wordmark.svg"
+                alt="Umodzi Connect"
+                width={414}
+                height={86}
+                loading="lazy"
+              />
+              <BrandAsset
+                className="split-art"
+                src="/illustrations/trust-reviews.svg"
+                alt="Illustration: a verified technician profile with ratings and customer reviews"
+                width={640}
+                height={480}
+                loading="lazy"
+              />
             </div>
-            <div>
-              <b>02 / Local by nature</b>
-              <span>
-                The initial service areas are Kitwe and Ndola, aligned with the study scope.
-              </span>
-            </div>
-            <div>
-              <b>03 / Built for low-data use</b>
-              <span>
-                Responsive pages, restrained imagery and lightweight interaction support constrained
-                connections.
-              </span>
-            </div>
+          </Reveal>
+          <div className="principles reveal-group">
+            <Reveal>
+              <p>
+                Umodzi Connect makes technician discovery clearer, more accessible and more
+                accountable while keeping the final decision with the user.
+              </p>
+            </Reveal>
+            <Reveal>
+              <div>
+                <b>01 / Trust with transparency</b>
+                <span>
+                  Verification, ratings and completed-job signals are visible as part of the
+                  decision context.
+                </span>
+              </div>
+            </Reveal>
+            <Reveal>
+              <div>
+                <b>02 / Local by nature</b>
+                <span>
+                  The initial service areas are Kitwe and Ndola, aligned with the study scope.
+                </span>
+              </div>
+            </Reveal>
+            <Reveal>
+              <div>
+                <b>03 / Built for low-data use</b>
+                <span>
+                  Responsive pages, restrained imagery and lightweight interaction support
+                  constrained connections.
+                </span>
+              </div>
+            </Reveal>
           </div>
         </section>
 
         <section className="city-band">
-          <div className="city-band-overlay">
+          <Reveal>
+            <div className="city-band-overlay">
+              <div>
+                <h2 className="light-heading">
+                  Local support starts
+                  <br />
+                  <em>where you are.</em>
+                </h2>
+                <p>
+                  Umodzi Connect begins with selected urban service areas in Zambia, starting with
+                  Ndola and Kitwe.
+                </p>
+              </div>
+              <div className="city-pills">
+                <span>
+                  <LuMapPin size={11} className="ic" aria-hidden="true" /> Ndola
+                </span>
+                <span>
+                  <LuMapPin size={11} className="ic" aria-hidden="true" /> Kitwe
+                </span>
+              </div>
+            </div>
+          </Reveal>
+        </section>
+        <Reveal>
+          <section className="cta-band">
             <div>
-              <h2 className="light-heading">
-                Local support starts
-                <br />
-                <em>where you are.</em>
-              </h2>
-              <p>
-                Umodzi Connect begins with selected urban service areas in Zambia, starting with
-                Ndola and Kitwe.
-              </p>
+              <h2 className="light-heading">Tell us what needs fixing.</h2>
             </div>
-            <div className="city-pills">
-              <span>
-                <LuMapPin size={11} className="ic" aria-hidden="true" /> Ndola
-              </span>
-              <span>
-                <LuMapPin size={11} className="ic" aria-hidden="true" /> Kitwe
-              </span>
-            </div>
-          </div>
-        </section>
-        <section className="cta-band">
-          <div>
-            <h2 className="light-heading">Tell us what needs fixing.</h2>
-          </div>
-          <Link href="/matching" className="button button-coral">
-            Request a Technician <LuArrowRight size={14} aria-hidden="true" />
-          </Link>
-        </section>
+            <Link href="/matching" className="button button-coral">
+              Request a Technician <LuArrowRight size={14} aria-hidden="true" />
+            </Link>
+          </section>
+        </Reveal>
       </main>
       <PublicFooter />
     </>

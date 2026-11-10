@@ -6,6 +6,7 @@ import { LuClipboardList, LuMapPin, LuMessageCircle, LuPlus } from 'react-icons/
 
 import RequireAuth from '@/components/RequireAuth';
 import ReviewCard from '@/components/ReviewCard';
+import Reveal from '@/components/Reveal';
 import { DashboardLayout, Button, Badge, type BadgeTone } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
 import {
@@ -285,58 +286,60 @@ function MyRequestsList() {
           )}
 
           {requests && requests.length > 0 && (
-            <ul className="inbox-list">
+            <ul className="inbox-list reveal-group">
               {requests.map((request) => (
-                <li key={request.id} className="inbox-item">
-                  <div className="inbox-item-button">
-                    <span className="inbox-item-top">
-                      <span className="inbox-item-type">{request.category}</span>
-                      <time dateTime={request.createdAt}>
-                        {new Date(request.createdAt).toLocaleDateString()}
-                      </time>
-                    </span>
-                    <span className="inbox-item-message">{request.description}</span>
-                    <span className="inbox-item-meta">
-                      <span className="inbox-channel">
-                        <LuMapPin size={11} className="ic" aria-hidden="true" /> {request.city}
+                <Reveal as="li" key={request.id}>
+                  <div className="inbox-item">
+                    <div className="inbox-item-button">
+                      <span className="inbox-item-top">
+                        <span className="inbox-item-type">{request.category}</span>
+                        <time dateTime={request.createdAt}>
+                          {new Date(request.createdAt).toLocaleDateString()}
+                        </time>
                       </span>
-                      <Badge tone={STATUS_TONE[request.status]}>
-                        {STATUS_LABEL[request.status]}
-                      </Badge>
-                    </span>
-                    <span className="inbox-item-meta">
-                      <span className="inbox-channel">
-                        {(isTechnician ? TECHNICIAN_STATUS_HINT : STATUS_HINT)[request.status]}
+                      <span className="inbox-item-message">{request.description}</span>
+                      <span className="inbox-item-meta">
+                        <span className="inbox-channel">
+                          <LuMapPin size={11} className="ic" aria-hidden="true" /> {request.city}
+                        </span>
+                        <Badge tone={STATUS_TONE[request.status]}>
+                          {STATUS_LABEL[request.status]}
+                        </Badge>
                       </span>
-                      {/* For a technician this row IS their own work — naming
-                          themselves back as "Technician: …" adds nothing. */}
-                      {!isTechnician && request.assignedTechnicianName && (
+                      <span className="inbox-item-meta">
                         <span className="inbox-channel">
-                          Technician: {request.assignedTechnicianName}
+                          {(isTechnician ? TECHNICIAN_STATUS_HINT : STATUS_HINT)[request.status]}
                         </span>
-                      )}
-                      {request.offerCount > 0 && (
-                        <span className="inbox-channel">
-                          {request.offerCount} offer{request.offerCount === 1 ? '' : 's'} received
-                        </span>
-                      )}
-                    </span>
+                        {/* For a technician this row IS their own work — naming
+                            themselves back as "Technician: …" adds nothing. */}
+                        {!isTechnician && request.assignedTechnicianName && (
+                          <span className="inbox-channel">
+                            Technician: {request.assignedTechnicianName}
+                          </span>
+                        )}
+                        {request.offerCount > 0 && (
+                          <span className="inbox-channel">
+                            {request.offerCount} offer{request.offerCount === 1 ? '' : 's'} received
+                          </span>
+                        )}
+                      </span>
+                    </div>
+                    {canMessage(request) && (
+                      <Link
+                        className="outline-button"
+                        href={`/dashboard/messages/${request.id}`}
+                        aria-label={`Message the technician about ${request.category}`}
+                      >
+                        <LuMessageCircle size={13} className="ic" aria-hidden="true" /> Message
+                      </Link>
+                    )}
+                    <RequestWorkflow
+                      request={request}
+                      isTechnician={isTechnician}
+                      onChanged={load}
+                    />
                   </div>
-                  {canMessage(request) && (
-                    <Link
-                      className="outline-button"
-                      href={`/dashboard/messages/${request.id}`}
-                      aria-label={`Message the technician about ${request.category}`}
-                    >
-                      <LuMessageCircle size={13} className="ic" aria-hidden="true" /> Message
-                    </Link>
-                  )}
-                  <RequestWorkflow
-                    request={request}
-                    isTechnician={isTechnician}
-                    onChanged={load}
-                  />
-                </li>
+                </Reveal>
               ))}
             </ul>
           )}

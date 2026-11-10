@@ -15,6 +15,7 @@ import {
 } from 'react-icons/lu';
 import { DashboardLayout, Badge, type BadgeTone } from '@/components/ui';
 import PushSubscriptionControl from '@/components/PushSubscriptionControl';
+import Reveal from '@/components/Reveal';
 import { useAuth } from '@/lib/auth';
 import {
   listMyServiceRequests,
@@ -97,55 +98,66 @@ export default function ConsumerDashboard() {
   return (
     <DashboardLayout active="Dashboard">
       <main className="dashboard-page">
-        <div className="dashboard-heading">
-          <div>
-            <h1>
-              {firstName ? `Welcome back, ${firstName}` : 'Your service workspace'} <span>👋</span>
-            </h1>
-            <p>Here’s what’s happening with your services.</p>
+        <Reveal>
+          <div className="dashboard-heading">
+            <div>
+              <h1>
+                {firstName ? `Welcome back, ${firstName}` : 'Your service workspace'}{' '}
+                <span>👋</span>
+              </h1>
+              <p>Here’s what’s happening with your services.</p>
+            </div>
+            <Badge tone="teal">
+              <LuMapPin size={10} aria-hidden="true" /> Kitwe · Ndola
+            </Badge>
           </div>
-          <Badge tone="teal">
-            <LuMapPin size={10} aria-hidden="true" /> Kitwe · Ndola
-          </Badge>
-        </div>
+        </Reveal>
 
-        <section className="stat-grid" aria-label="Your activity at a glance">
-          <article>
-            <span className="stat-icon teal">
-              <LuClipboardList aria-hidden="true" />
-            </span>
-            <div>
-              <b>{loading ? '…' : total}</b>
-              <small>Service requests you have raised</small>
-            </div>
-          </article>
-          <article>
-            <span className="stat-icon blue">
-              <LuClock aria-hidden="true" />
-            </span>
-            <div>
-              <b>{loading ? '…' : open}</b>
-              <small>Still open or in progress</small>
-            </div>
-          </article>
-          <article>
-            <span className="stat-icon green">
-              <LuCircleCheck aria-hidden="true" />
-            </span>
-            <div>
-              <b>{loading ? '…' : completed}</b>
-              <small>Completed services</small>
-            </div>
-          </article>
-          <article>
-            <span className="stat-icon coral">
-              <LuCircleAlert aria-hidden="true" />
-            </span>
-            <div>
-              <b>{loading ? '…' : total - open - completed}</b>
-              <small>Cancelled or without a match</small>
-            </div>
-          </article>
+        <section className="stat-grid reveal-group" aria-label="Your activity at a glance">
+          <Reveal>
+            <article>
+              <span className="stat-icon teal">
+                <LuClipboardList aria-hidden="true" />
+              </span>
+              <div>
+                <b>{loading ? '…' : total}</b>
+                <small>Service requests you have raised</small>
+              </div>
+            </article>
+          </Reveal>
+          <Reveal>
+            <article>
+              <span className="stat-icon blue">
+                <LuClock aria-hidden="true" />
+              </span>
+              <div>
+                <b>{loading ? '…' : open}</b>
+                <small>Still open or in progress</small>
+              </div>
+            </article>
+          </Reveal>
+          <Reveal>
+            <article>
+              <span className="stat-icon green">
+                <LuCircleCheck aria-hidden="true" />
+              </span>
+              <div>
+                <b>{loading ? '…' : completed}</b>
+                <small>Completed services</small>
+              </div>
+            </article>
+          </Reveal>
+          <Reveal>
+            <article>
+              <span className="stat-icon coral">
+                <LuCircleAlert aria-hidden="true" />
+              </span>
+              <div>
+                <b>{loading ? '…' : total - open - completed}</b>
+                <small>Cancelled or without a match</small>
+              </div>
+            </article>
+          </Reveal>
         </section>
 
         {error && (
@@ -159,29 +171,33 @@ export default function ConsumerDashboard() {
 
         <section className="dashboard-grid">
           <div className="dashboard-left">
-            <article className="request-banner">
-              <div>
-                <h2>Need a technician?</h2>
-                <p>Describe your issue and we’ll help you find a relevant local skill.</p>
-                <Link href="/matching" className="button button-coral">
-                  Create Service Request <LuArrowRight size={14} aria-hidden="true" />
-                </Link>
-              </div>
-              <div className="mini-city" />
-            </article>
+            <Reveal>
+              <article className="request-banner">
+                <div>
+                  <h2>Need a technician?</h2>
+                  <p>Describe your issue and we’ll help you find a relevant local skill.</p>
+                  <Link href="/matching" className="button button-coral">
+                    Create Service Request <LuArrowRight size={14} aria-hidden="true" />
+                  </Link>
+                </div>
+                <div className="mini-city" />
+              </article>
+            </Reveal>
 
             <div className="panel">
-              <div className="panel-head">
-                <div>
-                  <h2>Recent requests</h2>
-                  <p className="panel-sub">Your latest service requests and where they stand.</p>
+              <Reveal>
+                <div className="panel-head">
+                  <div>
+                    <h2>Recent requests</h2>
+                    <p className="panel-sub">Your latest service requests and where they stand.</p>
+                  </div>
+                  {total > RECENT_LIMIT && (
+                    <Link className="outline-button" href="/dashboard/requests">
+                      View all {total}
+                    </Link>
+                  )}
                 </div>
-                {total > RECENT_LIMIT && (
-                  <Link className="outline-button" href="/dashboard/requests">
-                    View all {total}
-                  </Link>
-                )}
-              </div>
+              </Reveal>
 
               {loading && (
                 <p className="panel-sub" role="status">
@@ -201,27 +217,30 @@ export default function ConsumerDashboard() {
               )}
 
               {!loading && recent.length > 0 && (
-                <ul className="inbox-list">
+                <ul className="inbox-list reveal-group">
                   {recent.map((request) => (
-                    <li key={request.id} className="inbox-item">
-                      <div className="inbox-item-button">
-                        <span className="inbox-item-top">
-                          <span className="inbox-item-type">{request.category}</span>
-                          <time dateTime={request.createdAt}>
-                            {new Date(request.createdAt).toLocaleDateString()}
-                          </time>
-                        </span>
-                        <span className="inbox-item-message">{request.description}</span>
-                        <span className="inbox-item-meta">
-                          <span className="inbox-channel">
-                            <LuMapPin size={11} className="ic" aria-hidden="true" /> {request.city}
+                    <Reveal as="li" key={request.id}>
+                      <div className="inbox-item">
+                        <div className="inbox-item-button">
+                          <span className="inbox-item-top">
+                            <span className="inbox-item-type">{request.category}</span>
+                            <time dateTime={request.createdAt}>
+                              {new Date(request.createdAt).toLocaleDateString()}
+                            </time>
                           </span>
-                          <Badge tone={STATUS_TONE[request.status]}>
-                            {STATUS_LABEL[request.status]}
-                          </Badge>
-                        </span>
+                          <span className="inbox-item-message">{request.description}</span>
+                          <span className="inbox-item-meta">
+                            <span className="inbox-channel">
+                              <LuMapPin size={11} className="ic" aria-hidden="true" />{' '}
+                              {request.city}
+                            </span>
+                            <Badge tone={STATUS_TONE[request.status]}>
+                              {STATUS_LABEL[request.status]}
+                            </Badge>
+                          </span>
+                        </div>
                       </div>
-                    </li>
+                    </Reveal>
                   ))}
                 </ul>
               )}

@@ -14,6 +14,7 @@ import {
 } from 'react-icons/lu';
 import { Badge, DashboardLayout } from '@/components/ui';
 import PushSubscriptionControl from '@/components/PushSubscriptionControl';
+import Reveal from '@/components/Reveal';
 import { AdminEmpty, AdminError, AdminLoading } from '@/components/admin/AdminStates';
 import { OfferStatusBadge, RequestStatusBadge, RoleBadge } from '@/components/admin/StatusBadge';
 import type { AdminOverview as Overview } from '@/lib/api/adminApi';
@@ -54,15 +55,17 @@ export default function AdminOverview() {
   return (
     <DashboardLayout active="Overview">
       <main className="dashboard-page admin-page">
-        <div className="dashboard-heading">
-          <div>
-            <h1>Platform overview</h1>
-            <p>Real counts from users, technicians, and service requests.</p>
+        <Reveal>
+          <div className="dashboard-heading">
+            <div>
+              <h1>Platform overview</h1>
+              <p>Real counts from users, technicians, and service requests.</p>
+            </div>
+            <Badge tone="teal">
+              <LuShieldCheck size={10} aria-hidden="true" /> Administrator
+            </Badge>
           </div>
-          <Badge tone="teal">
-            <LuShieldCheck size={10} aria-hidden="true" /> Administrator
-          </Badge>
-        </div>
+        </Reveal>
 
         {error ? (
           <AdminError message={error} onRetry={() => void load()} />
@@ -70,132 +73,156 @@ export default function AdminOverview() {
           <AdminLoading label="Loading platform overview…" />
         ) : (
           <>
-            <section className="stat-grid admin-stats" aria-label="Platform statistics">
-              <article>
-                <span className="stat-icon blue">
-                  <LuUsers aria-hidden="true" />
-                </span>
-                <div>
-                  <b>{overview.users.total}</b>
-                  <small>
-                    {overview.users.byRole.customer} customers · {overview.users.byRole.technician}{' '}
-                    technicians · {overview.users.byRole.administrator} administrators
-                  </small>
-                </div>
-              </article>
-              <article>
-                <span className="stat-icon teal">
-                  <LuWrench aria-hidden="true" />
-                </span>
-                <div>
-                  <b>{overview.technicians.total}</b>
-                  <small>
-                    {overview.technicians.active} active · {overview.technicians.available}{' '}
-                    available
-                  </small>
-                </div>
-              </article>
-              <article>
-                <span className="stat-icon green">
-                  <LuClipboardList aria-hidden="true" />
-                </span>
-                <div>
-                  <b>{overview.requests.total}</b>
-                  <small>
-                    {overview.requests.open} open · {overview.requests.completed} completed ·{' '}
-                    {overview.requests.cancelled} cancelled
-                  </small>
-                </div>
-              </article>
-              <article>
-                <span className="stat-icon coral">
-                  <LuCircleAlert aria-hidden="true" />
-                </span>
-                <div>
-                  <b>{overview.requests.noMatch}</b>
-                  <small>No-match · unresolved</small>
-                </div>
-              </article>
-              <article>
-                <span className="stat-icon green">
-                  <LuShieldCheck aria-hidden="true" />
-                </span>
-                <div>
-                  <b>{overview.technicians.verified}</b>
-                  <small>verified · {overview.technicians.unverified} unverified</small>
-                </div>
-              </article>
-              <article>
-                <span className="stat-icon teal">
-                  <LuSend aria-hidden="true" />
-                </span>
-                <div>
-                  <b>{overview.offers.total}</b>
-                  <small>
-                    {overview.offers.accepted} accepted · {overview.offers.pending} pending ·{' '}
-                    {overview.offers.rejected} rejected
-                  </small>
-                </div>
-              </article>
+            <section
+              className="stat-grid admin-stats reveal-group"
+              aria-label="Platform statistics"
+            >
+              <Reveal>
+                <article>
+                  <span className="stat-icon blue">
+                    <LuUsers aria-hidden="true" />
+                  </span>
+                  <div>
+                    <b>{overview.users.total}</b>
+                    <small>
+                      {overview.users.byRole.customer} customers ·{' '}
+                      {overview.users.byRole.technician} technicians ·{' '}
+                      {overview.users.byRole.administrator} administrators
+                    </small>
+                  </div>
+                </article>
+              </Reveal>
+              <Reveal>
+                <article>
+                  <span className="stat-icon teal">
+                    <LuWrench aria-hidden="true" />
+                  </span>
+                  <div>
+                    <b>{overview.technicians.total}</b>
+                    <small>
+                      {overview.technicians.active} active · {overview.technicians.available}{' '}
+                      available
+                    </small>
+                  </div>
+                </article>
+              </Reveal>
+              <Reveal>
+                <article>
+                  <span className="stat-icon green">
+                    <LuClipboardList aria-hidden="true" />
+                  </span>
+                  <div>
+                    <b>{overview.requests.total}</b>
+                    <small>
+                      {overview.requests.open} open · {overview.requests.completed} completed ·{' '}
+                      {overview.requests.cancelled} cancelled
+                    </small>
+                  </div>
+                </article>
+              </Reveal>
+              <Reveal>
+                <article>
+                  <span className="stat-icon coral">
+                    <LuCircleAlert aria-hidden="true" />
+                  </span>
+                  <div>
+                    <b>{overview.requests.noMatch}</b>
+                    <small>No-match · unresolved</small>
+                  </div>
+                </article>
+              </Reveal>
+              <Reveal>
+                <article>
+                  <span className="stat-icon green">
+                    <LuShieldCheck aria-hidden="true" />
+                  </span>
+                  <div>
+                    <b>{overview.technicians.verified}</b>
+                    <small>verified · {overview.technicians.unverified} unverified</small>
+                  </div>
+                </article>
+              </Reveal>
+              <Reveal>
+                <article>
+                  <span className="stat-icon teal">
+                    <LuSend aria-hidden="true" />
+                  </span>
+                  <div>
+                    <b>{overview.offers.total}</b>
+                    <small>
+                      {overview.offers.accepted} accepted · {overview.offers.pending} pending ·{' '}
+                      {overview.offers.rejected} rejected
+                    </small>
+                  </div>
+                </article>
+              </Reveal>
             </section>
 
             <section className="admin-activity">
-              <div className="dashboard-section-head">
-                <h2>Recent platform activity</h2>
-                <Link href="/admin/requests">
-                  Monitor requests <LuArrowRight size={11} className="ic" aria-hidden="true" />
-                </Link>
-              </div>
+              <Reveal>
+                <div className="dashboard-section-head">
+                  <h2>Recent platform activity</h2>
+                  <Link href="/admin/requests">
+                    Monitor requests <LuArrowRight size={11} className="ic" aria-hidden="true" />
+                  </Link>
+                </div>
+              </Reveal>
               {overview.recent.length === 0 ? (
                 <AdminEmpty title="No platform activity yet." />
               ) : (
-                <div className="recent-list">
+                <div className="recent-list reveal-group">
                   {overview.recent.map((event) => {
                     if (event.kind === 'request') {
                       return (
-                        <article key={`request-${event.id}`}>
-                          <span className="recent-avatar">
-                            <LuClipboardList aria-hidden="true" />
-                          </span>
-                          <div>
-                            <b>New request · {event.category}</b>
-                            <small>
-                              {event.city} · created {formatTimestamp(event.at)}
-                            </small>
-                          </div>
-                          <RequestStatusBadge status={event.status} />
-                        </article>
+                        <Reveal key={`request-${event.id}`}>
+                          <article>
+                            <span className="recent-avatar">
+                              <LuClipboardList aria-hidden="true" />
+                            </span>
+                            <div>
+                              <b>New request · {event.category}</b>
+                              <small>
+                                {event.city} · created {formatTimestamp(event.at)}
+                              </small>
+                            </div>
+                            <RequestStatusBadge status={event.status} />
+                          </article>
+                        </Reveal>
                       );
                     }
                     if (event.kind === 'user') {
                       return (
-                        <article key={`user-${event.id}`}>
-                          <span className="recent-avatar">
-                            <LuUser aria-hidden="true" />
-                          </span>
-                          <div>
-                            <b>
-                              New {event.role} account · {event.email}
-                            </b>
-                            <small>Joined {formatTimestamp(event.at)}</small>
-                          </div>
-                          <RoleBadge role={event.role} />
-                        </article>
+                        <Reveal key={`user-${event.id}`}>
+                          <article>
+                            <span className="recent-avatar">
+                              <LuUser aria-hidden="true" />
+                            </span>
+                            <div>
+                              <b>
+                                New {event.role} account · {event.email}
+                              </b>
+                              <small>Joined {formatTimestamp(event.at)}</small>
+                            </div>
+                            <RoleBadge role={event.role} />
+                          </article>
+                        </Reveal>
                       );
                     }
                     return (
-                      <article key={`offer-${event.id}`}>
-                        <span className="recent-avatar">
-                          <LuSend aria-hidden="true" />
-                        </span>
-                        <div>
-                          <b>Offer to {event.technicianName}</b>
-                          <small>
-                            {event.category} request · {formatTimestamp(event.at)}
-                          </small>
-                        </div>
-                        <OfferStatusBadge status={event.status} />
-                      </article>
+                      <Reveal key={`offer-${event.id}`}>
+                        <article>
+                          <span className="recent-avatar">
+                            <LuSend aria-hidden="true" />
+                          </span>
+                          <div>
+                            <b>Offer to {event.technicianName}</b>
+                            <small>
+                              {event.category} request · {formatTimestamp(event.at)}
+                            </small>
+                          </div>
+                          <OfferStatusBadge status={event.status} />
+                        </article>
+                      </Reveal>
                     );
                   })}
                 </div>

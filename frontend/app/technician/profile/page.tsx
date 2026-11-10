@@ -13,6 +13,7 @@ import {
   LuUpload,
 } from 'react-icons/lu';
 import RequireAuth from '@/components/RequireAuth';
+import Reveal from '@/components/Reveal';
 import { AdminEmpty, AdminError, AdminLoading } from '@/components/admin/AdminStates';
 import TechnicianReviewsSection from '@/components/TechnicianReviewsSection';
 import { Badge, BrandAsset, DashboardLayout } from '@/components/ui';
@@ -123,34 +124,36 @@ function ProfileBody({
   const completeness = profileCompleteness(profile);
   return (
     <div className="t26-grid">
-      <section className="t26-card" aria-label="Profile completeness">
-        <div className="t26-completeness-head">
-          <h2>Profile completeness</h2>
-          <b>{completeness.percent}%</b>
-        </div>
-        <div
-          className="t26-meter"
-          role="progressbar"
-          aria-valuenow={completeness.percent}
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-label="Profile completeness"
-        >
-          <span style={{ width: `${completeness.percent}%` }} />
-        </div>
-        <ul className="t26-checks">
-          {completeness.checks.map((check) => (
-            <li key={check.key} className={check.done ? 'done' : ''}>
-              {check.done ? (
-                <LuCircleCheck size={11} aria-hidden="true" />
-              ) : (
-                <LuCircleAlert size={11} aria-hidden="true" />
-              )}
-              {check.label}
-            </li>
-          ))}
-        </ul>
-      </section>
+      <Reveal>
+        <section className="t26-card" aria-label="Profile completeness">
+          <div className="t26-completeness-head">
+            <h2>Profile completeness</h2>
+            <b>{completeness.percent}%</b>
+          </div>
+          <div
+            className="t26-meter"
+            role="progressbar"
+            aria-valuenow={completeness.percent}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label="Profile completeness"
+          >
+            <span style={{ width: `${completeness.percent}%` }} />
+          </div>
+          <ul className="t26-checks">
+            {completeness.checks.map((check) => (
+              <li key={check.key} className={check.done ? 'done' : ''}>
+                {check.done ? (
+                  <LuCircleCheck size={11} aria-hidden="true" />
+                ) : (
+                  <LuCircleAlert size={11} aria-hidden="true" />
+                )}
+                {check.label}
+              </li>
+            ))}
+          </ul>
+        </section>
+      </Reveal>
 
       <PhotoCard profile={profile} onChanged={onChanged} />
       <ProfileFormCard profile={profile} onChanged={onChanged} />
@@ -498,20 +501,22 @@ function VerificationCard({
 
   return (
     <section className="t26-card t26-verify" aria-label="Verification">
-      <div className="t26-verify-head">
-        <h2>Verification</h2>
-        <Badge tone={display.tone}>
-          {profile.verificationStatus === 'verified' ? (
-            <LuShieldCheck size={10} aria-hidden="true" />
-          ) : profile.verificationStatus === 'pending' ||
-            profile.verificationStatus === 'partially_verified' ? (
-            <LuClock size={10} aria-hidden="true" />
-          ) : (
-            <LuCircleAlert size={10} aria-hidden="true" />
-          )}
-          {display.heading}
-        </Badge>
-      </div>
+      <Reveal>
+        <div className="t26-verify-head">
+          <h2>Verification</h2>
+          <Badge tone={display.tone}>
+            {profile.verificationStatus === 'verified' ? (
+              <LuShieldCheck size={10} aria-hidden="true" />
+            ) : profile.verificationStatus === 'pending' ||
+              profile.verificationStatus === 'partially_verified' ? (
+              <LuClock size={10} aria-hidden="true" />
+            ) : (
+              <LuCircleAlert size={10} aria-hidden="true" />
+            )}
+            {display.heading}
+          </Badge>
+        </div>
+      </Reveal>
       <p className="t26-verify-copy">{display.copy}</p>
       {profile.verificationRejectionReason && (
         <p className="admin-inline-error" role="alert">
@@ -556,8 +561,8 @@ function VerificationCard({
       )}
       {profile.verificationStatus === 'partially_verified' && (
         <p className="admin-note">
-          Some documents are approved and others still need attention. Replace any rejected
-          document below — the review team checks each one individually.
+          Some documents are approved and others still need attention. Replace any rejected document
+          below — the review team checks each one individually.
         </p>
       )}
       {profile.verificationStatus === 'pending' && (
@@ -703,8 +708,7 @@ function DocumentsBlock({
                     <Badge tone={docStatus.tone}>{docStatus.label}</Badge>
                   </span>
                   <small>
-                    {doc.fileName} · {formatBytes(doc.sizeBytes)} ·{' '}
-                    {formatTimestamp(doc.createdAt)}
+                    {doc.fileName} · {formatBytes(doc.sizeBytes)} · {formatTimestamp(doc.createdAt)}
                   </small>
                   {doc.status === 'rejected' && doc.reviewReason && (
                     <small className="t26-doc-reason" role="alert">

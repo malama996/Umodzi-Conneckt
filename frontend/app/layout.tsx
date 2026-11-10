@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { ServiceWorkerRegistration } from '@/components/ServiceWorkerRegistration';
 import NotificationCenter from '@/components/NotificationCenter';
+import ScrollReveals from '@/components/ScrollReveals';
 
 /* Theme B typography: the system font stack, applied in globals.css on
    `body` (and inherited by headings and inputs). It matches the visual weight
@@ -33,6 +34,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en">
       <body>
         {children}
+        <ScrollReveals />
         <NotificationCenter />
         <ServiceWorkerRegistration />
       </body>

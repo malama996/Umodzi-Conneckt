@@ -13,6 +13,7 @@ import {
 } from 'react-icons/lu';
 import { Badge, BrandAsset, DashboardLayout } from '@/components/ui';
 import RequireAuth from '@/components/RequireAuth';
+import Reveal from '@/components/Reveal';
 import TechnicianOfferCard from '@/components/TechnicianOfferCard';
 import { useAuth } from '@/lib/auth';
 import {
@@ -279,31 +280,35 @@ function TechnicianOffersContent() {
     <DashboardLayout active="Offers">
       <main className="app-page">
         <div className="page-wrap">
-          <div className="page-intro">
-            <div>
-              <h1>Your service offers</h1>
-              <p>View and respond to the service requests Smart Dispatch has offered to you.</p>
+          <Reveal>
+            <div className="page-intro">
+              <div>
+                <h1>Your service offers</h1>
+                <p>View and respond to the service requests Smart Dispatch has offered to you.</p>
+              </div>
+              <Badge tone="teal">
+                <LuClipboardList size={11} aria-hidden="true" /> Technician
+              </Badge>
             </div>
-            <Badge tone="teal">
-              <LuClipboardList size={11} aria-hidden="true" /> Technician
-            </Badge>
-          </div>
+          </Reveal>
 
-          <section className="request-card technician-offer-controls">
-            <p className="form-note">
-              <LuMapPin size={11} className="ic" aria-hidden="true" /> Viewing offers for{' '}
-              <strong>{technicianName || user?.email || 'your technician profile'}</strong>
-            </p>
-            <p className="form-note">
-              Your account is bound to a single technician profile — offers Smart Dispatch sends to
-              you appear below, and your responses are persisted to the backend API.
-            </p>
-            <p className="form-note">
-              <LuUserRound size={11} className="ic" aria-hidden="true" /> Keep your{' '}
-              <Link href="/technician/profile">profile &amp; verification</Link> current to stay
-              dispatch-eligible.
-            </p>
-          </section>
+          <Reveal>
+            <section className="request-card technician-offer-controls">
+              <p className="form-note">
+                <LuMapPin size={11} className="ic" aria-hidden="true" /> Viewing offers for{' '}
+                <strong>{technicianName || user?.email || 'your technician profile'}</strong>
+              </p>
+              <p className="form-note">
+                Your account is bound to a single technician profile — offers Smart Dispatch sends
+                to you appear below, and your responses are persisted to the backend API.
+              </p>
+              <p className="form-note">
+                <LuUserRound size={11} className="ic" aria-hidden="true" /> Keep your{' '}
+                <Link href="/technician/profile">profile &amp; verification</Link> current to stay
+                dispatch-eligible.
+              </p>
+            </section>
+          </Reveal>
 
           {technicianId && (
             <p

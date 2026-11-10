@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Reveal from '@/components/Reveal';
 import { Fragment, useCallback, useState, type ReactNode } from 'react';
 import {
   LuArrowRight,
@@ -324,20 +325,22 @@ export function VerificationTrustIndicators({
     .filter((label): label is string => Boolean(label));
   if (labels.length === 0) return null;
   return (
-    <div className="trust-indicators">
-      <div className="trust-badges">
-        {labels.map((label) => (
-          <Badge key={label} tone="teal">
-            <LuShieldCheck size={10} aria-hidden="true" /> {label}
-          </Badge>
-        ))}
+    <Reveal>
+      <div className="trust-indicators">
+        <div className="trust-badges">
+          {labels.map((label) => (
+            <Badge key={label} tone="teal">
+              <LuShieldCheck size={10} aria-hidden="true" /> {label}
+            </Badge>
+          ))}
+        </div>
+        <p className="trust-note">
+          Each badge is a document our team personally reviewed and approved — never a self-declared
+          claim. Verification confirms who the technician is and the qualifications they hold; it
+          does not guarantee a specific job outcome.
+        </p>
       </div>
-      <p className="trust-note">
-        Each badge is a document our team personally reviewed and approved — never a self-declared
-        claim. Verification confirms who the technician is and the qualifications they hold; it does
-        not guarantee a specific job outcome.
-      </p>
-    </div>
+    </Reveal>
   );
 }
 
@@ -567,50 +570,52 @@ export function TechnicianCard({
   availability: string;
 }) {
   return (
-    <article className="technician-card">
-      <div className="tech-photo">
-        {name
-          .split(' ')
-          .map((x) => x[0])
-          .join('')}
-      </div>
-      <div className="tech-card-body">
-        <div className="tech-card-heading">
-          <div>
-            <h3>{name}</h3>
-            <p>{[category, ...skills].join(' · ')}</p>
+    <Reveal>
+      <article className="technician-card">
+        <div className="tech-photo">
+          {name
+            .split(' ')
+            .map((x) => x[0])
+            .join('')}
+        </div>
+        <div className="tech-card-body">
+          <div className="tech-card-heading">
+            <div>
+              <h3>{name}</h3>
+              <p>{[category, ...skills].join(' · ')}</p>
+            </div>
+            <strong>
+              <LuStar size={10} fill="currentColor" className="ic" aria-hidden="true" /> {rating}
+            </strong>
           </div>
-          <strong>
-            <LuStar size={10} fill="currentColor" className="ic" aria-hidden="true" /> {rating}
-          </strong>
-        </div>
-        <div className="tech-card-meta">
-          <span>
-            <LuMapPin size={10} className="ic" aria-hidden="true" /> {serviceArea}
-          </span>
-          <span>
-            <LuBriefcaseBusiness size={10} className="ic" aria-hidden="true" /> {jobs} jobs
-          </span>
-          {verified ? (
-            <VerifiedBadge />
-          ) : (
-            <Badge tone="warning">
-              <LuClock size={10} aria-hidden="true" /> Pending
-            </Badge>
-          )}
-        </div>
-        <div className="tech-card-footer">
-          <span className="availability-dot">
-            <LuClock size={10} className="ic" aria-hidden="true" /> {availability}
-          </span>
-          <Link href={`/technicians/${encodeURIComponent(name)}`} className="outline-button">
-            View profile{' '}
+          <div className="tech-card-meta">
             <span>
-              <LuArrowRight size={10} aria-hidden="true" />
+              <LuMapPin size={10} className="ic" aria-hidden="true" /> {serviceArea}
             </span>
-          </Link>
+            <span>
+              <LuBriefcaseBusiness size={10} className="ic" aria-hidden="true" /> {jobs} jobs
+            </span>
+            {verified ? (
+              <VerifiedBadge />
+            ) : (
+              <Badge tone="warning">
+                <LuClock size={10} aria-hidden="true" /> Pending
+              </Badge>
+            )}
+          </div>
+          <div className="tech-card-footer">
+            <span className="availability-dot">
+              <LuClock size={10} className="ic" aria-hidden="true" /> {availability}
+            </span>
+            <Link href={`/technicians/${encodeURIComponent(name)}`} className="outline-button">
+              View profile{' '}
+              <span>
+                <LuArrowRight size={10} aria-hidden="true" />
+              </span>
+            </Link>
+          </div>
         </div>
-      </div>
-    </article>
+      </article>
+    </Reveal>
   );
 }

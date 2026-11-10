@@ -13,6 +13,7 @@ import {
   LuMapPin,
   LuStar,
 } from 'react-icons/lu';
+import Reveal from '@/components/Reveal';
 import { VerifiedBadge } from '@/components/ui';
 import {
   formatDistanceKm,
@@ -201,64 +202,64 @@ export default function TechnicianMapPanel({
           </p>
         </div>
 
-        <div className="map-results">
+        <div className="map-results reveal-group">
           {technicians.map((technician) => {
             const marker = markers.find((entry) => entry.id === technician.id);
             const isSelected = selectedId === technician.id;
             return (
-              <article
-                key={technician.id}
-                className={`map-result${isSelected ? ' is-selected' : ''}`}
-              >
-                <button
-                  type="button"
-                  className="map-result-select"
-                  aria-pressed={isSelected}
-                  onClick={() => handleListSelect(technician.id)}
-                >
-                  <span className="avatar" aria-hidden="true">
-                    {technician.name
-                      .split(' ')
-                      .map((part) => part[0])
-                      .join('')}
-                  </span>
-                  <span className="map-result-info">
-                    <span className="map-result-name">
-                      <b>{technician.name}</b>
-                      {technician.verified && <VerifiedBadge />}
-                      {isSelected && <span className="map-result-chip">Selected</span>}
-                    </span>
-                    <span className="map-result-cat">
-                      {[technician.category, technician.serviceArea].join(' · ')}
-                    </span>
-                    <span className="map-result-meta">
-                      <span>
-                        <LuStar size={10} aria-hidden="true" /> {technician.rating}
-                      </span>
-                      <span>
-                        <LuBriefcaseBusiness size={10} aria-hidden="true" /> {technician.jobs} jobs
-                      </span>
-                      {marker && (
-                        <span>
-                          <LuMapPin size={10} aria-hidden="true" />{' '}
-                          {formatDistanceKm(marker.distanceKm)} away (area)
-                        </span>
-                      )}
-                      <span>
-                        <LuClock size={10} aria-hidden="true" /> {technician.availability}
-                      </span>
-                    </span>
-                  </span>
-                </button>
-                <div className="map-result-actions">
-                  <Link
-                    href={`/technicians/profile/${encodeURIComponent(technician.id)}`}
-                    className="outline-button"
+              <Reveal key={technician.id}>
+                <article className={`map-result${isSelected ? ' is-selected' : ''}`}>
+                  <button
+                    type="button"
+                    className="map-result-select"
+                    aria-pressed={isSelected}
+                    onClick={() => handleListSelect(technician.id)}
                   >
-                    View Profile <LuArrowRight size={10} aria-hidden="true" />
-                  </Link>
-                </div>
-              </article>
+                    <span className="avatar" aria-hidden="true">
+                      {technician.name
+                        .split(' ')
+                        .map((part) => part[0])
+                        .join('')}
+                    </span>
+                    <span className="map-result-info">
+                      <span className="map-result-name">
+                        <b>{technician.name}</b>
+                        {technician.verified && <VerifiedBadge />}
+                        {isSelected && <span className="map-result-chip">Selected</span>}
+                      </span>
+                      <span className="map-result-cat">
+                        {[technician.category, technician.serviceArea].join(' · ')}
+                      </span>
+                      <span className="map-result-meta">
+                        <span>
+                          <LuStar size={10} aria-hidden="true" /> {technician.rating}
+                        </span>
+                        <span>
+                          <LuBriefcaseBusiness size={10} aria-hidden="true" /> {technician.jobs}{' '}
+                          jobs
+                        </span>
+                        {marker && (
+                          <span>
+                            <LuMapPin size={10} aria-hidden="true" />{' '}
+                            {formatDistanceKm(marker.distanceKm)} away (area)
+                          </span>
+                        )}
+                        <span>
+                          <LuClock size={10} aria-hidden="true" /> {technician.availability}
+                        </span>
+                      </span>
+                    </span>
+                  </button>
+                  <div className="map-result-actions">
+                    <Link
+                      href={`/technicians/profile/${encodeURIComponent(technician.id)}`}
+                      className="outline-button"
+                    >
+                      View Profile <LuArrowRight size={10} aria-hidden="true" />
+                    </Link>
+                  </div>
+                </article>
+              </Reveal>
             );
           })}
         </div>
