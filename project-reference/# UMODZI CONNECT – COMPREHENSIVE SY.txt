@@ -1,0 +1,770 @@
+# UMODZI CONNECT – COMPREHENSIVE SYSTEM ANALYSIS, BUG FIXING, DISPATCH ENGINEERING & PRODUCTION READINESS
+
+## ROLE AND OBJECTIVE
+
+Act as a Senior Full-Stack Software Engineer, Systems Architect, Database Engineer, QA Automation Engineer, and Application Security Specialist.
+
+You are working on the existing **Umodzi Connect** platform, a mobile-first service dispatch and technician connection Progressive Web Application (PWA).
+
+Your responsibility is to conduct a comprehensive technical audit of the existing implementation, identify the root causes of all reported problems, implement the necessary corrections, and validate the entire system from both the customer and technician perspectives.
+
+This is NOT a request to redesign the application or create a new implementation from scratch.
+
+You must work with the existing architecture, database schema, authentication system, dispatch algorithm, APIs, real-time infrastructure, and UI components wherever possible.
+
+**The ultimate objective is to make Umodzi Connect reliable, secure, race-condition-resistant, and ready for real-world usage.**
+
+---
+
+# PHASE 1: CODEBASE AND SYSTEM ARCHITECTURE AUDIT
+
+Before changing any code:
+
+1. Inspect the complete existing frontend and backend architecture.
+2. Examine the database schema, relationships, constraints, indexes, and Row Level Security (RLS) policies.
+3. Trace the complete service request lifecycle, from customer submission to technician acceptance and eventual completion.
+4. Inspect all API endpoints involved in:
+   - Service requests.
+   - Technician availability.
+   - Technician discovery.
+   - Dispatch and matching.
+   - Waiting queues.
+   - Real-time notifications.
+   - Chat and messaging.
+   - Voice and phone contact.
+   - Service completion.
+   - Gemini AI integration.
+5. Inspect authentication, authorization, session handling, and dashboard navigation.
+6. Examine existing Supabase Realtime subscriptions, WebSocket connections, polling mechanisms, and notification fallbacks.
+7. Identify incomplete implementations, disconnected frontend/backend functionality, duplicate logic, inconsistent database states, and unhandled exceptions.
+
+Do not assume that a feature is working simply because its interface exists.
+
+For every reported problem, trace the actual execution path from the frontend to the backend and database.
+
+Do not introduce unnecessary architectural changes.
+
+---
+
+# PHASE 2: CUSTOMER AND TECHNICIAN DASHBOARD NAVIGATION
+
+## Problem 1: Customer navigation from the service request panel
+
+Currently, customers cannot navigate properly from the service request panel back to their dashboards.
+
+Investigate and fix:
+
+- Incorrect navigation destinations.
+- Broken route configurations.
+- Missing or incorrect back-navigation functionality.
+- Incorrect role-based route protection.
+- Dashboard state not being restored.
+- Navigation failures after submitting a service request.
+- Navigation failures when opening an existing request.
+- Mobile navigation and browser history inconsistencies.
+
+Requirements:
+
+- Customers must always have a clear path back to their dashboard.
+- Technicians must be redirected to the correct technician dashboard.
+- Navigation must preserve relevant request context.
+- Refreshing a page must not break the current workflow.
+- Users must never be redirected to another user's protected dashboard.
+- Deep links must work correctly when a user opens an existing request.
+
+Test navigation on desktop and mobile.
+
+---
+
+# PHASE 3: REAL-TIME CHAT AND COMMUNICATION
+
+## Problem 2: Chat functionality is not working
+
+The customer and technician can establish a service connection after a request is made, but the chat feature is not functioning.
+
+Conduct a complete investigation of the messaging architecture.
+
+Inspect:
+
+- Conversation creation.
+- Conversation-to-request relationships.
+- Customer and technician participant identification.
+- Message insertion.
+- Message retrieval.
+- Supabase Realtime subscriptions.
+- Subscription authorization.
+- RLS policies.
+- Message delivery and ordering.
+- Unread message counts.
+- Conversation loading.
+- Frontend state synchronization.
+- Connection recovery and reconnection.
+
+Implementation requirements:
+
+1. A conversation must be created or activated when a technician successfully accepts a service request.
+2. The conversation must be associated with the correct service request.
+3. Only the customer and assigned technician should have access to the conversation.
+4. Messages must be persisted in the database.
+5. Messages should appear in real time without requiring a page refresh.
+6. Message history must remain accessible after refreshing or reopening the application.
+7. Handle temporary internet disconnections and reconnect subscriptions safely.
+8. Prevent duplicate message submissions.
+9. Display appropriate sending, sent, failed, and retry states.
+10. Prevent unauthorized users from reading or sending messages.
+
+Important: Do not treat a successful database insert as proof that real-time messaging works. Test actual message delivery between two independent authenticated sessions.
+
+---
+
+# PHASE 4: PHONE CALL AND CONTACT FUNCTIONALITY
+
+## Problem 3: Contact call functionality is not working
+
+The system is not properly initiating phone calls even when the technician's contact number is available.
+
+Investigate:
+
+- Technician phone number retrieval.
+- Phone number validation and formatting.
+- Contact information permissions.
+- Frontend click handlers.
+- Telephone URL generation.
+- Mobile browser support.
+- Desktop browser behavior.
+- Missing or incorrectly formatted country codes.
+
+Implementation requirements:
+
+1. Verify that valid phone numbers are retrieved from the correct technician profile.
+2. Normalize phone numbers to an appropriate international format.
+3. Use the correct telephone link implementation, such as `tel:`.
+4. Ensure the call button is only enabled when a valid contact number exists.
+5. Display a meaningful message when contact information is unavailable.
+6. Never silently fail when the user attempts to initiate a call.
+7. Test on supported mobile and desktop browsers.
+
+Important: A web application cannot independently guarantee that a telephone call has connected. The application should correctly invoke the device's calling interface and communicate that the call is being initiated, not falsely report a completed call.
+
+---
+
+# PHASE 5: DISPATCH FAILURE AND SERVICE AVAILABILITY
+
+## Problem 4: What happens when no technician accepts a request?
+
+Investigate the existing dispatch failure-handling mechanism.
+
+Implement a reliable request fallback strategy.
+
+The system must handle:
+
+- No technicians available.
+- Technicians available but none accepting.
+- Technicians rejecting requests.
+- Technicians not responding within the acceptance window.
+- Technicians becoming unavailable during dispatch.
+- Technicians losing internet connectivity.
+- All matching technicians being exhausted.
+
+Expected behavior:
+
+1. A request enters a clearly defined pending or dispatching state.
+2. The dispatch engine identifies eligible technicians.
+3. Requests are delivered to eligible technicians.
+4. A configurable response timeout is applied.
+5. Unanswered requests are handled according to the dispatch policy.
+6. The system attempts the next eligible technician or matching group.
+7. Once the eligible technician pool is exhausted, the request enters a clearly defined fallback state.
+8. The customer receives a clear explanation.
+9. The customer can cancel, retry, or receive notification when a suitable technician becomes available, subject to the supported business rules.
+
+Do not leave requests indefinitely pending without visibility.
+
+## Problem 5: Requested service is not available
+
+What happens when a customer requests a category or service for which no registered and qualified technician exists?
+
+Implement proper service availability validation.
+
+Requirements:
+
+- Check the actual technician database.
+- Check service categories and technician skills.
+- Consider technician availability and service location.
+- Do not display unavailable technicians as available.
+- Explain when no matching technician exists.
+- Offer appropriate alternatives where supported.
+- Allow the customer to cancel or retain the request for later matching if the business rules permit it.
+
+The system must distinguish between:
+
+- No technician registered for the requested service.
+- Technicians registered but currently unavailable.
+- Technicians available but not responding.
+- No eligible technician within the supported service area.
+
+These are different operational situations and should not be treated as identical errors.
+
+---
+
+# PHASE 6: GEMINI AI INTEGRATION AND CUSTOMER CLARIFICATION
+
+## Problem 6: Is the Gemini API key ready for integration?
+
+Audit the existing AI clarification functionality.
+
+Determine whether Gemini integration is:
+
+- Already implemented.
+- Partially implemented.
+- Configured but not connected.
+- Missing entirely.
+- Failing because of environment configuration.
+- Failing because of request or response handling.
+
+Inspect:
+
+- Backend Gemini client configuration.
+- Environment variable loading.
+- API authentication.
+- Model availability.
+- Request payload structure.
+- Response parsing.
+- Error handling.
+- API timeouts.
+- Rate limiting.
+- Fallback mechanisms.
+
+Implementation requirements:
+
+1. Gemini API keys must remain exclusively on the backend.
+2. Never expose API keys in frontend code, browser storage, public environment variables, or client-side bundles.
+3. Integrate AI clarification into the existing customer service request workflow.
+4. Allow customers to describe their technical problem in natural language.
+5. Where appropriate, ask follow-up questions to clarify the fault.
+6. Extract useful details such as symptoms, service category, urgency, and relevant context.
+7. Allow the customer to review and confirm the information before submitting the request.
+8. Ensure AI recommendations do not automatically create or accept service requests without customer confirmation.
+9. Provide a graceful fallback when Gemini is unavailable.
+10. Validate and sanitize AI-generated output before using it in application logic.
+
+Do not assume that the API key works simply because an environment variable exists.
+
+Verify the actual backend integration using a controlled test.
+
+If the API key is missing or invalid, document the exact configuration required without inventing credentials.
+
+---
+
+# PHASE 7: SERVICE REQUEST LIFECYCLE AND COMPLETION
+
+## Problem 7: What happens when a service is requested but never marked completed?
+
+Design and verify a complete request lifecycle.
+
+Establish clear and consistent statuses.
+
+Consider the following lifecycle:
+
+- PENDING
+- DISPATCHING
+- ACCEPTED
+- IN_PROGRESS
+- COMPLETION_PENDING
+- COMPLETED
+- CANCELLED
+- EXPIRED
+- FAILED
+
+Adapt these to the existing implementation rather than introducing duplicate or conflicting status systems.
+
+Requirements:
+
+1. Every request must have a valid lifecycle state.
+2. Only authorized users can perform permitted state transitions.
+3. A technician must not be able to mark an unrelated request as completed.
+4. Completion must be explicitly recorded.
+5. Where appropriate, the customer should confirm that the service was completed.
+6. Handle situations where the technician reports completion but the customer does not respond.
+7. Handle situations where the technician never starts or completes the service.
+8. Introduce configurable timeouts and reminders where appropriate.
+9. Provide an escalation or dispute mechanism for unresolved requests.
+10. Record relevant status changes with timestamps and actor information.
+
+Never automatically mark a service as completed simply because a certain amount of time has passed.
+
+The system must retain an auditable history of request transitions.
+
+---
+
+# PHASE 8: MULTIPLE SIMULTANEOUS CUSTOMER REQUESTS
+
+## Problem 8: What happens when a customer submits many requests simultaneously?
+
+Investigate how the system handles multiple active service requests belonging to one customer.
+
+Requirements:
+
+- Support multiple legitimate requests.
+- Prevent accidental duplicate submissions.
+- Prevent rapid repeated clicks from creating duplicate requests.
+- Give every request a unique identifier.
+- Maintain independent request states.
+- Keep each request linked to its own dispatch process and conversation.
+- Display all active requests in the customer dashboard.
+- Allow customers to track each request independently.
+- Handle cancellation of one request without affecting another.
+- Prevent messages or technician assignments from being attached to the wrong request.
+
+Introduce sensible request limits or abuse protection if required by the business rules.
+
+Do not impose arbitrary restrictions that prevent legitimate customer usage.
+
+---
+
+# PHASE 9: TECHNICIAN MULTIPLE REQUEST ACCEPTANCE
+
+## Problem 9: What happens when a technician accepts more than one service request?
+
+Investigate technician workload and concurrent assignment management.
+
+The system must prevent unrealistic or conflicting assignments.
+
+Requirements:
+
+1. Establish the maximum number of active assignments a technician can hold.
+2. Make the limit configurable according to the business rules.
+3. Check the technician's availability before accepting another request.
+4. Consider existing active assignments.
+5. Prevent overlapping or conflicting bookings where scheduling information exists.
+6. Prevent technicians from accepting requests they cannot reasonably handle.
+7. Update technician availability immediately after a successful assignment.
+8. Display all active assignments in the technician dashboard.
+9. Allow technicians to manage each assignment independently.
+10. Restore availability only when the appropriate assignment state permits it.
+
+Most importantly, enforce workload limits on the backend and database transaction level, not merely through disabled frontend buttons.
+
+---
+
+# PHASE 10: REQUEST ACCEPTANCE AND ASSIGNMENT INTEGRITY
+
+## Problem 10: How is a request handled when an available technician accepts it?
+
+Verify the entire acceptance process.
+
+The expected process must be:
+
+1. Customer submits a request.
+2. System validates the request.
+3. Dispatch engine identifies eligible technicians.
+4. Matching technicians receive the request.
+5. A technician accepts the request.
+6. Backend verifies that the request is still available.
+7. Backend verifies that the technician is still eligible.
+8. The system atomically assigns the technician.
+9. Request status changes to ACCEPTED.
+10. Technician availability and workload are updated.
+11. Customer receives an immediate notification.
+12. Technician receives confirmation.
+13. The associated conversation is activated.
+14. The customer and technician can access the correct request details.
+
+Important:
+
+A technician must not be able to accept a request that has already been assigned to another technician.
+
+Implement atomic assignment logic using appropriate database transactions, conditional updates, or database functions.
+
+---
+
+# PHASE 11: DISPATCH ALGORITHM AND WAITING QUEUE
+
+## Problem 11: Is the dispatch algorithm and waiting queue actually working?
+
+Conduct a complete technical audit of the existing dispatch algorithm.
+
+Inspect:
+
+- Technician matching.
+- Service category matching.
+- Skills and qualifications.
+- Location and service radius.
+- Technician availability.
+- Technician workload.
+- Matching priority.
+- Request ordering.
+- Response timeout.
+- Retry strategy.
+- Queue management.
+- Expired requests.
+- Duplicate dispatch attempts.
+- Failed dispatch jobs.
+
+The dispatch engine must be deterministic, traceable, and safe under concurrent execution.
+
+## Expected dispatch behavior
+
+1. Validate the customer's request.
+2. Identify technicians who satisfy the required service category and qualifications.
+3. Filter out unavailable technicians.
+4. Exclude technicians who have exceeded workload limits.
+5. Apply location and distance constraints where supported.
+6. Rank eligible technicians using the existing matching strategy.
+7. Dispatch the request according to the established priority.
+8. Record dispatch attempts.
+9. Apply response timeouts.
+10. Move to the next eligible technician or matching group when necessary.
+11. Update the request state consistently.
+12. Place unresolved requests into the appropriate waiting or fallback queue.
+
+The waiting queue must:
+
+- Preserve request identity.
+- Maintain clear ordering and priority rules.
+- Prevent duplicate queue entries.
+- Support retry and expiry.
+- Handle cancellation.
+- Avoid dispatching expired requests.
+- Avoid assigning the same request to multiple technicians.
+- Recover from temporary backend or worker failures.
+
+Document the actual algorithm and explain how each matching decision is made.
+
+---
+
+# PHASE 12: CONCURRENT REQUESTS AND RACE CONDITIONS
+
+## Problem 12: Multiple customers request the same service simultaneously, targeting the same available technicians.
+
+This is one of the most important areas of the audit.
+
+Test scenarios where:
+
+- Two customers request the same service simultaneously.
+- Multiple customers are matched with the same technician.
+- Two technicians attempt to accept the same request.
+- One technician receives multiple requests at nearly the same time.
+- A technician becomes unavailable during dispatch.
+- A customer cancels while a technician is accepting.
+- A request expires while a technician is responding.
+- Multiple dispatch workers process the same request.
+- A technician loses connectivity immediately after accepting.
+- Multiple requests enter the waiting queue simultaneously.
+
+## Required concurrency protections
+
+Implement appropriate safeguards:
+
+1. Atomic request assignment.
+2. Conditional database updates.
+3. Database-level uniqueness constraints where appropriate.
+4. Transactional updates to assignment and request state.
+5. Idempotency protection for repeated operations.
+6. Duplicate dispatch prevention.
+7. Safe queue processing.
+8. Backend validation of technician workload.
+9. Consistent request status transitions.
+10. Recovery from failed or interrupted operations.
+
+Never rely on frontend validation as the only protection against concurrent operations.
+
+The database must remain the source of truth.
+
+A request must never be assigned to two technicians simultaneously.
+
+A technician must never exceed the configured active assignment limit because of concurrent acceptance operations.
+
+---
+
+# PHASE 13: NOTIFICATIONS AND REAL-TIME SYNCHRONIZATION
+
+Audit the notification system across all major events.
+
+Test notifications for:
+
+- New service request.
+- Technician dispatch.
+- Technician acceptance.
+- Technician rejection.
+- Request reassignment.
+- Request cancellation.
+- Technician arrival or progress updates, where supported.
+- New chat messages.
+- Completion requests.
+- Service completion.
+- Unresolved requests.
+- Queue and availability updates.
+
+Ensure:
+
+- Notifications are sent to the correct users.
+- Notifications are not duplicated unnecessarily.
+- Notification failures do not corrupt request state.
+- Users can recover missed updates by reopening their dashboards.
+- Realtime updates and fallback polling remain consistent.
+- Sensitive request details are not exposed to unauthorized users.
+
+---
+
+# PHASE 14: SECURITY AND CUSTOMER/TECHNICIAN SAFETY
+
+Conduct a dedicated security and operational safety review.
+
+Inspect:
+
+- Authentication and authorization.
+- Supabase RLS policies.
+- API authorization.
+- User role enforcement.
+- Request ownership.
+- Technician assignment permissions.
+- Chat privacy.
+- Contact information exposure.
+- Input validation.
+- Rate limiting.
+- Abuse prevention.
+- AI prompt injection and unsafe AI output handling.
+- Sensitive information in logs.
+
+Verify the following:
+
+1. Customers can only manage their own requests.
+2. Technicians can only access requests assigned or dispatched to them according to the application's workflow.
+3. Only authorized participants can access request conversations.
+4. Customers cannot modify technician-only fields.
+5. Technicians cannot modify customer account information.
+6. Administrative operations require appropriate authorization.
+7. Service completion and cancellation operations are properly restricted.
+8. Personal information is exposed only when required for a legitimate service interaction.
+9. Support or administrative access is controlled and auditable.
+
+Do not weaken existing security policies to make a feature work.
+
+---
+
+# PHASE 15: AUTOMATED TESTING AND VALIDATION
+
+After implementing fixes, perform comprehensive testing.
+
+Do not stop at compilation or successful page rendering.
+
+## A. Frontend tests
+
+Test:
+
+- Customer dashboard navigation.
+- Technician dashboard navigation.
+- Service submission.
+- Request tracking.
+- Chat interface.
+- Contact call buttons.
+- Notifications.
+- Multiple active requests.
+- Request cancellation.
+- Completion confirmation.
+- Mobile responsiveness.
+
+## B. Backend tests
+
+Test:
+
+- Request creation.
+- Request validation.
+- Technician matching.
+- Request acceptance.
+- Technician workload limits.
+- Request cancellation.
+- Completion transitions.
+- Queue processing.
+- Timeout handling.
+- Retry mechanisms.
+- AI clarification.
+- Authorization and RLS enforcement.
+
+## C. Real-time tests
+
+Use two or more independent authenticated sessions.
+
+Verify:
+
+- Customer sends a message and technician receives it.
+- Technician responds and customer receives it.
+- Request status changes appear on both dashboards.
+- Notifications reach the correct recipient.
+- Reconnection restores real-time functionality.
+- Messages are not duplicated.
+
+## D. Concurrency and stress tests
+
+Create automated tests for:
+
+| Scenario | Expected result |
+|---|---|
+| Two technicians accept the same request | Only one succeeds |
+| Two customers target one technician | Workload limits are enforced |
+| Customer submits duplicate requests rapidly | Duplicate protection works |
+| Multiple requests enter dispatch simultaneously | Each request is processed correctly |
+| Technician becomes unavailable | Assignment is prevented or safely recovered |
+| Customer cancels during acceptance | No inconsistent assignment |
+| Dispatch worker processes the same job twice | No duplicate assignment |
+| Request times out | Correct fallback is executed |
+| Technician never completes service | Request remains unresolved and is escalated |
+| Realtime connection drops | System reconnects or recovers using fallback |
+
+Where appropriate, simulate at least 20 concurrent requests and multiple technicians.
+
+Measure:
+
+- Successful request processing.
+- Duplicate assignment attempts.
+- Failed dispatch operations.
+- Queue processing.
+- Response times.
+- Data consistency.
+
+Do not claim to have performed load testing if only unit tests were executed.
+
+---
+
+# PHASE 16: FINAL VERIFICATION AND REPORTING
+
+After completing implementation, produce a comprehensive engineering report.
+
+The report must contain:
+
+## 1. Initial findings
+
+For every reported issue, explain:
+
+- What was wrong.
+- Where the problem originated.
+- Its technical root cause.
+- Its effect on customers or technicians.
+
+## 2. Implementation summary
+
+Explain:
+
+- Files changed.
+- Database changes.
+- API changes.
+- Frontend changes.
+- Dispatch changes.
+- Security improvements.
+- AI integration status.
+- Testing infrastructure changes.
+
+## 3. Verification results
+
+For each issue, report one of:
+
+- FIXED AND VERIFIED.
+- FIXED BUT NOT FULLY VERIFIED.
+- PARTIALLY IMPLEMENTED.
+- NOT FIXED.
+- BLOCKED BY EXTERNAL CONFIGURATION.
+
+Include actual test results and evidence.
+
+## 4. Remaining risks
+
+Clearly identify:
+
+- Outstanding bugs.
+- Missing environment variables.
+- External service dependencies.
+- Unverified production behavior.
+- Database migration requirements.
+- Remaining operational risks.
+
+## 5. Production readiness assessment
+
+Provide a final assessment covering:
+
+- Functional reliability.
+- Dispatch reliability.
+- Concurrency safety.
+- Database consistency.
+- Real-time communication.
+- Application security.
+- Customer experience.
+- Technician experience.
+- Operational resilience.
+
+Do not classify the system as production-ready if critical issues remain.
+
+---
+
+# STRICT ENGINEERING RULES
+
+1. Do not rewrite the application from scratch.
+2. Do not replace working features unnecessarily.
+3. Do not introduce fake data to simulate working functionality.
+4. Do not hardcode technician availability.
+5. Do not create duplicate service request systems.
+6. Do not create parallel status definitions that conflict with existing database values.
+7. Do not bypass RLS or authentication.
+8. Do not expose Gemini API credentials.
+9. Do not rely exclusively on frontend validation.
+10. Do not claim a feature works without testing its actual execution path.
+11. Do not mark tests as passed when they were not executed.
+12. Do not silently ignore failed operations.
+13. Preserve the existing visual identity and mobile-first design.
+14. Use the existing stack and dependencies wherever practical.
+15. Make database migrations safe, documented, and reversible where possible.
+16. Preserve existing user data.
+17. Do not update project completion documentation or implementation state trackers until the corresponding changes have actually been implemented and verified.
+
+## EXECUTION STRATEGY
+
+Work in controlled stages:
+
+**Stage 1:** Audit the codebase and document the root causes.
+
+**Stage 2:** Identify architectural weaknesses and prioritize critical failures.
+
+**Stage 3:** Implement navigation, chat, contact, and request lifecycle corrections.
+
+**Stage 4:** Correct dispatch, matching, waiting queue, and technician workload management.
+
+**Stage 5:** Implement concurrency protections and database integrity safeguards.
+
+**Stage 6:** Complete Gemini integration where configuration and credentials permit.
+
+**Stage 7:** Conduct security, functional, integration, and concurrency testing.
+
+**Stage 8:** Produce the final verification report and list remaining production requirements.
+
+At each stage:
+
+- Inspect before editing.
+- Make focused changes.
+- Run relevant tests.
+- Check for regressions.
+- Record actual outcomes.
+- Continue only when the stage is sufficiently validated.
+
+## FINAL ACCEPTANCE CRITERIA
+
+Umodzi Connect should only be considered successfully improved when:
+
+- Customers can navigate between their service requests and dashboards correctly.
+- Customers and technicians can communicate through working, persistent real-time chat.
+- Phone contact functionality invokes valid device calling interfaces.
+- Requests with no available technicians are handled safely.
+- Unavailable service categories are handled transparently.
+- Gemini clarification works securely when configured, with a graceful fallback.
+- Service requests follow a controlled lifecycle.
+- Unresolved requests are identifiable and escalatable.
+- Customers can manage multiple requests independently.
+- Technicians cannot accept more assignments than permitted.
+- A service request can only have one active technician assignment.
+- The dispatch algorithm and waiting queue behave consistently.
+- Simultaneous requests do not cause duplicate or conflicting assignments.
+- RLS, authorization, and database integrity remain intact.
+- Automated tests demonstrate that the critical workflows work.
+
+**FINAL DIRECTIVE: Do not optimize for the number of files changed or the speed of implementation. Optimize for correctness, data integrity, security, reliability, and verifiable functionality.**
+
+The goal is not to make Umodzi Connect appear functional. The goal is to make its actual customer-to-technician service delivery process work reliably under normal, exceptional, and concurrent operating conditions.

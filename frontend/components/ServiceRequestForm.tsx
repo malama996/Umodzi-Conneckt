@@ -1,12 +1,50 @@
 'use client';
-import { useState } from 'react';
-import { LuCircleAlert, LuCircleCheck, LuLoader } from 'react-icons/lu';
+import { useRef, useState } from 'react';
+import Link from 'next/link';
+import { LuArrowRight, LuCircleAlert, LuCircleCheck, LuLoader } from 'react-icons/lu';
 import { isTechnicianCategory } from '@/lib/categories';
 import { createServiceRequest } from '@/lib/services/requestService';
 import type { ServiceRequest } from '@/lib/types';
 
+/**
+ * Task 36 (Stage 5, finding #10): browser idempotency key for a submission.
+ * Prefers crypto.randomUUID (secure contexts); falls back to a v4-shaped
+ * UUID from getRandomValues (available in every browser and Node ≥ 19,
+ * including non-secure contexts). No Web Crypto at all → an honest error:
+ * a malformed key would only earn a backend 400.
+ */
+function newClientRequestId(): string {
+  const c = typeof crypto !== 'undefined' ? crypto : undefined;
+  if (c && typeof c.randomUUID === 'function') return c.randomUUID();
+  if (c && typeof c.getRandomValues === 'function') {
+    const bytes = c.getRandomValues(new Uint8Array(16));
+    bytes[6] = (bytes[6] & 0x0f) | 0x40; // version 4
+    bytes[8] = (bytes[8] & 0x3f) | 0x80; // RFC 4122 variant
+    const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+    return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+  }
+  throw new Error(
+    'This browser cannot generate a submission id. Please update your browser and try again.',
+  );
+}
+
 type FormMode = 'editing' | 'reviewing';
 type CreateState = 'idle' | 'creating' | 'success' | 'error';
+
+/**
+ * The backend decides the request's real dispatch state (a request with no
+ * eligible technician is persisted as `no_match`, not `pending`). Showing a
+ * literal "Pending" here made the success panel contradict the stored row.
+ */
+const CREATED_STATUS_LABEL: Record<ServiceRequest['status'], string> = {
+  pending: 'Pending — queued for dispatch',
+  matching: 'Matching — an eligible technician has been offered the job',
+  matched: 'Matched — a technician accepted this request',
+  no_match: 'No technician is available right now',
+  in_progress: 'In progress',
+  completed: 'Completed',
+  cancelled: 'Cancelled',
+};
 
 interface ServiceRequestFormProps {
   description: string;
@@ -42,6 +80,13 @@ export default function ServiceRequestForm({
   const [createState, setCreateState] = useState<CreateState>('idle');
   const [createdRequest, setCreatedRequest] = useState<ServiceRequest | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
+  /**
+   * Task 36 (Stage 5): idempotency key for the CURRENT submission attempt.
+   * Kept across a failed confirm→confirm-again cycle (a network retry of the
+   * same logical submission replays to the same request); cleared when the
+   * user goes back to edit or resets, so edited content is a NEW submission.
+   */
+  const clientRequestIdRef = useRef<string | null>(null);
 
   const isCreating = createState === 'creating';
 
@@ -73,6 +118,8 @@ export default function ServiceRequestForm({
     setMode('editing');
     setErrorMessage('');
     setCreateState('idle');
+    // Edited content is a new logical submission — new idempotency key.
+    clientRequestIdRef.current = null;
   };
 
   const handleConfirm = async () => {
@@ -81,10 +128,15 @@ export default function ServiceRequestForm({
     setCreateState('creating');
 
     try {
+      // Reuse the key from a failed attempt (same submission retried) or
+      // mint one for this submission; the backend replays duplicates to the
+      // original request instead of creating a second row.
+      clientRequestIdRef.current ||= newClientRequestId();
       const request = await createServiceRequest({
         description: description.trim(),
         category: category as ServiceRequest['category'],
         city: city.trim(),
+        clientRequestId: clientRequestIdRef.current,
       });
       setCreatedRequest(request);
       setCreateState('success');
@@ -104,6 +156,7 @@ export default function ServiceRequestForm({
     setCreateState('idle');
     setCreatedRequest(null);
     setErrorMessage('');
+    clientRequestIdRef.current = null;
     onRequestReset?.();
   };
 
@@ -129,12 +182,30 @@ export default function ServiceRequestForm({
           </div>
           <div>
             <dt>Status</dt>
-            <dd>Pending</dd>
+            <dd>{CREATED_STATUS_LABEL[createdRequest.status]}</dd>
           </div>
         </dl>
-        <button type="button" className="outline-button" onClick={handleReset}>
-          Create another request
-        </button>
+        <p className="form-note" role="status">
+          {createdRequest.status === 'no_match'
+            ? 'We could not find an eligible technician for this category, area and availability right now. Open the request to retry dispatch later or cancel it.'
+            : createdRequest.status === 'matching'
+              ? 'Dispatch has offered this job to an eligible technician. Chat unlocks when they accept.'
+              : 'You can follow the request and its conversation from My Requests.'}
+        </p>
+        <div className="request-review-actions">
+          <Link
+            className="button button-coral button-small"
+            href={`/dashboard/requests/${createdRequest.id}`}
+          >
+            Track this request <LuArrowRight size={12} aria-hidden="true" />
+          </Link>
+          <Link className="outline-button" href="/dashboard">
+            Back to dashboard
+          </Link>
+          <button type="button" className="outline-button" onClick={handleReset}>
+            Create another request
+          </button>
+        </div>
       </section>
     );
   }

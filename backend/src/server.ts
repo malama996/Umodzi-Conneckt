@@ -28,11 +28,26 @@ import type { RecordEventNotificationParams } from "./notifications/notification
 import {
   assertOfferCreateAccess,
   assertOfferEligibility,
-  assertRequestStatusWriteScope,
   assertTechnicianOfferCollection,
   loadOfferForResponse,
   loadRequestForUser,
 } from "./auth/authorization.js";
+import {
+  acceptedTechnicianId,
+  assignOfferAtomically,
+  createOfferForCandidate,
+  findNextCandidate,
+  offerTimeoutMinutes,
+  processOfferOutcome,
+  recordRequestEvent,
+  releaseTechnicianCapacity,
+  retryDispatchForRequest,
+  sweepExpiredOffers,
+  sweepIntervalMs,
+  sweepStuckMatchingRequests,
+  sweepWaitingRequests,
+  waitingRetryMinutes,
+} from "./dispatch/dispatchService.js";
 import { loadJwtConfig, registerJwt } from "./auth/jwt.js";
 import { assertUuid, CITY_CENTRES } from "./auth/authService.js";
 import { seedAdminFromEnv } from "./auth/seedAdmin.js";
@@ -289,15 +304,24 @@ const requestSchema = z.object({
   description: z.string().min(8).max(2000),
   category: z.enum(categories as unknown as [string, ...string[]]),
   city: z.enum(["Kitwe", "Ndola", "Other"]),
+  /**
+   * Task 36 (Stage 5, finding #10): browser-generated idempotency key. The
+   * SAME key submitted twice by the SAME customer returns the SAME request
+   * instead of creating a duplicate (double-tap / network retry). Absent on
+   * legacy calls, which keep working exactly as before.
+   */
+  clientRequestId: z.string().uuid().optional(),
 });
 
 /**
- * Helper to return JSON API responses
+ * Helper to return JSON API responses. `meta` carries non-data context
+ * (Task 36: dispatch outcomes, idempotent-replay flags) — additive and
+ * optional, so existing callers are unaffected.
  */
 function jsonResponse<T>(
   reply: FastifyReply,
   status: number,
-  payload: { data?: T; error?: string; message?: string; details?: unknown },
+  payload: { data?: T; error?: string; message?: string; details?: unknown; meta?: unknown },
 ) {
   return reply.status(status).send(payload);
 }
@@ -581,14 +605,51 @@ app.post(
     }
 
     const { description, category, city } = parsed.data;
+    const clientRequestId = parsed.data.clientRequestId ?? null;
     const id = crypto.randomUUID();
     const now = new Date().toISOString();
 
     try {
+      // Task 36 (Stage 5) — idempotent replay: the same idempotency key from
+      // the same customer returns the original request instead of creating a
+      // duplicate. The partial unique index in migration 012 is the backstop
+      // if two retries race past this read.
+      if (clientRequestId) {
+        const replay = await query<{
+          id: string;
+          description: string;
+          category: string;
+          city: string;
+          status: string;
+          created_at: string;
+          updated_at: string;
+        }>(
+          `SELECT id, description, category, city, status, created_at, updated_at
+             FROM service_requests
+            WHERE customer_user_id = $1 AND client_request_id = $2
+            LIMIT 1`,
+          [authUser.id, clientRequestId],
+        );
+        if (replay[0]) {
+          return jsonResponse(reply, 200, {
+            data: {
+              id: replay[0].id,
+              description: replay[0].description,
+              category: replay[0].category,
+              city: replay[0].city,
+              status: toRequestStatus(replay[0].status),
+              createdAt: replay[0].created_at,
+              updatedAt: replay[0].updated_at,
+            },
+            meta: { idempotentReplay: true },
+          });
+        }
+      }
+
       // Dispatch selection belongs on the server. A browser must never be
       // able to select its own preferred technician or submit a fabricated
-      // ranking. We offer the least-used eligible, linked technician first;
-      // subsequent cascade handling remains governed by the offer endpoints.
+      // ranking. The shared dispatch engine picks the least-loaded eligible
+      // candidate; reject/timeout cascade continues from the offer endpoints.
       const created = await transaction(async (client: PoolClient) => {
         const result = await client.query<{
           id: string;
@@ -599,41 +660,105 @@ app.post(
           created_at: string;
           updated_at: string;
         }>(
-          `INSERT INTO service_requests (id, description, category, city, status, customer_user_id, created_at, updated_at)
-         VALUES ($1, $2, $3, $4, 'pending', $5, $6, $7)
-         RETURNING id, description, category, city, status, created_at, updated_at`,
-          [id, description, category, city, authUser.id, now, now],
+          `INSERT INTO service_requests
+             (id, description, category, city, status, customer_user_id,
+              client_request_id, last_dispatch_at, dispatch_attempts, created_at, updated_at)
+           VALUES ($1, $2, $3, $4, 'pending', $5, $6, NOW(), 1, $7, $8)
+           RETURNING id, description, category, city, status, created_at, updated_at`,
+          [id, description, category, city, authUser.id, clientRequestId, now, now],
         );
-        const candidate = await client.query<{ id: string; user_id: string }>(
-          `SELECT id, user_id
-             FROM technicians
-            WHERE category = $1
-              AND service_area = $2
-              AND verified = true
-              AND account_status = 'active'
-              AND availability_status = 'available'
-              AND user_id IS NOT NULL
-            ORDER BY jobs ASC, rating DESC, id ASC
-            LIMIT 1
-            FOR UPDATE SKIP LOCKED`,
-          [category, city],
-        );
-        const technician = candidate.rows[0] ?? null;
-        if (technician) {
-          await client.query(
-            `INSERT INTO dispatch_offers (request_id, technician_id, candidate_index, status, created_at, updated_at)
-             VALUES ($1, $2, 0, 'pending', NOW(), NOW())`,
-            [id, technician.id],
-          );
+
+        const request = {
+          id,
+          category,
+          city,
+          status: "pending" as string,
+          customerUserId: authUser.id as string | null,
+        };
+        const candidate = await findNextCandidate(client, request);
+
+        if (candidate) {
+          await createOfferForCandidate(client, id, candidate);
           await client.query(
             `UPDATE service_requests SET status = 'matching', updated_at = NOW() WHERE id = $1`,
             [id],
           );
+          await recordRequestEvent(client, {
+            requestId: id,
+            fromStatus: "pending",
+            toStatus: "matching",
+            actorUserId: authUser.id,
+            actorRole: authUser.role,
+            reason: "initial_dispatch",
+          });
           result.rows[0].status = "matching";
+        } else {
+          // Task 36 (Stage 4, finding #6): "no technician anywhere" is a
+          // REAL state, not a silent pending limbo. The request persists as
+          // no_match with a diagnosable reason, an audit row, and the
+          // customer-visible retry path. The three counts distinguish the
+          // directive's four operational situations:
+          //   no technician registered for the category at all,
+          //   registered but none in this service area,
+          //   in the area but none currently available.
+          const counts = await client.query<{
+            registered: number;
+            in_area: number;
+            available: number;
+          }>(
+            `SELECT
+               (SELECT COUNT(*)::int FROM technicians
+                 WHERE category = $1
+                   AND account_status = 'active'
+                   AND (verification_status = 'verified' OR verified = true)
+               ) AS registered,
+               (SELECT COUNT(*)::int FROM technicians
+                 WHERE category = $1
+                   AND service_area = $2
+                   AND account_status = 'active'
+                   AND (verification_status = 'verified' OR verified = true)
+               ) AS in_area,
+               (SELECT COUNT(*)::int FROM technicians
+                 WHERE category = $1
+                   AND service_area = $2
+                   AND account_status = 'active'
+                   AND (verification_status = 'verified' OR verified = true)
+                   AND availability_status = 'available'
+               ) AS available`,
+            [category, city],
+          );
+          const c = counts.rows[0] ?? { registered: 0, in_area: 0, available: 0 };
+          const reason =
+            c.registered === 0
+              ? "no_registered_technician"
+              : c.in_area === 0
+                ? "no_technician_in_area"
+                : c.available === 0
+                  ? "none_currently_available"
+                  : "none_below_workload_cap";
+          await client.query(
+            `UPDATE service_requests SET status = 'no_match', updated_at = NOW() WHERE id = $1`,
+            [id],
+          );
+          await recordRequestEvent(client, {
+            requestId: id,
+            fromStatus: "pending",
+            toStatus: "no_match",
+            actorUserId: authUser.id,
+            actorRole: authUser.role,
+            reason,
+          });
+          result.rows[0].status = "no_match";
+          return {
+            row: result.rows[0],
+            technicianUserId: null as string | null,
+            dispatchReason: reason,
+          };
         }
         return {
           row: result.rows[0],
-          technicianUserId: technician?.user_id ?? null,
+          technicianUserId: candidate.technicianUserId,
+          dispatchReason: null as string | null,
         };
       });
 
@@ -660,7 +785,12 @@ app.post(
           (error) => app.log.error(error),
         );
       }
-      return jsonResponse(reply, 201, { data: serviceRequest });
+      return jsonResponse(reply, 201, {
+        data: serviceRequest,
+        ...(created.dispatchReason
+          ? { meta: { dispatch: { reason: created.dispatchReason } } }
+          : {}),
+      });
     } catch (error) {
       app.log.error(error);
       return jsonResponse(reply, 500, {
@@ -771,6 +901,13 @@ app.get(
       return jsonResponse(reply, 401, { error: "Authentication required" });
     }
     const row = await loadRequestForUser(id, authUser); // throws 400/404 → error handler
+
+    /* Task 36 (Stage 3): the request detail page needs the assigned
+     * technician's name and the conversation id without two extra round
+     * trips. Both are additive response fields derived from the same
+     * ownership-scoped row; absence stays null, never fabricated. */
+    const extras = await loadRequestDetailExtras(row.id);
+
     const req: ServiceRequestApi = {
       id: row.id,
       description: row.description,
@@ -779,19 +916,189 @@ app.get(
       status: toRequestStatus(row.status),
       createdAt: row.created_at,
       updatedAt: row.updated_at,
+      assignedTechnicianName: extras?.technicianName ?? null,
+      conversationId: extras?.conversationId ?? null,
     };
     return jsonResponse(reply, 200, { data: req });
   },
 );
 
 /**
- * PATCH /api/v1/requests/:id/status
- * Owner customer / administrator may apply any previously-valid status
- * (unchanged Task-15 lifecycle vocabulary). A technician participant may
- * only record the terminal statuses their own respond flow produces
- * ('matched' / 'no_match') — anyone else gets 404 (ownership) or 403
- * (write scope).
+ * POST /api/v1/requests/:id/retry — ask dispatch to look again (Task 36,
+ * Stage 4). Owner customer only; the backend decides retryability: only a
+ * request that is still unmatched (`no_match` or a legacy stuck `pending`)
+ * with no accepted offer is eligible. On success the request is either
+ * re-offered (status → matching, new pending offer) or it stays no_match
+ * with a fresh dispatch attempt timestamp.
  */
+app.post(
+  "/api/v1/requests/:id/retry",
+  {
+    preHandler: requireRole("customer"),
+    config: { rateLimit: routeRateLimit("RATE_LIMIT_ME_DATA", 30) },
+  },
+  async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const authUser = request.authUser;
+    if (!authUser) {
+      return jsonResponse(reply, 401, { error: "Authentication required" });
+    }
+    try {
+      assertUuid(id);
+    } catch {
+      return jsonResponse(reply, 400, { error: "Invalid id format" });
+    }
+    const owned = await loadRequestForUser(id, authUser); // 400/404 → error handler
+    if (owned.customer_user_id !== authUser.id) {
+      return jsonResponse(reply, 403, {
+        error: "Only the customer who owns this request may retry dispatch",
+      });
+    }
+    const outcome = await retryDispatchForRequest(id, {
+      id: authUser.id,
+      role: authUser.role,
+    });
+    if (!outcome) {
+      return jsonResponse(reply, 409, {
+        error: "This request cannot be retried right now",
+      });
+    }
+    if (outcome.nextOffer?.technicianUserId) {
+      try {
+        await recordAndDeliverEvent(
+          {
+            userId: outcome.nextOffer.technicianUserId,
+            type: "dispatch_offer_created",
+            title: "New service offer",
+            message: `You have a new ${owned.category} service offer in ${owned.city}.`,
+            referenceType: "service_request",
+            referenceId: id,
+            channel: "in_app",
+          },
+          (error) => app.log.error(error),
+        );
+      } catch (notifyError) {
+        app.log.error(notifyError);
+      }
+    }
+    const row = await loadRequestForUser(id, authUser);
+    const extras = await loadRequestDetailExtras(id);
+    const req: ServiceRequestApi = {
+      id: row.id,
+      description: row.description,
+      category: row.category,
+      city: row.city,
+      status: toRequestStatus(row.status),
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      assignedTechnicianName: extras?.technicianName ?? null,
+      conversationId: extras?.conversationId ?? null,
+    };
+    return jsonResponse(reply, 200, {
+      data: req,
+      meta: { dispatch: outcome.nextOffer ? "offered" : "no_candidate" },
+    });
+  },
+);
+
+/**
+ * PATCH /api/v1/requests/:id/status — server-enforced lifecycle (Task 36,
+ * Stage 5; findings #11 and #12).
+ *
+ * The old handler validated the status vocabulary but not the transition: a
+ * customer could mark an unmatched request completed, a technician holding a
+ * mere pending offer could fabricate an assignment by writing 'matched', and
+ * nothing was audited. This route is now a transition matrix applied inside
+ * ONE transaction with a `service_request_events` audit row per real
+ * transition:
+ *
+ *   same status → no-op success (idempotent retry from old clients)
+ *   customer (owner)
+ *     pending | matching | matched | in_progress → cancelled  (withdraw)
+ *     in_progress → completed                                 (confirm completion)
+ *   technician (must hold the ACCEPTED offer on this request)
+ *     matched → in_progress                                   (start work)
+ *     in_progress → completed                                 (record completion)
+ *   administrator → any transition (operator override, always audited)
+ *
+ * completed/cancelled are closed records for customers and technicians —
+ * changing them further is refused (409) so history is never rewritten.
+ * Cancellation closes every still-pending offer (dispatch_offers keeps the
+ * fixed four-value status vocabulary, so they are closed as 'rejected'; the
+ * audit row records that the CUSTOMER ended them) and releases the accepted
+ * technician's workload. Completion releases the workload too. Notifications
+ * fire only after the transaction has committed.
+ */
+
+/** One lifecycle-transition decision (role-aware, from-state aware). */
+function evaluateRequestTransition(
+  from: string,
+  to: string,
+  role: UserRole,
+): { ok: true } | { ok: false; code: number; error: string } {
+  if (from === to) {
+    return { ok: true }; // same-status write stays a successful no-op
+  }
+  if (role === "administrator") {
+    return { ok: true }; // operator override — recorded in the audit trail
+  }
+  if (from === "completed" || from === "cancelled") {
+    return {
+      ok: false,
+      code: 409,
+      error: `This request is ${from} and cannot be reopened`,
+    };
+  }
+  if (role === "customer") {
+    if (to === "cancelled") {
+      return ["pending", "matching", "matched", "in_progress"].includes(from)
+        ? { ok: true }
+        : {
+            ok: false,
+            code: 409,
+            error: `A request that is ${from} cannot be cancelled`,
+          };
+    }
+    if (to === "completed") {
+      return from === "in_progress"
+        ? { ok: true }
+        : {
+            ok: false,
+            code: 409,
+            error:
+              "A request can only be marked completed after work has started",
+          };
+    }
+    return {
+      ok: false,
+      code: 409,
+      error:
+        "Customers may cancel a request or confirm its completion — all other status changes belong to dispatch",
+    };
+  }
+  // technician
+  if (from === "matched" && to === "in_progress") return { ok: true };
+  if (from === "in_progress" && to === "completed") return { ok: true };
+  return {
+    ok: false,
+    code: 403,
+    error:
+      "Technicians may only start an awarded job or record its completion",
+  };
+}
+
+/** Audit reason recorded in service_request_events for this transition. */
+function statusChangeReason(role: UserRole, to: string): string {
+  if (role === "administrator") return "admin_status_update";
+  if (to === "cancelled") return "customer_cancelled";
+  if (to === "completed") {
+    return role === "technician"
+      ? "technician_completed"
+      : "customer_confirmed_completion";
+  }
+  return role === "technician" ? "technician_started" : "status_update";
+}
+
 app.patch(
   "/api/v1/requests/:id/status",
   { preHandler: requireAuth },
@@ -810,89 +1117,170 @@ app.patch(
       return jsonResponse(reply, 401, { error: "Authentication required" });
     }
     const owned = await loadRequestForUser(id, authUser); // 400/404 → error handler
-    assertRequestStatusWriteScope(status, authUser); // 403 → error handler
 
-    // Awarded-work guard (completion workflow): recording progress or
-    // completion is a statement about work THIS technician was awarded, so it
-    // requires their own ACCEPTED offer on this request. Holding an offer that
-    // is still pending (or rejected/timed out) is not enough — without this, a
-    // technician Smart Dispatch merely offered the job to could close another
-    // technician's work. Enforced here, on the server, so hiding a button in
-    // the UI is never the only thing standing in the way.
-    if (
-      authUser.role === "technician" &&
-      (status === "in_progress" || status === "completed")
-    ) {
-      const awarded = await query<{ id: string }>(
-        `SELECT o.id FROM dispatch_offers o
-           JOIN technicians t ON t.id = o.technician_id
-          WHERE o.request_id = $1 AND t.user_id = $2 AND o.status = 'accepted'
-          LIMIT 1`,
-        [owned.id, authUser.id],
-      );
-      if (awarded.length === 0) {
-        return jsonResponse(reply, 403, {
-          error:
-            "Forbidden: only the technician awarded this request may record progress or completion",
-        });
-      }
+    // Same-status writes stay successful no-ops (idempotent old clients): no
+    // transition, no audit row, no notification — the current row is echoed.
+    if (owned.status === status) {
+      const req: ServiceRequestApi = {
+        id: owned.id,
+        description: owned.description,
+        category: owned.category,
+        city: owned.city,
+        status: toRequestStatus(owned.status),
+        createdAt: owned.created_at,
+        updatedAt: owned.updated_at,
+      };
+      return jsonResponse(reply, 200, { data: req });
     }
 
-    // Task 28.2D4: capture the previous status for the transition guard.
-    // The UPDATE below stays unconditional (existing API semantics); only
-    // the notification is gated on an actual change.
-    const previousStatus = owned.status;
-
-    // Closed-request guard: a completed or cancelled request is a closed
-    // record, and re-opening it would rewrite history (and detach the review,
-    // completion and notification trail from the state they describe).
-    // Re-sending the SAME status stays a successful no-op, so an idempotent
-    // retry from a flaky connection is never turned into an error.
-    if (previousStatus !== status && (previousStatus === "completed" || previousStatus === "cancelled")) {
-      return jsonResponse(reply, 409, {
-        error: `This request is ${previousStatus} and cannot be reopened`,
-      });
+    const decision = evaluateRequestTransition(
+      owned.status,
+      status,
+      authUser.role,
+    );
+    if (!decision.ok) {
+      return jsonResponse(reply, decision.code, { error: decision.error });
     }
+
+    type StatusWriteOutcome =
+      | { applied: true; previousStatus: string }
+      | { applied: false; code: number; error: string; idempotent?: boolean };
 
     try {
-      const result = await query<{
-        id: string;
-        description: string;
-        category: string;
-        city: string;
-        status: string;
-        created_at: string;
-        updated_at: string;
-      }>(
-        "UPDATE service_requests SET status = $1, updated_at = NOW() WHERE id = $2 RETURNING id, description, category, city, status, created_at, updated_at",
-        [status, owned.id],
-      );
-      if (result.length === 0) {
-        return jsonResponse(reply, 404, { error: "Service request not found" });
-      }
-      const req: ServiceRequestApi = {
-        id: result[0].id,
-        description: result[0].description,
-        category: result[0].category,
-        city: result[0].city,
-        status: toRequestStatus(result[0].status),
-        createdAt: result[0].created_at,
-        updatedAt: result[0].updated_at,
-      };
-      if (previousStatus !== status) {
-        // Other participant(s) only — never the actor; missing recipients
-        // skip safely. A notification failure is logged but never fails the
-        // already-committed status change.
-        await notifyRequestStatusChange({
+      const outcome = await transaction(async (client: PoolClient): Promise<StatusWriteOutcome> => {
+        // Re-read under the row lock: the status may have changed between the
+        // ownership read and this transaction (two tabs, a concurrent accept,
+        // a cancellation racing a completion).
+        const locked = await client.query<{ status: string }>(
+          "SELECT status FROM service_requests WHERE id = $1 FOR UPDATE",
+          [owned.id],
+        );
+        const current = locked.rows[0]?.status;
+        if (!current) {
+          return {
+            applied: false,
+            code: 404,
+            error: "Service request not found",
+          };
+        }
+        if (current === status) {
+          return { applied: false, code: 200, error: "", idempotent: true };
+        }
+        const recheck = evaluateRequestTransition(current, status, authUser.role);
+        if (!recheck.ok) {
+          return { applied: false, code: recheck.code, error: recheck.error };
+        }
+
+        // Awarded-work guard: starting or completing work is a statement about
+        // work THIS technician was awarded, so it requires their own ACCEPTED
+        // offer on this request, re-checked inside the transaction. A mere
+        // pending (or rejected/timed_out) offer is not enough.
+        if (authUser.role === "technician") {
+          const awarded = await client.query<{ id: string }>(
+            `SELECT o.id FROM dispatch_offers o
+               JOIN technicians t ON t.id = o.technician_id
+              WHERE o.request_id = $1 AND t.user_id = $2 AND o.status = 'accepted'
+              LIMIT 1`,
+            [owned.id, authUser.id],
+          );
+          if (awarded.rows.length === 0) {
+            return {
+              applied: false,
+              code: 403,
+              error:
+                "Forbidden: only the technician awarded this request may record progress or completion",
+            };
+          }
+        }
+
+        await client.query(
+          "UPDATE service_requests SET status = $1, updated_at = NOW() WHERE id = $2",
+          [status, owned.id],
+        );
+        // Phase 7 requirement 10 — every real transition is audited with its
+        // actor, role and reason, atomically with the change itself.
+        await recordRequestEvent(client, {
           requestId: owned.id,
-          category: owned.category,
-          city: owned.city,
-          newStatus: toRequestStatus(status),
+          fromStatus: current,
+          toStatus: status,
           actorUserId: authUser.id,
-          customerUserId: owned.customer_user_id,
-          onError: (error) => app.log.error(error),
+          actorRole: authUser.role,
+          reason: statusChangeReason(authUser.role, status),
+        });
+
+        // Cancellation cascade (Stage 5): pending offers are dead the moment
+        // the request is withdrawn — no more dispatch noise for a request the
+        // customer has ended. dispatch_offers uses the fixed four-value status
+        // vocabulary, so they are closed as 'rejected'; the audit row above is
+        // what records that the customer — not a technician — ended them.
+        if (status === "cancelled") {
+          await client.query(
+            `UPDATE dispatch_offers SET status = 'rejected', updated_at = NOW()
+              WHERE request_id = $1 AND status = 'pending'`,
+            [owned.id],
+          );
+        }
+        // Completed or cancelled work frees the assigned technician's
+        // workload slot. releaseTechnicianCapacity only restores availability
+        // that was set automatically (availability_auto) — a manual
+        // "unavailable" toggle is never overridden.
+        if (status === "cancelled" || status === "completed") {
+          const accepted = await client.query<{ technician_id: string }>(
+            `SELECT technician_id FROM dispatch_offers
+              WHERE request_id = $1 AND status = 'accepted'
+              ORDER BY updated_at DESC LIMIT 1`,
+            [owned.id],
+          );
+          const techId = accepted.rows[0]?.technician_id;
+          if (techId) {
+            await releaseTechnicianCapacity(client, techId);
+          }
+        }
+        return { applied: true, previousStatus: current };
+      });
+
+      if (!outcome.applied) {
+        if (outcome.idempotent) {
+          // Lost the race to an identical write — the request is already in
+          // the requested state; echo it as the no-op success it is.
+          const req: ServiceRequestApi = {
+            id: owned.id,
+            description: owned.description,
+            category: owned.category,
+            city: owned.city,
+            status: toRequestStatus(status),
+            createdAt: owned.created_at,
+            updatedAt: owned.updated_at,
+          };
+          return jsonResponse(reply, 200, { data: req });
+        }
+        return jsonResponse(reply, outcome.code, {
+          error: outcome.error || "Failed to update request status",
         });
       }
+
+      // Other participant(s) only — never the actor; missing recipients skip
+      // safely. A notification failure is logged but never fails the
+      // already-committed status change.
+      await notifyRequestStatusChange({
+        requestId: owned.id,
+        category: owned.category,
+        city: owned.city,
+        newStatus: toRequestStatus(status),
+        actorUserId: authUser.id,
+        customerUserId: owned.customer_user_id,
+        onError: (error) => app.log.error(error),
+      });
+
+      const req: ServiceRequestApi = {
+        id: owned.id,
+        description: owned.description,
+        category: owned.category,
+        city: owned.city,
+        status: toRequestStatus(status),
+        createdAt: owned.created_at,
+        updatedAt: owned.updated_at,
+      };
       return jsonResponse(reply, 200, { data: req });
     } catch (error) {
       app.log.error(error);
@@ -1143,127 +1531,75 @@ app.post(
     if (!authUser) {
       return jsonResponse(reply, 401, { error: "Authentication required" });
     }
-    const { offer: existing, request: serviceRequest } =
-      await loadOfferForResponse(offerId, authUser); // 400/404 → error handler
-    // Genuine transition only: pending → accepted. Rewriting an already
-    // terminal offer still succeeds (existing behavior) but stays silent.
-    const transitioned = existing.status === "pending";
-    try {
-      const result = await query<{
-        id: string;
-        request_id: string;
-        technician_id: string;
-        candidate_index: number;
-        status: string;
-        created_at: string;
-        updated_at: string;
-      }>(
-        "UPDATE dispatch_offers SET status = $1, updated_at = NOW() WHERE id = $2 RETURNING *",
-        ["accepted", offerId],
-      );
-      if (result.length === 0) {
-        return jsonResponse(reply, 404, { error: "Offer not found" });
-      }
-      const offer: OfferApi = {
-        id: result[0].id,
-        requestId: result[0].request_id,
-        technicianId: result[0].technician_id,
-        candidateIndex: result[0].candidate_index,
-        status: toOfferStatus(result[0].status),
-        createdAt: result[0].created_at,
-        updatedAt: result[0].updated_at,
-      };
-      if (transitioned) {
-        await notifyOfferOutcome(offerId, serviceRequest, "accepted", (error) =>
-          app.log.error(error),
-        );
+    // Authorization FIRST (unchanged contract): the offer's technician, the
+    // owning customer, or an administrator. Strangers get the uniform 404.
+    const { request: serviceRequest } = await loadOfferForResponse(offerId, authUser);
 
-        /* Task 33.1 fix: an accepted offer means the request is matched.
-         * Without this transition the request stayed 'matching' forever, so
-         * the request-scoped conversation route (which requires 'matched')
-         * 404'd for both participants even though the conversation existed.
-         * Only genuine pending → accepted transitions move the request;
-         * rewrites of terminal offers stay silent, as before. */
-        await query(
-          `UPDATE service_requests SET status = 'matched', updated_at = NOW()
-            WHERE id = $1 AND status <> 'matched'`,
-          [serviceRequest.id],
-        );
+    /* Task 36 (Stage 5) — ATOMIC ASSIGNMENT.
+     *
+     * The old handler ran an unconditional UPDATE with no status predicate,
+     * no request lock, no already-assigned guard, no eligibility/workload
+     * re-check, and a conversation creation whose failure answered 500 AFTER
+     * the offer and request had already changed. Two technicians could win
+     * the same request; a suspended technician could still accept.
+     *
+     * assignOfferAtomically performs the whole assignment in ONE transaction:
+     * lock offer + request → guard offer pending & request open → re-check
+     * technician eligibility and workload cap → conditional offer update →
+     * conditional request update → close competing pending offers → create
+     * the conversation → audit event → availability at cap. Any guard failure
+     * throws HttpError and rolls EVERYTHING back; the database stays the
+     * source of truth. Notifications are sent only after commit.
+     */
+    const result = await assignOfferAtomically(offerId, {
+      id: authUser.id,
+      role: authUser.role,
+    });
 
-        /* Step 5 / 28.4A — communicate unlocked: create the conversation
-         * only when this is a genuine accepted transition (not a rewrite of
-         * an already-terminal offer). The request's existing customer link is
-         * authoritative; the technician is the offer's technician. A UNIQUE
-         * constraint on service_request_id prevents duplicate conversations.
-         * Any creation failure must not silently claim communication is available.
-         */
-        try {
-          const existingConv = await query<{ id: string }>(
-            "SELECT id FROM conversations WHERE service_request_id = $1 LIMIT 1",
-            [serviceRequest.id],
-          );
-          if (existingConv.length === 0) {
-            const serviceReqRow = await query<{
-              customer_user_id: string | null;
-            }>("SELECT customer_user_id FROM service_requests WHERE id = $1", [
-              serviceRequest.id,
-            ]);
-            const customerId = serviceReqRow[0]?.customer_user_id;
-            if (customerId) {
-              const created = await query<{
-                id: string;
-                service_request_id: string;
-                customer_id: string;
-                technician_id: string;
-                status: string;
-              }>(
-                `INSERT INTO conversations
-                 (id, service_request_id, customer_id, technician_id, status)
-               VALUES ($1, $2, $3, $4, 'active')
-               RETURNING id, service_request_id, customer_id, technician_id, status`,
-                [
-                  crypto.randomUUID(),
-                  serviceRequest.id,
-                  customerId,
-                  result[0].technician_id,
-                ],
-              );
-              // The conversation exists — notify both sides through the
-              // existing pipeline (no new push logic needed at this stage).
-              await notifyOfferOutcome(
-                offerId,
-                serviceRequest,
-                "accepted",
-                (err) => app.log.error(err),
-              );
-            } else {
-              // Customer link missing — do not report communication available.
-              // The business operation (offer accepted) is preserved; the
-              // conversation simply isn't created this time. The frontend
-              // treats a missing conversation as "communication not yet unlocked".
-              app.log.error({
-                msg: "Offer accepted but service_request.customer_user_id is NULL — conversation not created",
-                requestId: serviceRequest.id,
-                offerId,
-              });
-            }
-          }
-        } catch (convError) {
-          app.log.error(convError);
-          // Never claim communication unlocked when the conversation creation
-          // failed — the error is returned honestly so the frontend can show
-          // the correct state rather than a fabricated "chat available" message.
-          return jsonResponse(reply, 500, {
-            error:
-              "Offer accepted, but communication could not be activated. Please try again or contact support.",
-          });
-        }
+    if (!result.alreadyAssigned) {
+      // Offer-outcome notification to the OTHER party (dedupe keeps the
+      // historical key stable). The duplicate second call the old handler
+      // made inside the conversation block is gone (finding #14).
+      try {
+        await notifyOfferOutcome(
+          offerId,
+          serviceRequest,
+          "accepted",
+          (error) => app.log.error(error),
+        );
+      } catch (notifyError) {
+        app.log.error(notifyError);
       }
-      return jsonResponse(reply, 200, { data: offer });
-    } catch (error) {
-      app.log.error(error);
-      return jsonResponse(reply, 500, { error: "Failed to accept offer" });
+      if (result.closedCompetingOffers > 0) {
+        app.log.info({
+          msg: "Competing pending offers closed by accepted offer",
+          requestId: serviceRequest.id,
+          offerId,
+          closed: result.closedCompetingOffers,
+        });
+      }
+      if (!result.conversationCreated) {
+        // Assignment committed, chat could not be created (legacy NULL
+        // customer link). The frontend treats a missing conversation as
+        // "communication not yet unlocked" — never a fabricated success.
+        app.log.error({
+          msg: "Offer accepted but conversation was not created",
+          requestId: serviceRequest.id,
+          offerId,
+        });
+      }
     }
+
+    const offer: OfferApi = {
+      id: result.offer.id,
+      requestId: result.offer.requestId,
+      technicianId: result.offer.technicianId,
+      candidateIndex: result.offer.candidateIndex,
+      status: toOfferStatus(result.offer.status),
+      createdAt: result.offer.createdAt,
+      updatedAt: result.offer.updatedAt,
+    };
+    return jsonResponse(reply, 200, { data: offer });
   },
 );
 
@@ -1276,51 +1612,7 @@ app.post(
   "/api/v1/offers/:offerId/reject",
   { preHandler: requireAuth },
   async (request, reply) => {
-    const { offerId } = request.params as { offerId: string };
-    const authUser = request.authUser;
-    if (!authUser) {
-      return jsonResponse(reply, 401, { error: "Authentication required" });
-    }
-    const { offer: existing, request: serviceRequest } =
-      await loadOfferForResponse(offerId, authUser); // 400/404 → error handler
-    // Genuine transition only: pending → rejected (rewrite of a terminal
-    // offer still succeeds but stays silent — existing behavior preserved).
-    const transitioned = existing.status === "pending";
-    try {
-      const result = await query<{
-        id: string;
-        request_id: string;
-        technician_id: string;
-        candidate_index: number;
-        status: string;
-        created_at: string;
-        updated_at: string;
-      }>(
-        "UPDATE dispatch_offers SET status = $1, updated_at = NOW() WHERE id = $2 RETURNING *",
-        ["rejected", offerId],
-      );
-      if (result.length === 0) {
-        return jsonResponse(reply, 404, { error: "Offer not found" });
-      }
-      const offer: OfferApi = {
-        id: result[0].id,
-        requestId: result[0].request_id,
-        technicianId: result[0].technician_id,
-        candidateIndex: result[0].candidate_index,
-        status: toOfferStatus(result[0].status),
-        createdAt: result[0].created_at,
-        updatedAt: result[0].updated_at,
-      };
-      if (transitioned) {
-        await notifyOfferOutcome(offerId, serviceRequest, "rejected", (error) =>
-          app.log.error(error),
-        );
-      }
-      return jsonResponse(reply, 200, { data: offer });
-    } catch (error) {
-      app.log.error(error);
-      return jsonResponse(reply, 500, { error: "Failed to reject offer" });
-    }
+    return handleOfferOutcome(request, reply, "rejected");
   },
 );
 
@@ -1333,56 +1625,109 @@ app.post(
   "/api/v1/offers/:offerId/timeout",
   { preHandler: requireAuth },
   async (request, reply) => {
-    const { offerId } = request.params as { offerId: string };
-    const authUser = request.authUser;
-    if (!authUser) {
-      return jsonResponse(reply, 401, { error: "Authentication required" });
-    }
-    const { offer: existing, request: serviceRequest } =
-      await loadOfferForResponse(offerId, authUser); // 400/404 → error handler
-    // Genuine transition only: pending → timed_out (rewrite of a terminal
-    // offer still succeeds but stays silent — existing behavior preserved).
-    const transitioned = existing.status === "pending";
-    try {
-      const result = await query<{
-        id: string;
-        request_id: string;
-        technician_id: string;
-        candidate_index: number;
-        status: string;
-        created_at: string;
-        updated_at: string;
-      }>(
-        "UPDATE dispatch_offers SET status = $1, updated_at = NOW() WHERE id = $2 RETURNING *",
-        ["timed_out", offerId],
-      );
-      if (result.length === 0) {
-        return jsonResponse(reply, 404, { error: "Offer not found" });
-      }
-      const offer: OfferApi = {
-        id: result[0].id,
-        requestId: result[0].request_id,
-        technicianId: result[0].technician_id,
-        candidateIndex: result[0].candidate_index,
-        status: toOfferStatus(result[0].status),
-        createdAt: result[0].created_at,
-        updatedAt: result[0].updated_at,
-      };
-      if (transitioned) {
-        await notifyOfferOutcome(
-          offerId,
-          serviceRequest,
-          "timed_out",
-          (error) => app.log.error(error),
-        );
-      }
-      return jsonResponse(reply, 200, { data: offer });
-    } catch (error) {
-      app.log.error(error);
-      return jsonResponse(reply, 500, { error: "Failed to timeout offer" });
-    }
+    return handleOfferOutcome(request, reply, "timed_out");
   },
 );
+
+/**
+ * Task 36 (Stage 4) — server-side cascade for reject/timeout.
+ *
+ * The browser used to decide the next candidate after a reject/timeout; a
+ * closed tab therefore stranded the request in `matching` forever (finding
+ * #4). processOfferOutcome now applies the outcome inside one transaction
+ * AND advances dispatch: next eligible candidate → new pending offer, else
+ * the request falls back to `no_match` with an audit row. Both outcomes are
+ * committed before any notification is sent, and a stale pending offer on an
+ * already-resolved request is closed without a cascade.
+ */
+async function handleOfferOutcome(
+  request: FastifyRequest,
+  reply: FastifyReply,
+  outcome: "rejected" | "timed_out",
+) {
+  const { offerId } = request.params as { offerId: string };
+  const authUser = request.authUser;
+  if (!authUser) {
+    return jsonResponse(reply, 401, { error: "Authentication required" });
+  }
+  // Authorization FIRST (unchanged contract, same as /accept).
+  await loadOfferForResponse(offerId, authUser); // 400/404 → error handler
+
+  const result = await processOfferOutcome(offerId, outcome);
+  if (!result) {
+    return jsonResponse(reply, 404, { error: "Offer not found" });
+  }
+
+  if (result.offerUpdated) {
+    try {
+      await notifyOfferOutcome(
+        offerId,
+        {
+          category: result.requestCategory,
+          city: result.requestCity,
+          customer_user_id: result.customerUserId,
+        },
+        outcome,
+        (error) => app.log.error(error),
+      );
+    } catch (notifyError) {
+      app.log.error(notifyError);
+    }
+    if (result.nextOffer) {
+      // The next ranked technician was offered the job after commit.
+      try {
+        if (result.nextOffer.technicianUserId) {
+          await recordAndDeliverEvent(
+            {
+              userId: result.nextOffer.technicianUserId,
+              type: "dispatch_offer_created",
+              title: "New service offer",
+              message: `You have a new ${result.requestCategory} service offer in ${result.requestCity}.`,
+              referenceType: "service_request",
+              referenceId: result.requestId,
+              channel: "in_app",
+            },
+            (error) => app.log.error(error),
+          );
+        }
+      } catch (notifyError) {
+        app.log.error(notifyError);
+      }
+    }
+    if (result.requestStatusAfter === "no_match") {
+      // All candidates are exhausted — the customer is told honestly.
+      try {
+        await notifyRequestStatusChange({
+          requestId: result.requestId,
+          category: result.requestCategory,
+          city: result.requestCity,
+          newStatus: "no_match",
+          actorUserId: authUser.id,
+          customerUserId: result.customerUserId,
+          onError: (error) => app.log.error(error),
+        });
+      } catch (notifyError) {
+        app.log.error(notifyError);
+      }
+    }
+  }
+
+  const offer: OfferApi | null = result.offer
+    ? {
+        id: result.offer.id,
+        requestId: result.offer.requestId,
+        technicianId: result.offer.technicianId,
+        candidateIndex: result.offer.candidateIndex,
+        status: toOfferStatus(result.offer.status),
+        createdAt: result.offer.createdAt,
+        updatedAt: result.offer.updatedAt,
+      }
+    : null;
+  if (!offer) {
+    return jsonResponse(reply, 404, { error: "Offer not found" });
+  }
+  return jsonResponse(reply, 200, { data: offer });
+}
 
 /**
  * POST /api/v1/offers
@@ -1412,16 +1757,32 @@ app.post(
       !requestId ||
       !technicianId ||
       candidateIndex === undefined ||
-      !status
+      status === undefined
     ) {
       return jsonResponse(reply, 400, {
         error: "Missing required offer fields",
       });
     }
 
-    const validStatuses = ["pending", "accepted", "rejected", "timed_out"];
-    if (!validStatuses.includes(status)) {
-      return jsonResponse(reply, 400, { error: "Invalid offer status" });
+    /* Task 36 (Stage 5, finding #13): the API creates PENDING offers only.
+     * A browser can no longer fabricate `accepted`/`rejected`/`timed_out`
+     * dispatch decisions by POSTing a terminal status — outcomes are the
+     * exclusive business of the outcome endpoints and the sweeper. The
+     * candidate index is server-bounded: a non-integer, negative or absurd
+     * value is rejected before it can distort cascade order. */
+    if (status !== "pending") {
+      return jsonResponse(reply, 400, {
+        error: "Offers can only be created with status 'pending'",
+      });
+    }
+    if (
+      !Number.isInteger(candidateIndex) ||
+      candidateIndex < 0 ||
+      candidateIndex > 1000
+    ) {
+      return jsonResponse(reply, 400, {
+        error: "candidateIndex must be a non-negative integer",
+      });
     }
 
     const authUser = request.authUser;
@@ -2157,6 +2518,36 @@ async function loadAcceptedTechnician(
     [requestId],
   );
   return rows[0] ?? null;
+}
+
+/**
+ * Detail-view extras shared by GET /requests/:id and POST /requests/:id/retry
+ * (Task 36, Stage 3): the accepted technician's display name and the
+ * conversation id, both nullable — a request may be matched but never have
+ * earned a conversation, and unmatched requests have neither.
+ */
+async function loadRequestDetailExtras(
+  requestId: string,
+): Promise<{ technicianName: string | null; conversationId: string | null } | null> {
+  const rows = await query<{
+    technician_name: string | null;
+    conversation_id: string | null;
+  }>(
+    `SELECT
+       (SELECT t.name FROM dispatch_offers o
+          JOIN technicians t ON t.id = o.technician_id
+         WHERE o.request_id = r.id AND o.status = 'accepted'
+         ORDER BY o.updated_at DESC LIMIT 1) AS technician_name,
+       (SELECT c.id FROM conversations c WHERE c.service_request_id = r.id
+         LIMIT 1) AS conversation_id
+     FROM service_requests r WHERE r.id = $1`,
+    [requestId],
+  );
+  if (!rows[0]) return null;
+  return {
+    technicianName: rows[0].technician_name ?? null,
+    conversationId: rows[0].conversation_id ?? null,
+  };
 }
 
 async function loadReviewForRequest(
@@ -4456,7 +4847,11 @@ app.get(
       return jsonResponse(reply, 400, { error: "Invalid id format" });
     }
     try {
-      const authResult = await canCommunicateOnRequest(request, requestId);
+      const authResult = await canCommunicateOnRequest(request, requestId, {
+        // The thread remains readable after completion/cancellation; only the
+        // contact-number route keeps the tighter active-service window.
+        includeClosedHistory: true,
+      });
       if (!authResult.exists || !authResult.allowed) {
         // Either the request does not exist, or the offer was never accepted,
         // or the caller is not a participant. All indistinguishable.
@@ -5230,6 +5625,66 @@ if (wsServer) {
 }
 await app.listen({ port, host: "0.0.0.0" });
 console.log(`Server listening on port ${port}`);
+
+/* Task 36 (Stage 4) — in-process dispatch sweeper (Phase 5.4–6).
+ *
+ * Mounted AFTER a successful listen so a failed startup never leaves a
+ * timer behind. One interval, three bounded jobs, each in its own
+ * transaction:
+ *   1. sweepExpiredOffers      — close pending offers past the response
+ *                                window; the outcome path cascades to the
+ *                                next candidate or falls back to no_match.
+ *   2. sweepStuckMatchingRequests — recover requests stranded in 'matching'
+ *                                with no pending offer (interrupted flow).
+ *   3. sweepWaitingRequests    — re-offer no_match requests when capacity
+ *                                returns (throttled, age-bounded).
+ *
+ * Never blocks request flow: every failure is logged and the next tick
+ * retries. The interval is configurable (DISPATCH_SWEEP_INTERVAL_MS, min
+ * 15s, default 60s) so the cadence can be tuned per environment.
+ */
+const dispatchSweepTimer = setInterval(() => {
+  void (async () => {
+    try {
+      const expired = await sweepExpiredOffers();
+      if (expired.expired > 0) {
+        app.log.info({
+          msg: "Offer timeout sweep",
+          expired: expired.expired,
+          advanced: expired.matched,
+          fellBack: expired.fellBack,
+        });
+      }
+    } catch (error) {
+      app.log.error({ msg: "Offer timeout sweep failed", error });
+    }
+    try {
+      const recovered = await sweepStuckMatchingRequests();
+      if (recovered > 0) {
+        app.log.info({
+          msg: "Stuck dispatch recovery sweep",
+          recovered,
+        });
+      }
+    } catch (error) {
+      app.log.error({ msg: "Stuck dispatch sweep failed", error });
+    }
+    try {
+      const waiting = await sweepWaitingRequests();
+      if (waiting.retried > 0) {
+        app.log.info({
+          msg: "Waiting request sweep",
+          retried: waiting.retried,
+          offered: waiting.matched,
+        });
+      }
+    } catch (error) {
+      app.log.error({ msg: "Waiting request sweep failed", error });
+    }
+  })();
+}, sweepIntervalMs());
+// The timer must never hold the process open on its own.
+dispatchSweepTimer.unref();
 
 process.on("SIGINT", async () => {
   console.log("Shutting down gracefully");

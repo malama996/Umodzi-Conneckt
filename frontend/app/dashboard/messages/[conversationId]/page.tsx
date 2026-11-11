@@ -424,14 +424,15 @@ function ConversationThread() {
         <div className="chat-shell">
           {/* ---------------- header ---------------- */}
           <header className="chat-header">
-            <button
-              type="button"
+            {/* Explicit destination, never browser history: a deep link or a
+                notification open has no reliable previous page. */}
+            <Link
+              href="/dashboard/messages"
               className="chat-header-back"
-              onClick={() => router.back()}
-              aria-label="Go back"
+              aria-label="Back to messages"
             >
               <LuArrowLeft size={18} aria-hidden="true" />
-            </button>
+            </Link>
             <div className="chat-header-identity">
               <div className="chat-avatar" aria-hidden="true">
                 {(other?.displayName ?? '?').slice(0, 1).toUpperCase()}
@@ -443,6 +444,14 @@ function ConversationThread() {
                   {detail?.request?.category ? ` · ${detail.request.category}` : ''}
                   {detail?.request?.city ? ` · ${detail.request.city}` : ''}
                 </p>
+                {detail?.conversation.serviceRequestId && (
+                  <Link
+                    className="chat-header-request"
+                    href={`/dashboard/requests/${detail.conversation.serviceRequestId}`}
+                  >
+                    View request details
+                  </Link>
+                )}
               </div>
             </div>
             <div className="chat-header-actions">
@@ -524,7 +533,7 @@ function ConversationThread() {
                 <p>
                   Chat unlocks once a technician has accepted the offer on this service request.
                 </p>
-                <Link className="button button-teal" href="/matching">
+                <Link className="button button-teal" href="/dashboard/requests">
                   Back to requests
                 </Link>
               </div>

@@ -1,101 +1,63 @@
-import {
-  executeSmartDispatch,
-  type SmartDispatchPipelineResult,
-} from '@/lib/services/matchingService';
-import { getServiceRequest, updateServiceRequestStatus } from '@/lib/services/requestService';
+import { getServiceRequest } from '@/lib/services/requestService';
 import {
   acceptOffer,
-  createOffer,
   getRequestOffers,
   getTechnicianOffers as fetchTechnicianOffers,
   rejectOffer,
   timeoutOffer,
-  type PersistedOffer,
 } from '@/lib/api/offersApi';
 import type { DispatchOffer, DispatchOfferStatus, ServiceRequest } from '@/lib/types';
 
 /**
- * Technician offer service (Task 21B).
+ * Technician offer service (Task 21B; rewritten in Task 36, Stage 4).
  *
  * Application-level boundary for the technician-side offer experience.
  * Persistence is backend-authoritative (PostgreSQL via the offers API) —
- * there is no localStorage ledger. ALL dispatch, cascading, ranking,
- * and lifecycle behaviour is still derived by re-running the existing
- * Smart Dispatch pipeline via executeSmartDispatch() — this service
- * implements no eligibility, scoring, ranking, candidate selection,
- * offer advancement, or lifecycle rules of its own.
+ * there is no localStorage ledger.
+ *
+ * Task 36 (Stage 4): dispatch is SERVER-authoritative. The retired browser
+ * cascade (re-running the Smart Dispatch pipeline client-side, creating the
+ * next candidate's offer row, PATCHing matched/no_match onto the request) is
+ * GONE: a response is now ONE outcome endpoint call, and the backend
+ * transaction resolves the offer, advances dispatch to the next ranked
+ * candidate, falls back to `no_match` honestly, or completes the assignment.
+ * Closing this tab can no longer strand a request in `matching`, and a
+ * browser can no longer fabricate dispatch decisions.
  *
  * Architecture:
- *   Customer dispatch → recordDispatchedOffer()   (POST /api/v1/offers)
- *   Technician view  → getTechnicianOffers()      (GET offers + requests)
- *   Technician response → accept/reject/timeout  (POST outcome, then
- *     advance: POST next offer or PATCH request matched/no_match)
- *
- * No real-time communication, no notifications, no timers —
- * 'timed_out' is an explicit domain outcome only.
+ *   Technician view    → getTechnicianOffers()   (GET offers + requests)
+ *   Technician response → accept/reject/timeout  (POST outcome, then re-fetch
+ *     the owner-scoped request for the honest post-outcome state)
  */
 
-/**
- * A pending technician offer, as presented to a technician.
- * Contains only existing domain fields — no invented data.
- */
+/** A pending technician offer, as presented to a technician. */
 export interface TechnicianOfferView {
   /** The full service request being offered (hydrated from the backend). */
   request: ServiceRequest;
   /** The current pending dispatch offer. */
   offer: DispatchOffer;
-  /** Total ranked candidates in the dispatch result. */
+  /**
+   * Backend offer row id — the target of the outcome endpoints. The old
+   * client pipeline identified offers by technician name; under a
+   * server-authoritative dispatch the row id is the only unambiguous key.
+   */
+  offerId: string;
+  /** Total offer rows recorded for this request's dispatch history. */
   totalCandidates: number;
 }
 
 /**
- * Outcome history for a request, derived from its persisted offer rows
- * (oldest candidate first). The trailing 'pending' row represents the
- * unresolved current offer — it is NOT an outcome, so it is excluded:
- * the pipeline derives the current offer from the resolved history.
+ * What actually happened after a response, as the backend reports it —
+ * no client-side lifecycle simulation.
  */
-function toOutcomeHistory(rows: PersistedOffer[]): DispatchOfferStatus[] {
-  return rows.filter((row) => row.status !== 'pending').map((row) => row.status);
-}
-
-/**
- * Record a dispatched service request so the ranked technician can
- * see the pending offer. Runs the existing Smart Dispatch pipeline to
- * determine the first candidate — no offer is constructed here.
- * Idempotent per request (an existing candidate-0 row is returned).
- * Returns null when no technician was matched.
- *
- * Throws when the candidate has no backend id or when persistence fails
- * — a failed mutation is never presented as successfully persisted.
- */
-export async function recordDispatchedOffer(
-  request: ServiceRequest,
-): Promise<PersistedOffer | null> {
-  const result = await executeSmartDispatch(request, []);
-  if (result.offer === null) {
-    return null; // no eligible technician — nothing to offer
-  }
-
-  const existing = await getRequestOffers(request.id);
-  const first = existing.find((row) => row.candidateIndex === 0);
-  if (first) {
-    return first;
-  }
-
-  const candidate = result.dispatch.candidates[result.offer.candidateIndex];
-  const technicianId = candidate?.technician.id;
-  if (!technicianId) {
-    throw new Error(
-      `Cannot persist offer: technician ${result.offer.technicianId} has no backend id.`,
-    );
-  }
-
-  return createOffer({
-    requestId: request.id,
-    technicianId,
-    candidateIndex: result.offer.candidateIndex,
-    status: 'pending',
-  });
+export interface TechnicianOfferResponse {
+  requestId: string;
+  /**
+   * The request's status AFTER the backend processed the outcome:
+   * 'matched' (offer accepted), 'no_match' (all candidates exhausted),
+   * or 'matching' (dispatch advanced to the next ranked candidate).
+   */
+  requestStatus: ServiceRequest['status'];
 }
 
 /**
@@ -123,6 +85,7 @@ export async function getTechnicianOffers(technicianId: string): Promise<Technic
         candidateIndex: row.candidateIndex,
         status: row.status,
       },
+      offerId: row.id,
       totalCandidates: siblings.length,
     });
   }
@@ -131,105 +94,45 @@ export async function getTechnicianOffers(technicianId: string): Promise<Technic
 
 /**
  * Apply an explicit technician response to a pending offer.
- * Delegates the cascade/lifecycle decision entirely to the existing
- * Smart Dispatch pipeline (re-run over the persisted outcome history),
- * then persists the consequence: the outcome on the pending row plus
- * either the next candidate's offer row or the terminal request status.
- *
- * Throws Error when the request does not exist, has no pending offer,
- * is no longer awaiting a response, or the current offer does not
- * target the given technician. On persistence failure the error
- * propagates and the UI must keep its previous valid state.
+ * ONE backend call resolves the offer inside a server transaction; the
+ * backend alone advances dispatch. The request is then re-fetched so the
+ * caller sees the REAL post-outcome state — a failed re-fetch is an error,
+ * never a fabricated status.
  */
 export async function respondToTechnicianOffer(
-  technicianName: string,
-  requestId: string,
-  outcome: DispatchOfferStatus,
-): Promise<SmartDispatchPipelineResult> {
-  if (outcome === 'pending') {
-    throw new Error("Invalid technician response: 'pending' is not an offer outcome.");
-  }
+  offerId: string,
+  outcome: Exclude<DispatchOfferStatus, 'pending'>,
+): Promise<TechnicianOfferResponse> {
+  const resolved =
+    outcome === 'accepted'
+      ? await acceptOffer(offerId)
+      : outcome === 'rejected'
+        ? await rejectOffer(offerId)
+        : await timeoutOffer(offerId);
 
-  const request = await getServiceRequest(requestId);
+  const request = await getServiceRequest(resolved.requestId);
   if (!request) {
-    throw new Error(`Service request ${requestId} not found.`);
+    throw new Error(
+      `Service request ${resolved.requestId} could not be loaded after the offer response.`,
+    );
   }
-
-  const rows = await getRequestOffers(requestId);
-  const current = await executeSmartDispatch(request, toOutcomeHistory(rows));
-
-  if (current.request.status !== 'matching') {
-    throw new Error(`Request ${requestId} is no longer awaiting a technician response.`);
-  }
-  if (current.offer === null || current.offer.technicianId !== technicianName) {
-    throw new Error(`No pending offer for ${technicianName} on request ${requestId}.`);
-  }
-
-  const pendingRow = rows.find((row) => row.status === 'pending');
-  if (!pendingRow || pendingRow.candidateIndex !== current.offer.candidateIndex) {
-    throw new Error(`No pending offer row for request ${requestId}.`);
-  }
-
-  // Persist the outcome on the pending row first.
-  if (outcome === 'accepted') {
-    await acceptOffer(pendingRow.id);
-  } else if (outcome === 'rejected') {
-    await rejectOffer(pendingRow.id);
-  } else {
-    await timeoutOffer(pendingRow.id);
-  }
-
-  // Delegate to the existing Smart Dispatch pipeline —
-  // no ranking, cascading, or lifecycle logic is duplicated.
-  const nextOutcomes = [...toOutcomeHistory(rows), outcome];
-  const result = await executeSmartDispatch(request, nextOutcomes);
-
-  if (result.request.status !== 'matching') {
-    // Terminal: persist matched / no_match on the request.
-    await updateServiceRequestStatus(requestId, result.request.status);
-  } else if (result.offer !== null) {
-    // Cascade advanced: persist the next candidate's pending offer.
-    const nextCandidate = result.dispatch.candidates[result.offer.candidateIndex];
-    const nextTechnicianId = nextCandidate?.technician.id;
-    if (!nextTechnicianId) {
-      throw new Error(
-        `Cannot persist offer: technician ${result.offer.technicianId} has no backend id.`,
-      );
-    }
-    await createOffer({
-      requestId,
-      technicianId: nextTechnicianId,
-      candidateIndex: result.offer.candidateIndex,
-      status: 'pending',
-    });
-  }
-
-  return result;
+  return { requestId: request.id, requestStatus: request.status };
 }
 
-/** Technician accepts the pending offer (request → matched). */
-export async function acceptTechnicianOffer(
-  technicianName: string,
-  requestId: string,
-): Promise<SmartDispatchPipelineResult> {
-  return respondToTechnicianOffer(technicianName, requestId, 'accepted');
+/** Technician accepts the pending offer — the server completes the assignment. */
+export function acceptTechnicianOffer(offerId: string): Promise<TechnicianOfferResponse> {
+  return respondToTechnicianOffer(offerId, 'accepted');
 }
 
-/** Technician rejects the pending offer (cascade advances). */
-export async function rejectTechnicianOffer(
-  technicianName: string,
-  requestId: string,
-): Promise<SmartDispatchPipelineResult> {
-  return respondToTechnicianOffer(technicianName, requestId, 'rejected');
+/** Technician declines — the server offers the next ranked candidate. */
+export function rejectTechnicianOffer(offerId: string): Promise<TechnicianOfferResponse> {
+  return respondToTechnicianOffer(offerId, 'rejected');
 }
 
 /**
  * Explicit prototype-only simulation of a response timeout.
  * Uses the existing 'timed_out' domain outcome — no timers.
  */
-export async function simulateTechnicianTimeout(
-  technicianName: string,
-  requestId: string,
-): Promise<SmartDispatchPipelineResult> {
-  return respondToTechnicianOffer(technicianName, requestId, 'timed_out');
+export function simulateTechnicianTimeout(offerId: string): Promise<TechnicianOfferResponse> {
+  return respondToTechnicianOffer(offerId, 'timed_out');
 }

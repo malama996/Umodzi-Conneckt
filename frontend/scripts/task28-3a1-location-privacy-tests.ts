@@ -22,7 +22,7 @@ process.env.NEXT_PUBLIC_API_BASE_URL = 'http://localhost:9999/api/v1';
 
 import { mapApiTechnicianToFrontend } from '../lib/api/technicianMapper';
 import type { MapPoint } from '../lib/mapData';
-import { MOCK_CITY_COORDINATES, getServiceAreaPoint, toTechnicianMapMarkers } from '../lib/mapData';
+import { CITY_CENTRES, getServiceAreaPoint, toTechnicianMapMarkers } from '../lib/mapData';
 import type { ApiTechnician } from '../lib/api/techniciansApi';
 import type { RankedTechnician, Technician } from '../lib/types';
 
@@ -109,7 +109,7 @@ function testMapperOmitsCoordinates(): void {
 function testMapStillRendersMarkers(): void {
   console.log('\nprototype map markers');
 
-  const customer: MapPoint = MOCK_CITY_COORDINATES.Kitwe;
+  const customer: MapPoint = CITY_CENTRES.Kitwe;
 
   const technicians: Technician[] = [
     mapApiTechnicianToFrontend(apiTechnician({ name: 'A', serviceArea: 'Kitwe' })),
@@ -145,11 +145,11 @@ function testMapStillRendersMarkers(): void {
 function testMarkersAreCoarse(): void {
   console.log('\nmarker positions are coarse, not precise');
 
-  const customer: MapPoint = MOCK_CITY_COORDINATES.Kitwe;
+  const customer: MapPoint = CITY_CENTRES.Kitwe;
   const ndola = mapApiTechnicianToFrontend(apiTechnician({ serviceArea: 'Ndola' }));
   const [marker] = toTechnicianMapMarkers([ranked(ndola)], customer);
 
-  const centre = MOCK_CITY_COORDINATES.Ndola;
+  const centre = CITY_CENTRES.Ndola;
   assert(
     marker.latitude === centre.latitude && marker.longitude === centre.longitude,
     'marker sits exactly on the declared service-area city centre',
@@ -174,7 +174,7 @@ function testMarkersAreCoarse(): void {
     'an unrecognised service area still yields a finite fallback position',
   );
   assert(
-    fallback.latitude === MOCK_CITY_COORDINATES.Kitwe.latitude,
+    fallback.latitude === CITY_CENTRES.Kitwe.latitude,
     'unrecognised service area falls back to the default pilot city',
   );
 }
@@ -187,7 +187,7 @@ function testServiceAreaPoint(): void {
   console.log('\ngetServiceAreaPoint');
 
   assert(
-    getServiceAreaPoint('Kitwe') === MOCK_CITY_COORDINATES.Kitwe,
+    getServiceAreaPoint('Kitwe') === CITY_CENTRES.Kitwe,
     'known service area returns the shared city-centre reference',
   );
   assert(
@@ -195,7 +195,7 @@ function testServiceAreaPoint(): void {
     'repeated calls return a stable reference (no render churn)',
   );
   assert(
-    getServiceAreaPoint('Atlantis') === MOCK_CITY_COORDINATES.Kitwe,
+    getServiceAreaPoint('Atlantis') === CITY_CENTRES.Kitwe,
     'unknown service area falls back to the default pilot city',
   );
 }

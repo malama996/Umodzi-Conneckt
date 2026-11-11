@@ -15,6 +15,15 @@ interface ServiceRequestDto {
   status: string;
   createdAt: string;
   updatedAt: string;
+  /** Additive detail fields — only GET /requests/:id sends them. */
+  assignedTechnicianName?: string | null;
+  conversationId?: string | null;
+}
+
+/** A single request plus the detail-view context the backend derives. */
+export interface ServiceRequestDetail extends ServiceRequest {
+  assignedTechnicianName: string | null;
+  conversationId: string | null;
 }
 
 const REQUEST_STATUSES: readonly string[] = [
@@ -63,15 +72,23 @@ export async function createServiceRequest(
     description: input.description,
     category: input.category,
     city: input.city,
+    // Task 36 (Stage 5): absent on legacy callers; when present, a replay of
+    // the same submission returns the ORIGINAL request (HTTP 200) instead of
+    // creating a duplicate row.
+    ...(input.clientRequestId ? { clientRequestId: input.clientRequestId } : {}),
   });
   return toServiceRequest(body.data);
 }
 
 /** Fetch one service request by id. Returns null on 404. */
-export async function getServiceRequest(id: string): Promise<ServiceRequest | null> {
+export async function getServiceRequest(id: string): Promise<ServiceRequestDetail | null> {
   try {
     const body = await get<{ data: ServiceRequestDto }>(`/requests/${encodeURIComponent(id)}`);
-    return toServiceRequest(body.data);
+    return {
+      ...toServiceRequest(body.data),
+      assignedTechnicianName: body.data.assignedTechnicianName ?? null,
+      conversationId: body.data.conversationId ?? null,
+    };
   } catch (error) {
     if (error instanceof ApiError && error.status === 404) return null;
     throw error;
@@ -96,6 +113,24 @@ export async function updateServiceRequestStatus(
     if (error instanceof ApiError && error.status === 404) return null;
     throw error;
   }
+}
+
+/**
+ * Ask dispatch to look again for an eligible technician (Task 36, Stage 4).
+ * Only the backend decides whether the request is retryable — a retry on a
+ * request that is not waiting fails honestly.
+ */
+export async function retryServiceRequestDispatch(
+  id: string,
+): Promise<ServiceRequestDetail> {
+  const body = await post<{ data: ServiceRequestDto }>(
+    `/requests/${encodeURIComponent(id)}/retry`,
+  );
+  return {
+    ...toServiceRequest(body.data),
+    assignedTechnicianName: body.data.assignedTechnicianName ?? null,
+    conversationId: body.data.conversationId ?? null,
+  };
 }
 
 /** History row — a request plus the dispatch context shown alongside it. */

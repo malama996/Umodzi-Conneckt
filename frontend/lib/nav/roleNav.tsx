@@ -100,7 +100,7 @@ const technicianGroups: NavGroup[] = [
         badge: 'offers',
       },
       {
-        label: 'My Requests',
+        label: 'My Assignments',
         href: '/dashboard/requests',
         icon: <LuClipboardList size={14} aria-hidden="true" />,
       },

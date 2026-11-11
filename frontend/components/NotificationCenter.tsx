@@ -12,6 +12,11 @@
  * - Tone is conveyed by a visible text label + icon, never colour alone.
  * - Dismiss controls are real buttons: keyboard accessible with the
  *   global visible focus style.
+ *
+ * Delivery-side behaviour (follow-up pass): each toast plays a
+ * fail-silent Web Audio ping and auto-dismisses after a tone-dependent
+ * delay (6 s success/info, 10 s warning/error) — see lib/notifications
+ * /store.ts. Manual dismiss always works and cancels the timer.
  */
 import { LuCircleAlert, LuCircleCheck, LuInfo, LuTriangleAlert, LuX } from 'react-icons/lu';
 import { useNotifications } from '@/lib/notifications';

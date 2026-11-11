@@ -2,7 +2,15 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { LuBell, LuCheck, LuInbox, LuMessageSquare } from 'react-icons/lu';
+import {
+  LuBell,
+  LuCheck,
+  LuClipboardList,
+  LuInbox,
+  LuMessageSquare,
+  LuUser,
+} from 'react-icons/lu';
+import { useAuth } from '@/lib/auth';
 
 import {
   getMyNotifications,
@@ -64,7 +72,50 @@ function formatWhen(iso: string): string {
   return new Date(iso).toISOString().slice(0, 10);
 }
 
+/**
+ * Deep link for a persisted notification row.
+ *
+ * The backend persists exactly four reference types (referenceType on
+ * every notification it writes); each now opens the surface where the
+ * recipient acts on it:
+ *   - service_request → the request detail (recipient is a participant);
+ *   - dispatch_offer  → the recipient's offer surface (technicians respond
+ *     in /technician/offers; customers follow up in their request list —
+ *     the reference id is an offer id, not a request id, so a list is the
+ *     honest target for both roles);
+ *   - technician      → the technician's own profile (verification events
+ *     target the technician);
+ *   - conversation    → the chat thread (unchanged).
+ * Anything else — no reference, or an unknown type — gets NO link.
+ * Nothing is invented for rows the backend did not reference.
+ */
+function deepLinkTarget(
+  item: NotificationItem,
+  role: string | undefined,
+): { href: string; label: string } | null {
+  if (item.referenceType === 'conversation' && item.referenceId) {
+    return { href: `/dashboard/messages/${item.referenceId}`, label: 'Open chat' };
+  }
+  if (item.referenceType === 'service_request' && item.referenceId) {
+    return {
+      href: `/dashboard/requests/${item.referenceId}`,
+      label: 'Open request',
+    };
+  }
+  if (item.referenceType === 'dispatch_offer') {
+    return {
+      href: role === 'technician' ? '/technician/offers' : '/dashboard/requests',
+      label: 'Open offers',
+    };
+  }
+  if (item.referenceType === 'technician') {
+    return { href: '/technician/profile', label: 'Open profile' };
+  }
+  return null;
+}
+
 export default function NotificationInbox() {
+  const { user } = useAuth();
   const [page, setPage] = useState<NotificationPage | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -225,19 +276,37 @@ export default function NotificationInbox() {
                 )}
               </span>
             </button>
-            {/* Real deep link: only rendered when the persisted row actually
-                carries a conversation reference (Task 28.4B). No reference,
-                no link — nothing is invented for rows without one. */}
-            {item.referenceType === 'conversation' && item.referenceId && (
-              <Link
-                className="outline-button inbox-open"
-                href={`/dashboard/messages/${item.referenceId}`}
-                onClick={() => void openNotification(item)}
-                aria-label={`Open the chat for ${item.title}`}
-              >
-                <LuMessageSquare size={12} className="ic" aria-hidden="true" /> Open chat
-              </Link>
-            )}
+            {/* Real deep links: one per persisted reference type, rendered
+                only when the row actually carries that reference (Task
+                28.4B + follow-up pass). No reference, no link — nothing
+                is invented for rows without one. Opening a link also
+                marks the row read. */}
+            {(() => {
+              const target = deepLinkTarget(item, user?.role);
+              if (!target) return null;
+              return (
+                <Link
+                  className="outline-button inbox-open"
+                  href={target.href}
+                  onClick={() => void openNotification(item)}
+                  aria-label={`${target.label} for ${item.title}`}
+                >
+                  {item.referenceType === 'conversation' && (
+                    <LuMessageSquare size={12} className="ic" aria-hidden="true" />
+                  )}
+                  {item.referenceType === 'service_request' && (
+                    <LuClipboardList size={12} className="ic" aria-hidden="true" />
+                  )}
+                  {item.referenceType === 'technician' && (
+                    <LuUser size={12} className="ic" aria-hidden="true" />
+                  )}
+                  {item.referenceType === 'dispatch_offer' && (
+                    <LuBell size={12} className="ic" aria-hidden="true" />
+                  )}
+                  {target.label}
+                </Link>
+              );
+            })()}
           </li>
         ))}
       </ul>

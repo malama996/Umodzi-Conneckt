@@ -20,9 +20,9 @@ import {
   acceptTechnicianOffer,
   getTechnicianOffers,
   rejectTechnicianOffer,
+  type TechnicianOfferResponse,
   type TechnicianOfferView,
 } from '@/lib/services/technicianOfferService';
-import type { SmartDispatchPipelineResult } from '@/lib/services/matchingService';
 import {
   subscribeToOfferUpdates,
   type ConnectionStatus,
@@ -36,13 +36,12 @@ type Notice = { tone: 'success' | 'info' | 'warning'; text: string } | null;
  * Technician-side offer experience (Tasks 21B + 22).
  *
  * Shows the service requests Smart Dispatch has offered
- * to the selected technician, and lets the technician
+ * to the technician, and lets the technician
  * explicitly accept, reject, or (prototype-only) simulate
  * a response timeout. Offers and responses are persisted
- * through the backend API (PostgreSQL); all state transitions
- * are produced by the technician offer service, which delegates
- * cascade/lifecycle decisions to the existing Smart Dispatch
- * pipeline.
+ * through the backend API (PostgreSQL); Task 36 moved ALL cascade and
+ * lifecycle decisions to the backend — a response here is one outcome
+ * call, and the server advances dispatch.
  *
  * Signed-in technicians see THEIR offers — the profile is bound to the
  * account (one account ↔ one technician profile), so there is no
@@ -196,22 +195,22 @@ function TechnicianOffersContent() {
     };
   }, [technicianId]);
 
-  const describeResult = (result: SmartDispatchPipelineResult): Notice => {
-    if (result.request.status === 'matched') {
+  const describeResult = (result: TechnicianOfferResponse): Notice => {
+    if (result.requestStatus === 'matched') {
       return {
         tone: 'success',
-        text: `Request accepted — you have accepted service request ${result.request.id}.`,
+        text: `Request accepted — you have accepted service request ${result.requestId}.`,
       };
     }
-    if (result.request.status === 'no_match') {
+    if (result.requestStatus === 'no_match') {
       return {
         tone: 'warning',
-        text: `All ranked technicians have been offered request ${result.request.id} — Smart Dispatch found no match.`,
+        text: `All ranked technicians have been offered request ${result.requestId} — Smart Dispatch found no match.`,
       };
     }
     return {
       tone: 'info',
-      text: `Offer recorded — Smart Dispatch will advance request ${result.request.id} to the next ranked technician.`,
+      text: `Offer recorded — dispatch will advance request ${result.requestId} to the next ranked technician.`,
     };
   };
 
@@ -229,10 +228,10 @@ function TechnicianOffersContent() {
    * inline notice and never reported as success.
    */
   const notifyConfirmedAction = (
-    result: SmartDispatchPipelineResult,
+    result: TechnicianOfferResponse,
     action: 'accepted' | 'rejected',
   ) => {
-    const requestId = result.request.id;
+    const requestId = result.requestId;
     const dedupeKey = entityStateKey('request', requestId, action);
     if (action === 'accepted') {
       notifySuccess({
@@ -243,7 +242,7 @@ function TechnicianOffersContent() {
     } else if (action === 'rejected') {
       notifyInfo({
         title: 'Offer rejected',
-        message: `Service request ${requestId} — Smart Dispatch will advance to the next ranked technician.`,
+        message: `Service request ${requestId} — dispatch will advance to the next ranked technician.`,
         dedupeKey,
       });
     }
@@ -254,10 +253,12 @@ function TechnicianOffersContent() {
     actionBusyRef.current = true;
     setNotice(null);
     try {
+      // The offer ROW id is the outcome target — the backend resolves and
+      // cascades in one transaction; this page only reports the result.
       const result =
         action === 'accepted'
-          ? await acceptTechnicianOffer(technicianName, offer.request.id)
-          : await rejectTechnicianOffer(technicianName, offer.request.id);
+          ? await acceptTechnicianOffer(offer.offerId)
+          : await rejectTechnicianOffer(offer.offerId);
       setNotice(describeResult(result));
       notifyConfirmedAction(result, action);
       await loadOffers(technicianId);

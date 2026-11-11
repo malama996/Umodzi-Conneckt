@@ -205,9 +205,20 @@ export async function canAccessConversation(
  * request-scoped conversation access is participant-only by construction —
  * Task 33.2 privacy policy.
  */
+export interface CommunicationWindowOptions {
+  /**
+   * History remains readable after the work is closed. This is used by the
+   * request-scoped conversation route so a completed/cancelled job keeps its
+   * message thread reachable. Contact-number exposure deliberately does NOT
+   * use this: the number is only available while the service is active.
+   */
+  includeClosedHistory?: boolean;
+}
+
 export async function canCommunicateOnRequest(
   request: FastifyRequest,
   requestId: string,
+  options: CommunicationWindowOptions = {},
 ): Promise<{
   allowed: boolean;
   conversationId: string | null;
@@ -282,12 +293,26 @@ export async function canCommunicateOnRequest(
   );
   const conversationExists = conversationRow.length > 0;
 
-  // Communication is unlocked when the relationship through the accepted offer exists,
-  // whether or not a conversation row has yet been created (the route creates it when needed).
+  // Communication is unlocked when the relationship through the accepted offer
+  // exists, whether or not a conversation row has yet been created (the route
+  // creates it when needed).
+  //
+  // Task 36 fix: the old gate required status === 'matched', which 404'd the
+  // conversation and contact routes the moment the technician started work
+  // (in_progress) or finished it (completed). Communication now follows the
+  // accepted relationship for the whole active service window. Closed history
+  // (completed/cancelled) is readable only where the caller opts in; the
+  // contact-number route does not, so a phone number is not exposed after the
+  // job is closed.
+  const activeServiceStatus =
+    requestRow.status === "matched" || requestRow.status === "in_progress";
+  const closedHistoryStatus =
+    options.includeClosedHistory === true &&
+    (requestRow.status === "completed" || requestRow.status === "cancelled");
   const allowed =
     (isCustomer || isTechnician) &&
     hasAccepted &&
-    requestRow.status === "matched";
+    (activeServiceStatus || closedHistoryStatus);
 
   return {
     allowed,

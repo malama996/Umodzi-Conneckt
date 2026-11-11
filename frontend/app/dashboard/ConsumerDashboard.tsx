@@ -36,16 +36,14 @@ import type { ServiceRequestStatus } from '@/lib/types';
  * status and next steps, and clear empty/loading/failure states. All of that
  * now comes from GET /me/requests (the endpoint added in Phase 4). If the
  * request fails, the failure is shown — no placeholder numbers are invented.
+ *
+ * The status vocabulary/tone maps are exported for the technician dashboard
+ * (TechnicianDashboard), which reads the same role-aware endpoint and must
+ * label the same persisted statuses identically — one definition, two
+ * consumers, so the wording can never drift between the two dashboards.
  */
 
-const OPEN_STATUSES: ReadonlySet<ServiceRequestStatus> = new Set([
-  'pending',
-  'matching',
-  'matched',
-  'in_progress',
-]);
-
-const STATUS_LABEL: Record<ServiceRequestStatus, string> = {
+export const STATUS_LABEL: Record<ServiceRequestStatus, string> = {
   pending: 'Pending',
   matching: 'Finding a technician',
   matched: 'Matched',
@@ -55,7 +53,7 @@ const STATUS_LABEL: Record<ServiceRequestStatus, string> = {
   cancelled: 'Cancelled',
 };
 
-const STATUS_TONE: Record<ServiceRequestStatus, BadgeTone> = {
+export const STATUS_TONE: Record<ServiceRequestStatus, BadgeTone> = {
   pending: 'neutral',
   matching: 'teal',
   matched: 'success',
@@ -66,6 +64,13 @@ const STATUS_TONE: Record<ServiceRequestStatus, BadgeTone> = {
 };
 
 const RECENT_LIMIT = 5;
+
+const OPEN_STATUSES: ReadonlySet<ServiceRequestStatus> = new Set([
+  'pending',
+  'matching',
+  'matched',
+  'in_progress',
+]);
 
 export default function ConsumerDashboard() {
   const { user } = useAuth();
@@ -115,7 +120,7 @@ export default function ConsumerDashboard() {
 
         <section className="stat-grid reveal-group" aria-label="Your activity at a glance">
           <Reveal>
-            <article>
+            <article className="card-clickable">
               <span className="stat-icon teal">
                 <LuClipboardList aria-hidden="true" />
               </span>
@@ -123,10 +128,15 @@ export default function ConsumerDashboard() {
                 <b>{loading ? '…' : total}</b>
                 <small>Service requests you have raised</small>
               </div>
+              <Link
+                className="card-link-overlay"
+                href="/dashboard/requests"
+                aria-label="Open all your service requests"
+              />
             </article>
           </Reveal>
           <Reveal>
-            <article>
+            <article className="card-clickable">
               <span className="stat-icon blue">
                 <LuClock aria-hidden="true" />
               </span>
@@ -134,10 +144,15 @@ export default function ConsumerDashboard() {
                 <b>{loading ? '…' : open}</b>
                 <small>Still open or in progress</small>
               </div>
+              <Link
+                className="card-link-overlay"
+                href="/dashboard/requests"
+                aria-label="Open your open requests"
+              />
             </article>
           </Reveal>
           <Reveal>
-            <article>
+            <article className="card-clickable">
               <span className="stat-icon green">
                 <LuCircleCheck aria-hidden="true" />
               </span>
@@ -145,10 +160,15 @@ export default function ConsumerDashboard() {
                 <b>{loading ? '…' : completed}</b>
                 <small>Completed services</small>
               </div>
+              <Link
+                className="card-link-overlay"
+                href="/dashboard/requests"
+                aria-label="Open your completed requests"
+              />
             </article>
           </Reveal>
           <Reveal>
-            <article>
+            <article className="card-clickable">
               <span className="stat-icon coral">
                 <LuCircleAlert aria-hidden="true" />
               </span>
@@ -156,6 +176,11 @@ export default function ConsumerDashboard() {
                 <b>{loading ? '…' : total - open - completed}</b>
                 <small>Cancelled or without a match</small>
               </div>
+              <Link
+                className="card-link-overlay"
+                href="/dashboard/requests"
+                aria-label="Open your cancelled and unmatched requests"
+              />
             </article>
           </Reveal>
         </section>
@@ -221,7 +246,11 @@ export default function ConsumerDashboard() {
                   {recent.map((request) => (
                     <Reveal as="li" key={request.id}>
                       <div className="inbox-item">
-                        <div className="inbox-item-button">
+                        <Link
+                          className="inbox-item-button"
+                          href={`/dashboard/requests/${request.id}`}
+                          aria-label={`Open ${request.category} request details`}
+                        >
                           <span className="inbox-item-top">
                             <span className="inbox-item-type">{request.category}</span>
                             <time dateTime={request.createdAt}>
@@ -238,7 +267,7 @@ export default function ConsumerDashboard() {
                               {STATUS_LABEL[request.status]}
                             </Badge>
                           </span>
-                        </div>
+                        </Link>
                       </div>
                     </Reveal>
                   ))}

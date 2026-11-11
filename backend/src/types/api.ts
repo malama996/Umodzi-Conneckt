@@ -71,6 +71,13 @@ export interface ServiceRequestApi {
   status: ServiceRequestStatus;
   createdAt: string;
   updatedAt: string;
+  /**
+   * Additive detail fields (Task 36, Stage 3). Only `GET /requests/:id`
+   * populates them; other projections omit them, so consumers must treat
+   * both as nullable rather than assume presence.
+   */
+  assignedTechnicianName?: string | null;
+  conversationId?: string | null;
 }
 
 // Offer API shape

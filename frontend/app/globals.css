@@ -1887,6 +1887,19 @@ h2 {
   max-width: 1080px;
   margin: 0 auto 22px;
 }
+.matching-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+  color: var(--teal);
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+}
+.matching-back:hover {
+  text-decoration: underline;
+}
 .matching-hero h1 {
   color: var(--navy);
   font-size: clamp(31px, 4vw, 46px);
@@ -2874,6 +2887,27 @@ h2 {
 .stat-icon.coral {
   background: #fff0ef;
   color: var(--coral);
+}
+/* Clickable cards (stat cards, admin activity rows): the visible card
+   stays an <article>; a single stretched <Link> covers its whole hit
+   area, so the click target and the visual boundary are the same and
+   keyboard focus is a real, visible focus ring. */
+.card-clickable {
+  position: relative;
+}
+.card-link-overlay {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  outline: none;
+}
+.card-link-overlay:focus-visible {
+  outline: 2px solid var(--teal2);
+  outline-offset: -2px;
+}
+.stat-grid .card-clickable:hover,
+.recent-list .card-clickable:hover {
+  border-color: var(--teal2);
 }
 .dashboard-grid {
   display: grid;
@@ -5425,6 +5459,9 @@ h2 {
   padding: 12px 14px;
   font-family: var(--font-body);
   cursor: pointer;
+  /* Rows link to the request detail page (Stage 3 navigation fix). */
+  color: inherit;
+  text-decoration: none;
 }
 .inbox-item-button:hover {
   background: var(--bg);

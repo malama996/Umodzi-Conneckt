@@ -1,7 +1,7 @@
 import type { RankedTechnician } from './types';
 
 /**
- * Map data helpers (V0.2 prototype).
+ * Map data helpers.
  *
  * Pure, framework-free functions for the frontend map UI. These
  * helpers only TRANSFORM existing domain data — they never rank,
@@ -9,8 +9,11 @@ import type { RankedTechnician } from './types';
  * Dispatch pipeline (via matchingService) remains the single
  * source of truth for matching; the map visualises its output.
  *
- * All coordinates are deterministic mock values. Nothing here
- * performs geolocation, network calls, or backend lookups.
+ * The only coordinates defined here are the coarse, publicly known
+ * city-centre points for the pilot service areas, used as the
+ * honest "Approx. <city>" fallback. The customer's real position
+ * comes from opt-in `navigator.geolocation`; the backend and the
+ * geolocation hook feed everything else.
  */
 
 /** A geographic point in WGS84 degrees. */
@@ -49,8 +52,8 @@ export interface TechnicianMapMarker {
 }
 
 /**
- * Deterministic COARSE coordinates for the pilot service areas —
- * approximate city-centre points. These are NOT real GPS
+ * COARSE city-centre coordinates for the pilot service areas —
+ * approximate, publicly known city-centre points. These are NOT real GPS
  * locations and NOT real technician positions.
  *
  * Task 28.3A.1 (G-01): technician pins on the map are now derived from the
@@ -59,13 +62,17 @@ export interface TechnicianMapMarker {
  * stored precise coordinate, and the frontend must not treat one as display
  * data. A city centre is coarse area information, not a location fix.
  *
+ * The customer's own position is NEVER taken from here: it comes from
+ * opt-in `navigator.geolocation` (see lib/ui/useGeolocation). This table
+ * is only the honest fallback labelled "Approx. <city>" in the UI.
+ *
  * Replacement seams for later tasks:
  * - Customer location: navigator.geolocation or backend-provided
  *   request coordinates (swap the source feeding MapPoint).
  * - Technician marker: already coarse (service-area centre). It should stay
  *   coarse; do NOT wire real technician coordinates into this map.
  */
-export const MOCK_CITY_COORDINATES: Readonly<Record<string, MapPoint>> = {
+export const CITY_CENTRES: Readonly<Record<string, MapPoint>> = {
   Kitwe: { latitude: -12.8105, longitude: 28.2073 },
   Ndola: { latitude: -12.9587, longitude: 28.6366 },
 };
@@ -79,17 +86,19 @@ const EARTH_RADIUS_KM = 6371;
  * Returns the shared reference so consumers get stable identity across renders.
  */
 export function getServiceAreaPoint(serviceArea: string): MapPoint {
-  return MOCK_CITY_COORDINATES[serviceArea] ?? MOCK_CITY_COORDINATES[DEFAULT_CITY];
+  return CITY_CENTRES[serviceArea] ?? CITY_CENTRES[DEFAULT_CITY];
 }
 
 /**
- * Deterministic mock customer location for a request city.
+ * Coarse city-centre fallback for a request city.
  * Falls back to the default pilot city for unknown values.
- * Returns the shared reference from MOCK_CITY_COORDINATES so
- * consumers get stable identity across renders.
+ * Returns the shared reference from CITY_CENTRES so
+ * consumers get stable identity across renders. This is a declared
+ * coarse point, never a device fix — the customer's real position
+ * comes from opt-in geolocation only.
  */
 export function getCustomerLocation(city: string): MapPoint {
-  return MOCK_CITY_COORDINATES[city] ?? MOCK_CITY_COORDINATES[DEFAULT_CITY];
+  return CITY_CENTRES[city] ?? CITY_CENTRES[DEFAULT_CITY];
 }
 
 /**

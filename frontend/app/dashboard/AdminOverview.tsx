@@ -33,6 +33,10 @@ import {
  * or computed in the browser. The window has loading, error (+ retry),
  * and empty states, and the recent-activity feed merges real request,
  * account, and offer rows newest-first.
+ *
+ * No static cards: every stat card and activity row is a real link to
+ * the list it belongs to (stretched-overlay pattern — the visible card
+ * stays an <article>, the <Link> covers its full hit area).
  */
 export default function AdminOverview() {
   const [overview, setOverview] = useState<Overview | null>(null);
@@ -78,7 +82,7 @@ export default function AdminOverview() {
               aria-label="Platform statistics"
             >
               <Reveal>
-                <article>
+                <article className="card-clickable">
                   <span className="stat-icon blue">
                     <LuUsers aria-hidden="true" />
                   </span>
@@ -90,10 +94,15 @@ export default function AdminOverview() {
                       {overview.users.byRole.administrator} administrators
                     </small>
                   </div>
+                  <Link
+                    className="card-link-overlay"
+                    href="/admin/users"
+                    aria-label="Open the user list"
+                  />
                 </article>
               </Reveal>
               <Reveal>
-                <article>
+                <article className="card-clickable">
                   <span className="stat-icon teal">
                     <LuWrench aria-hidden="true" />
                   </span>
@@ -104,10 +113,15 @@ export default function AdminOverview() {
                       available
                     </small>
                   </div>
+                  <Link
+                    className="card-link-overlay"
+                    href="/admin/technicians"
+                    aria-label="Open the technician list"
+                  />
                 </article>
               </Reveal>
               <Reveal>
-                <article>
+                <article className="card-clickable">
                   <span className="stat-icon green">
                     <LuClipboardList aria-hidden="true" />
                   </span>
@@ -118,10 +132,15 @@ export default function AdminOverview() {
                       {overview.requests.cancelled} cancelled
                     </small>
                   </div>
+                  <Link
+                    className="card-link-overlay"
+                    href="/admin/requests"
+                    aria-label="Open the request monitor"
+                  />
                 </article>
               </Reveal>
               <Reveal>
-                <article>
+                <article className="card-clickable">
                   <span className="stat-icon coral">
                     <LuCircleAlert aria-hidden="true" />
                   </span>
@@ -129,10 +148,15 @@ export default function AdminOverview() {
                     <b>{overview.requests.noMatch}</b>
                     <small>No-match · unresolved</small>
                   </div>
+                  <Link
+                    className="card-link-overlay"
+                    href="/admin/requests"
+                    aria-label="Open the request monitor filtered to problem requests"
+                  />
                 </article>
               </Reveal>
               <Reveal>
-                <article>
+                <article className="card-clickable">
                   <span className="stat-icon green">
                     <LuShieldCheck aria-hidden="true" />
                   </span>
@@ -140,10 +164,15 @@ export default function AdminOverview() {
                     <b>{overview.technicians.verified}</b>
                     <small>verified · {overview.technicians.unverified} unverified</small>
                   </div>
+                  <Link
+                    className="card-link-overlay"
+                    href="/admin/technicians"
+                    aria-label="Open technician verification"
+                  />
                 </article>
               </Reveal>
               <Reveal>
-                <article>
+                <article className="card-clickable">
                   <span className="stat-icon teal">
                     <LuSend aria-hidden="true" />
                   </span>
@@ -154,6 +183,11 @@ export default function AdminOverview() {
                       {overview.offers.rejected} rejected
                     </small>
                   </div>
+                  <Link
+                    className="card-link-overlay"
+                    href="/admin/requests"
+                    aria-label="Open the request monitor to see dispatch offers"
+                  />
                 </article>
               </Reveal>
             </section>
@@ -175,7 +209,7 @@ export default function AdminOverview() {
                     if (event.kind === 'request') {
                       return (
                         <Reveal key={`request-${event.id}`}>
-                          <article>
+                          <article className="card-clickable">
                             <span className="recent-avatar">
                               <LuClipboardList aria-hidden="true" />
                             </span>
@@ -186,6 +220,11 @@ export default function AdminOverview() {
                               </small>
                             </div>
                             <RequestStatusBadge status={event.status} />
+                            <Link
+                              className="card-link-overlay"
+                              href="/admin/requests"
+                              aria-label={`Open the request monitor at ${event.category}`}
+                            />
                           </article>
                         </Reveal>
                       );
@@ -193,7 +232,7 @@ export default function AdminOverview() {
                     if (event.kind === 'user') {
                       return (
                         <Reveal key={`user-${event.id}`}>
-                          <article>
+                          <article className="card-clickable">
                             <span className="recent-avatar">
                               <LuUser aria-hidden="true" />
                             </span>
@@ -204,13 +243,18 @@ export default function AdminOverview() {
                               <small>Joined {formatTimestamp(event.at)}</small>
                             </div>
                             <RoleBadge role={event.role} />
+                            <Link
+                              className="card-link-overlay"
+                              href="/admin/users"
+                              aria-label={`Open the user list at ${event.email}`}
+                            />
                           </article>
                         </Reveal>
                       );
                     }
                     return (
                       <Reveal key={`offer-${event.id}`}>
-                        <article>
+                        <article className="card-clickable">
                           <span className="recent-avatar">
                             <LuSend aria-hidden="true" />
                           </span>
@@ -221,6 +265,11 @@ export default function AdminOverview() {
                             </small>
                           </div>
                           <OfferStatusBadge status={event.status} />
+                          <Link
+                            className="card-link-overlay"
+                            href="/admin/requests"
+                            aria-label={`Open the request monitor at the offer to ${event.technicianName}`}
+                          />
                         </article>
                       </Reveal>
                     );

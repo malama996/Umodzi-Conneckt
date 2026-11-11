@@ -1,5 +1,5 @@
 /**
- * In-app notification store (Task 22).
+ * In-app notification store (Task 22 + follow-up pass).
  *
  * A deliberately small, in-memory, session-scoped store:
  *
@@ -10,18 +10,55 @@
  *   only by the number of distinct keys observed this session.
  * - `notify*` never throws: a notification failure can never break the
  *   request/offer flow that raised it.
+ * - Delivery plays a fail-silent Web Audio ping (see ./sound) and arms
+ *   a tone-appropriate auto-dismiss timer, so a toast nobody interacts
+ *   with cannot sit on screen forever.
  *
  * Consumers: realtime subscribers and confirmed mutation handlers call
  * `notifySuccess/Info/Warning/Error`; UI reads via `subscribeNotifications`
  * / `getNotifications` (or the `useNotifications` React hook).
  */
-import type { AppNotification, NotificationInput } from './types';
+import type { AppNotification, NotificationInput, NotificationTone } from './types';
+import { playToastPing } from './sound';
 
 /** At most this many notifications are kept visible at once. */
 const MAX_VISIBLE = 4;
 
+/**
+ * Auto-dismiss delay per tone. Success/info are transient confirmations;
+ * warnings and errors get longer so their detail can actually be read.
+ */
+const AUTO_DISMISS_MS: Record<NotificationTone, number> = {
+  success: 6000,
+  info: 6000,
+  warning: 10000,
+  error: 10000,
+};
+
 let notifications: AppNotification[] = [];
 let nextId = 1;
+
+/** Armed auto-dismiss timers, keyed by notification id. */
+const timers = new Map<string, ReturnType<typeof setTimeout>>();
+
+function clearAutoDismiss(id: string): void {
+  const timer = timers.get(id);
+  if (timer === undefined) return;
+  clearTimeout(timer);
+  timers.delete(id);
+}
+
+function scheduleAutoDismiss(id: string, tone: NotificationTone): void {
+  if (typeof window === 'undefined') return; // no timers during SSR
+  clearAutoDismiss(id);
+  timers.set(
+    id,
+    setTimeout(() => {
+      timers.delete(id);
+      dismissNotification(id);
+    }, AUTO_DISMISS_MS[tone]),
+  );
+}
 
 /**
  * Dedup ledger: entity+state keys already delivered this session.
@@ -67,6 +104,9 @@ export function notify(input: NotificationInput): boolean {
     if (notifications.length > MAX_VISIBLE) {
       notifications = notifications.slice(notifications.length - MAX_VISIBLE);
     }
+    // Delivered = heard: ping (fail-silent) + tone-appropriate auto-dismiss.
+    playToastPing(input.tone);
+    scheduleAutoDismiss(notification.id, input.tone);
     emit();
     return true;
   } catch {
@@ -110,6 +150,7 @@ export function subscribeNotifications(listener: () => void): () => void {
 
 /** Remove one notification by id. */
 export function dismissNotification(id: string): void {
+  clearAutoDismiss(id);
   const remaining = notifications.filter((notification) => notification.id !== id);
   if (remaining.length === notifications.length) return;
   notifications = remaining;
@@ -118,6 +159,7 @@ export function dismissNotification(id: string): void {
 
 /** Remove all visible notifications (the dedup ledger is unaffected). */
 export function clearNotifications(): void {
+  for (const id of [...timers.keys()]) clearAutoDismiss(id);
   if (notifications.length === 0) return;
   notifications = [];
   emit();
@@ -130,9 +172,11 @@ export function wasNotificationObserved(key: string): boolean {
 
 /**
  * Reset all in-memory notification state (visible list + dedup
- * ledger). Test-only helper — not called by the application.
+ * ledger + auto-dismiss timers). Test-only helper — not called by
+ * the application.
  */
 export function resetNotificationStore(): void {
+  for (const id of [...timers.keys()]) clearAutoDismiss(id);
   notifications = [];
   observedKeys.clear();
   nextId = 1;

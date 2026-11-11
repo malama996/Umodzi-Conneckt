@@ -330,23 +330,16 @@ export async function assertOfferEligibility(
 }
 
 /**
- * PATCH /requests/:id/status write scope for technician participants:
- * the respond flow may only persist the terminal statuses produced by
- * its own cascade ('matched' / 'no_match'). Customers keep the existing
- * full status vocabulary (unchanged Task-15 lifecycle behaviour).
- */
-/**
- * Statuses a technician may ever write. `matched`/`no_match` are dispatch
- * outcomes; `in_progress`/`completed` are the progress + completion records
- * of the job the technician actually holds — see the awarded-offer check that
- * the status route applies ON TOP of this guard (an accepted offer by their own technician
- * profile). Widening this list does not widen access: without that accepted
- * offer the route still answers 403, which is what keeps "a technician who
- * merely received an offer cannot close somebody else's job" true.
+ * Statuses a technician may ever write. Task 36 (Stage 5): dispatch outcomes
+ * ('matched'/'no_match') are produced by the OFFER endpoints and the sweeper,
+ * never by a browser status write, so the scope narrows to the progress and
+ * completion records of the job the technician actually holds —
+ * `in_progress`/`completed`. The status route applies the full transition
+ * matrix on top of this guard (from-state + the awarded accepted offer,
+ * re-checked inside the accept transaction). The role-level check stays
+ * exported as the cheap coarse filter; the route is the authority.
  */
 const TECHNICIAN_REQUEST_STATUS_WRITES: readonly string[] = [
-  'matched',
-  'no_match',
   'in_progress',
   'completed',
 ];
@@ -355,9 +348,9 @@ const TECHNICIAN_REQUEST_STATUS_WRITES: readonly string[] = [
  * Role-level write scope for a request status.
  *
  * Customers (request owners) and administrators keep the full vocabulary —
- * that is the existing, tested contract. Technicians are limited to their
- * own dispatch outcomes plus the progress/completion states of the job they
- * were awarded, which the caller verifies against the accepted offer.
+ * that is the existing, tested contract. Technicians are limited to the
+ * progress/completion states of the job they were awarded, which the caller
+ * verifies against the accepted offer.
  */
 export function assertRequestStatusWriteScope(
   status: string,
@@ -366,7 +359,7 @@ export function assertRequestStatusWriteScope(
   if (user.role === 'technician' && !TECHNICIAN_REQUEST_STATUS_WRITES.includes(status)) {
     throw new HttpError(
       403,
-      'Forbidden: technicians may only record matched, no_match, in_progress or completed on requests they were offered',
+      'Forbidden: technicians may only record in_progress or completed on requests they were awarded',
     );
   }
 }

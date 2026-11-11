@@ -153,6 +153,13 @@ export interface ServiceRequestCreateInput {
   description: string;
   category: SkillCategory;
   city: string;
+  /**
+   * Task 36 (Stage 5, finding #10): browser-generated idempotency key. The
+   * SAME key submitted twice by the SAME customer returns the SAME request
+   * (idempotent replay) instead of creating a duplicate — the backstop for
+   * double taps and network retries. Optional; legacy calls omit it.
+   */
+  clientRequestId?: string;
 }
 
 // ---------------------------------------------------------------------------
