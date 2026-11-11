@@ -451,6 +451,7 @@ window.
 | 2 + 4 (notifications) | `NotificationInbox` now deep-links every persisted reference type: `service_request` → `/dashboard/requests/{id}`, `dispatch_offer` → `/technician/offers` (technician) or `/dashboard/requests` (customer — the reference id is an offer id, not a request id), `technician` → `/technician/profile`, `conversation` → the chat thread (unchanged). Rows without a reference still get no link (nothing invented). Opening a link also marks the row read. |
 | 2 (sound + auto-dismiss) | New `frontend/lib/notifications/sound.ts`: fail-silent Web Audio ping per toast tone (no network, no files; every failure swallowed). `store.ts` arms tone-appropriate auto-dismiss (6 s success/info, 10 s warning/error) and clears timers on manual dismiss/clear/reset. Device push (sw.js) keeps the OS default sound — it already had no `silent` flag, so no change was needed there. |
 | 5 (naming only) | `MOCK_CITY_COORDINATES` → `CITY_CENTRES` (incl. the test script and doc comments). Behaviour unchanged; nothing was ever a mock GPS fix — the customer position is real opt-in GPS, the fallback is a declared city centre. |
+| Reported: Log out hidden | Sidebar Log Out could fall below the viewport: `.sidebar` was `position: sticky` with `min-height: 100dvh`, so when the nav content grew taller than the window (zoom, short screens) the pinned column's bottom — the `margin-top: auto` Log Out button — became unreachable by page scroll. Fixed by giving `.sidebar` an exact `100dvh` height, making `.sidebar-nav` the scrollable flex area (`overflow-y: auto; min-height: 0`) and `.sidebar-logout` `flex-shrink: 0`, so Log Out is always rendered at the sidebar's visible bottom. The avatar menu panel got the same guarantee (panel is now a flex column; the item list scrolls inside; Log out is `flex-shrink: 0` and always visible). CSS-only; visual identity unchanged when content fits. |
 
 ### Verification (static only — live-system rule, no runtime tests)
 
@@ -458,7 +459,8 @@ window.
   in this pass; re-run to confirm).
 - frontend `npm run typecheck` (`tsc --noEmit`): **PASS**.
 - frontend `npm run lint` (eslint): **PASS**.
-- frontend `npm run build` (next build): **PASS** — 23 routes compiled.
+- frontend `npm run build` (next build): **PASS** — 23 routes compiled
+  (re-run after the Log out visibility fix; still 23 routes).
 - NOT executed: any runtime endpoint call, any browser session, any
   concurrency/load test.
 

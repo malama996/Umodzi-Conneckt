@@ -2173,8 +2173,13 @@ h2 {
 .sidebar {
   background: linear-gradient(180deg, var(--deep), var(--navy));
   color: #fff;
-  min-height: 100vh;
-  min-height: 100dvh;
+  /* Exactly viewport height, not min-height: a sticky column taller than
+     the window gets pinned at the top and its bottom — the Log Out button —
+     falls below the fold where page scroll can never reach it. With a fixed
+     height the overflow moves INTO the nav (scrollable below), so Log Out
+     stays visible at every screen size and zoom level. */
+  height: 100vh;
+  height: 100dvh;
   padding: 23px 13px calc(18px + env(safe-area-inset-bottom));
   display: flex;
   flex-direction: column;
@@ -2183,10 +2188,19 @@ h2 {
 }
 .sidebar .logo {
   padding: 0 9px 25px;
+  flex-shrink: 0;
 }
 .sidebar-nav {
   display: grid;
   gap: 4px;
+  /* The nav owns the spare height and scrolls when it overflows, so the
+     Log Out control pinned underneath can never be pushed off-screen. */
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
 }
 .sidebar-nav a {
   display: flex;
@@ -2246,6 +2260,7 @@ h2 {
   display: block;
   width: 100%;
   margin-top: auto;
+  flex-shrink: 0;
   color: #b9cbd1;
   font-size: 10px;
   padding: 10px 12px;
@@ -2670,7 +2685,11 @@ h2 {
   left: 0;
   right: 0;
   bottom: 0;
-  display: grid;
+  /* Flex column so the item list scrolls INSIDE the panel: the Log out
+     row at the bottom is always rendered, never scrolled away or cut off
+     when the item list (plus badges) is taller than the panel. */
+  display: flex;
+  flex-direction: column;
   gap: 2px;
   max-height: min(86dvh, 640px);
   overflow-y: auto;
@@ -2705,6 +2724,7 @@ h2 {
   display: flex;
   align-items: center;
   gap: 10px;
+  flex-shrink: 0;
   padding: 4px 6px 12px;
   border-bottom: 1px solid var(--line);
 }
@@ -2736,6 +2756,12 @@ h2 {
   display: grid;
   gap: 2px;
   padding: 8px 0;
+  /* Scrolls when the item list overflows the panel; Log out below it
+     stays pinned and visible. */
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 .account-menu-item {
   display: flex;
@@ -2779,6 +2805,7 @@ h2 {
 }
 .account-menu-logout {
   margin-top: 6px;
+  flex-shrink: 0;
   border-top: 1px solid var(--line);
   border-radius: 0 0 10px 10px;
   color: var(--coral);
