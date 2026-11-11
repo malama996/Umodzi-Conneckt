@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import Reveal from '@/components/Reveal';
 import { Fragment, useCallback, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import {
   LuArrowRight,
   LuBriefcaseBusiness,
@@ -395,6 +396,14 @@ export function Sidebar({
   const { busy, run } = useLogoutAction();
   const fullName = displayNameFor(user);
   const initials = initialsFor(user);
+  /* The confirmation must be PORTALED to <body>, not rendered inside the
+     aside: the sticky sidebar is its own stacking context (and, in drawer
+     mode, a transform-containing block), so a `position: fixed` dialog
+     rendered here would paint BEHIND the page content and/or be sized to
+     the 280px drawer instead of the viewport — the reported "logout hides
+     behind the page". Portaled to <body> it stacks above everything
+     (z-index 1300), exactly like the avatar menu's dialog. */
+  const host = typeof document === 'undefined' ? null : document.body;
 
   /** Live owner-scoped count for a badge; zero hides it (never a literal). */
   const countFor = (badge?: NavBadge) =>
@@ -456,17 +465,24 @@ export function Sidebar({
         <LuLogOut size={13} className="ic" aria-hidden="true" />{' '}
         <span>{busy ? 'Signing out…' : 'Log Out'}</span>
       </button>
-      {/* Log-out confirmation (§3) — the shared dialog, so the drawer, the
-          avatar menu and the public header can never word it differently. */}
-      <LogoutConfirm
-        open={confirmLogout}
-        busy={busy}
-        onCancel={() => setConfirmLogout(false)}
-        onConfirm={() => {
-          setConfirmLogout(false);
-          void run();
-        }}
-      />
+      {/* Log-out confirmation (§3) — the shared dialog, portaled to <body>
+          (see the comment above), so the drawer, the avatar menu and the
+          public header can never word it differently — and the dialog is
+          always on top of the page, never trapped behind the sidebar. */}
+      {confirmLogout &&
+        host &&
+        createPortal(
+          <LogoutConfirm
+            open
+            busy={busy}
+            onCancel={() => setConfirmLogout(false)}
+            onConfirm={() => {
+              setConfirmLogout(false);
+              void run();
+            }}
+          />,
+          host,
+        )}
     </aside>
   );
 }
