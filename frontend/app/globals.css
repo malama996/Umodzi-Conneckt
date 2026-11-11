@@ -2193,9 +2193,11 @@ h2 {
 .sidebar-nav {
   display: grid;
   gap: 4px;
-  /* The nav owns the spare height and scrolls when it overflows, so the
-     Log Out control pinned underneath can never be pushed off-screen. */
-  flex: 1 1 auto;
+  /* The nav keeps its NATURAL height, so the menu items and the Log Out
+     button below them sit together as one compact block. It may only
+     SHRINK (and then scroll internally) when the window is too short to
+     show everything — never stretch to fill space. */
+  flex: 0 1 auto;
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -2259,7 +2261,9 @@ h2 {
 .sidebar-logout {
   display: block;
   width: 100%;
-  margin-top: auto;
+  /* Sits directly under the menu items (compact), with a fixed small
+     separation — never a stretched gap, never pushed off-screen. */
+  margin-top: 8px;
   flex-shrink: 0;
   color: #b9cbd1;
   font-size: 10px;
@@ -2756,9 +2760,10 @@ h2 {
   display: grid;
   gap: 2px;
   padding: 8px 0;
-  /* Scrolls when the item list overflows the panel; Log out below it
-     stays pinned and visible. */
-  flex: 1 1 auto;
+  /* Natural height, so Log out sits right under the items (compact). It
+     may only shrink and scroll internally when the panel's max height is
+     genuinely exceeded — never stretch to fill space. */
+  flex: 0 1 auto;
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
