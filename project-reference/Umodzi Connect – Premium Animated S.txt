@@ -1,0 +1,509 @@
+Umodzi Connect – Premium Animated Splash Screen Implementation
+(Consolidated implementation prompt) (Mandatory pre-deployment testing)
+:::writing{variant="document" id="63825"}
+# UMODZI CONNECT – PROFESSIONAL ANIMATED, THEME-AWARE SPLASH SCREEN
+
+## ROLE
+
+Act as a Senior Frontend Engineer, UI/UX Designer, PWA Specialist, and QA Automation Engineer.
+
+Your task is to implement a professional, modern, animated splash screen for the existing Umodzi Connect application.
+
+The implementation must integrate seamlessly with the existing Next.js architecture, branding, theme provider, authentication system, routing, and PWA configuration.
+
+This is an enhancement to the existing application, NOT a redesign or replacement of existing functionality.
+
+**IMPORTANT: All implementation changes MUST be tested and verified before they are considered ready for deployment.**
+
+---
+
+# 1. OFFICIAL UMODZI CONNECT LOGO – STRICT REQUIREMENT
+
+The splash screen MUST use the exact official Umodzi Connect logo already present in the existing codebase.
+
+Before making changes:
+
+1. Inspect the project's assets and identify the existing official logo.
+2. Locate all existing references to the logo.
+3. Identify the correct image format and available light/dark variants.
+4. Reuse the existing logo asset in the splash screen.
+
+STRICTLY PROHIBITED:
+
+- Generating a new logo.
+- Creating an alternative logo.
+- Replacing the logo with plain text.
+- Using an AI-generated logo.
+- Redrawing or modifying the logo.
+- Changing its original proportions.
+- Cropping or distorting the logo.
+- Introducing unrelated branding.
+
+The logo must remain visually identical to the existing application logo.
+
+Only animate its presentation, not its artwork.
+
+---
+
+# 2. PROFESSIONAL VISUAL DESIGN
+
+Create a premium, minimalist application launch experience.
+
+Use the existing Umodzi Connect design system.
+
+The splash screen should contain:
+
+- Official Umodzi Connect logo.
+- Application name where appropriate.
+- Existing brand typography.
+- Tagline: "Connecting Skills. Solving Problems."
+- Elegant loading indicator.
+- Contextual loading message.
+- Subtle branded decorative elements where appropriate.
+
+The design must look professional on both smartphones and tablets.
+
+Avoid excessive gradients, unnecessary illustrations, flashy effects, excessive text, and generic splash-screen templates.
+
+Use consistent spacing, visual hierarchy, typography, and alignment.
+
+---
+
+# 3. ADAPTIVE SYSTEM COLOUR THEME
+
+The splash screen MUST follow the existing application theme system.
+
+Do not introduce a separate theme provider or independent colour configuration.
+
+### Light mode
+
+- Use existing light-theme background tokens.
+- Use existing primary text colours.
+- Use existing accent colours.
+- Maintain a clean, bright, premium appearance.
+
+### Dark mode
+
+- Use existing dark-theme background tokens.
+- Use existing text and surface colours.
+- Use existing accent colours.
+- Maintain appropriate contrast and readability.
+
+### System theme
+
+When the application is configured to follow the device theme:
+
+- Respect the operating system's light/dark preference.
+- Apply the correct theme before rendering the splash screen.
+- Prevent a flash of the incorrect theme during launch.
+
+### Saved theme preference
+
+If the user has explicitly selected a theme within the application, respect that preference instead of overriding it with the operating system setting.
+
+The splash screen must respond correctly to supported theme changes.
+
+---
+
+# 4. PROFESSIONAL ANIMATED FEATURES
+
+Implement subtle, smooth animations that make Umodzi Connect feel like a professionally developed mobile application.
+
+### Animation sequence
+
+1. Background smoothly fades into view.
+2. Official logo fades in and gently scales from approximately 90% to 100%.
+3. Application branding reveals with a subtle upward movement.
+4. Tagline fades into view.
+5. Teal and coral accents animate subtly using existing theme colours.
+6. Loading indicator rotates smoothly.
+7. Loading text displays the current initialization activity where appropriate.
+8. When initialization finishes, the splash screen transitions smoothly into the application.
+
+### Additional animation effects
+
+Where appropriate, implement:
+
+- Subtle logo breathing animation.
+- Gentle background movement.
+- Smooth opacity transitions.
+- Lightweight animated gradient accents.
+- Smooth loading indicator rotation.
+- Elegant exit fade and transition.
+
+Animations must be coordinated using staggered timing.
+
+Do not use excessive bouncing, flashing, rapid scaling, or distracting effects.
+
+The splash screen should feel refined, not like an animated advertisement.
+
+---
+
+# 5. RESPONSIVE PHONE AND TABLET SUPPORT
+
+Ensure the splash screen works correctly on:
+
+- Android smartphones.
+- iPhones.
+- Android tablets.
+- iPads.
+- Small and large screen resolutions.
+- Portrait orientation.
+- Landscape orientation.
+- Desktop browsers.
+
+Requirements:
+
+- Correct logo proportions.
+- Proper content alignment.
+- Responsive spacing.
+- Appropriate font sizing.
+- Safe-area support for device notches.
+- No horizontal overflow.
+- No unwanted scrolling.
+- No layout shifts.
+
+Use responsive viewport dimensions and appropriate safe-area insets.
+
+---
+
+# 6. PWA NATIVE SPLASH SCREEN INTEGRATION
+
+Inspect the existing PWA configuration before changing anything.
+
+Verify:
+
+- Web App Manifest.
+- Application name.
+- Short name.
+- Theme colour.
+- Background colour.
+- Display mode.
+- Application icons.
+- Icon sizes.
+- Service worker configuration.
+
+Where supported, configure native PWA launch presentation to remain consistent with the application's branding.
+
+IMPORTANT:
+
+Native operating-system splash screens and application-rendered splash screens are different mechanisms.
+
+Use supported platform configuration and do not assume CSS animations can control the native operating-system launch screen.
+
+Avoid duplicate or unnecessarily prolonged splash experiences.
+
+---
+
+# 7. APPLICATION INITIALIZATION AND AUTHENTICATION
+
+Integrate the splash screen with the existing application initialization process.
+
+The expected sequence:
+
+1. Application starts.
+2. Correct theme is established.
+3. Splash screen becomes visible.
+4. Existing authentication session is restored.
+5. Required application configuration is initialized.
+6. User role is identified.
+7. Initial route is resolved.
+8. Appropriate application screen loads.
+9. Splash screen transitions out.
+
+### Routing requirements
+
+- Authenticated customers must reach their customer dashboard.
+- Authenticated technicians must reach their technician dashboard.
+- Unauthenticated users must reach the appropriate welcome or login screen.
+- Existing role-based route protection must remain intact.
+
+### Loading requirements
+
+- Do not introduce artificial loading delays.
+- Do not block normal navigation.
+- Do not display the splash screen repeatedly during ordinary internal navigation.
+- Do not create an infinite loading state.
+- Handle authentication failures appropriately.
+- Provide retry or recovery functionality when initialization fails.
+
+The splash screen should only cover the actual application initialization period.
+
+---
+
+# 8. PERFORMANCE AND ACCESSIBILITY
+
+The implementation must remain lightweight.
+
+Requirements:
+
+- Prefer CSS animations and transitions.
+- Avoid unnecessary animation libraries.
+- Avoid large assets.
+- Avoid expensive continuous animations.
+- Respect `prefers-reduced-motion`.
+- Avoid blocking the main application thread.
+- Prevent layout shifts.
+- Maintain readable contrast.
+- Support different screen densities.
+- Avoid unnecessary component re-renders.
+
+Users with reduced-motion preferences should receive a simplified presentation with minimal or no decorative animation.
+
+---
+
+# 9. CODEBASE INSPECTION BEFORE IMPLEMENTATION
+
+Before editing any files, inspect:
+
+- Existing Next.js project structure.
+- Root application layout.
+- Existing splash or loading components.
+- Theme provider.
+- Global CSS variables.
+- Design tokens.
+- Official logo assets.
+- Authentication initialization.
+- Routing and role protection.
+- PWA manifest.
+- Service worker.
+- Existing loading states.
+
+Reuse existing infrastructure wherever possible.
+
+Do not:
+
+- Duplicate theme management.
+- Create competing application initialization logic.
+- Replace working authentication.
+- Modify unrelated dashboard functionality.
+- Introduce unnecessary dependencies.
+- Break existing mobile responsiveness.
+
+Preserve all existing functionality.
+
+---
+
+# 10. MANDATORY PRE-DEPLOYMENT TESTING
+
+THIS SECTION IS COMPULSORY.
+
+Do not declare the implementation complete until the relevant tests have actually been executed.
+
+## A. Build and code quality
+
+Run the existing project checks, including:
+
+- TypeScript compilation.
+- Production build.
+- ESLint or existing lint checks.
+- Relevant unit tests.
+- Existing frontend regression tests.
+
+Resolve any errors introduced by the implementation.
+
+Do not hide errors by disabling existing checks.
+
+## B. Theme testing
+
+Verify the splash screen under:
+
+| Test | Expected result |
+|---|---|
+| Light mode | Correct light theme |
+| Dark mode | Correct dark theme |
+| System light | Follows device light preference |
+| System dark | Follows device dark preference |
+| Saved theme | Respects user selection |
+| Theme switching | Correctly adapts |
+| Initial launch | No incorrect-theme flash |
+
+## C. Device and responsive testing
+
+Test the following viewport sizes:
+
+| Device profile | Viewport |
+|---|---|
+| Small phone | 360 × 640 |
+| Standard phone | 390 × 844 |
+| Large phone | 430 × 932 |
+| Small tablet | 768 × 1024 |
+| Large tablet | 1024 × 1366 |
+| Desktop | 1440 × 900 |
+
+Test both portrait and landscape orientations where applicable.
+
+Check:
+
+- Logo visibility.
+- Alignment.
+- Safe areas.
+- Text overflow.
+- Animation positioning.
+- Responsive spacing.
+- Loading indicator placement.
+
+Use real-device testing for native PWA launch behavior where browser emulation is insufficient.
+
+## D. Authentication and navigation tests
+
+Verify:
+
+1. First-time unauthenticated launch.
+2. Returning authenticated customer.
+3. Returning authenticated technician.
+4. Session restoration.
+5. Expired session.
+6. Failed authentication initialization.
+7. Dashboard navigation after launch.
+8. Browser refresh.
+9. Direct URL access.
+
+Ensure the splash screen does not interfere with existing authentication and role-based routing.
+
+## E. Animation tests
+
+Verify:
+
+- Logo entrance.
+- Logo proportions.
+- Branding reveal.
+- Tagline transition.
+- Loading indicator.
+- Background animations.
+- Splash exit transition.
+- Reduced-motion behavior.
+
+Ensure animations do not freeze or continue unnecessarily after the application has loaded.
+
+## F. PWA tests
+
+Verify:
+
+- Manifest validity.
+- Application installation.
+- Home-screen launch.
+- Correct application icons.
+- Correct theme configuration.
+- Native launch presentation where supported.
+- No duplicate splash screens.
+- Service worker compatibility.
+
+## G. Performance tests
+
+Measure and inspect:
+
+- Initial rendering.
+- Animation smoothness.
+- Unnecessary re-renders.
+- Layout shifts.
+- Main-thread blocking.
+- Asset loading.
+- Memory usage where measurable.
+
+Avoid introducing noticeable delays to application startup.
+
+---
+
+# 11. REGRESSION TESTING
+
+After implementation, verify that existing Umodzi Connect functionality remains unaffected.
+
+Pay particular attention to:
+
+- Customer dashboard.
+- Technician dashboard.
+- Login and registration.
+- Authentication persistence.
+- Service request submission.
+- Request tracking.
+- Navigation.
+- Chat.
+- Notifications.
+- Existing theme switching.
+- PWA installation and updates.
+
+The splash screen must not introduce regressions into the existing service marketplace.
+
+---
+
+# 12. FINAL IMPLEMENTATION REPORT
+
+After implementation and testing, provide a clear report containing:
+
+### A. Files modified
+
+List every file created or modified and explain its purpose.
+
+### B. Implementation summary
+
+Explain:
+
+- How the official logo was reused.
+- How animations were implemented.
+- How theme adaptation works.
+- How the splash screen integrates with authentication.
+- How PWA launch presentation was configured.
+
+### C. Testing results
+
+Provide a table:
+
+| Test | Result | Evidence |
+|---|---|---|
+| Production build | Actual result | Command output |
+| TypeScript | Actual result | Command output |
+| Light theme | Actual result | Test evidence |
+| Dark theme | Actual result | Test evidence |
+| Phone responsiveness | Actual result | Viewport/device |
+| Tablet responsiveness | Actual result | Viewport/device |
+| Authentication | Actual result | Test evidence |
+| PWA launch | Actual result | Test evidence |
+| Reduced motion | Actual result | Test evidence |
+| Regression testing | Actual result | Test evidence |
+
+Use only results from tests that were actually executed.
+
+### D. Outstanding issues
+
+Identify any:
+
+- Failed tests.
+- Unverified device-specific behaviors.
+- Missing configuration.
+- External dependencies.
+- Remaining limitations.
+
+### E. Deployment recommendation
+
+Give one of these outcomes:
+
+- READY FOR DEPLOYMENT.
+- READY WITH DOCUMENTED LIMITATIONS.
+- NOT READY FOR DEPLOYMENT.
+
+Do not recommend deployment if critical tests fail or existing functionality is broken.
+
+---
+
+# STRICT FINAL DIRECTIVE
+
+Do not optimize for how many files are changed.
+
+Optimize for:
+
+- Correctness.
+- Existing brand consistency.
+- Professional animation quality.
+- Theme compatibility.
+- Responsive behavior.
+- Application performance.
+- Authentication reliability.
+- PWA compatibility.
+- Regression prevention.
+
+Do not claim success based on screenshots alone.
+
+Do not claim success based on a successful build alone.
+
+**Implement, test, verify, and report before declaring the work complete.**

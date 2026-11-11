@@ -5800,3 +5800,305 @@ h2 {
     justify-content: center;
   }
 }
+
+/* ==========================================================================
+   Launch splash (components/SplashScreen.tsx)
+   --------------------------------------------------------------------------
+   A full-viewport overlay that covers only the real app-initialization
+   window. It uses the SAME Theme B token names as the rest of the app
+   (--bg, --text, --muted, --line, --white) — it is not a second theme
+   system. The application currently ships one light token set, so the dark
+   block below re-declares those same tokens *scoped to the splash root* to
+   give the launch surface a correct dark counterpart without restyling any
+   page. Colours: navy #0B1F3A, deep navy #07182B, teal #0F9D8A, coral #F26B5B.
+   ========================================================================== */
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 1400; /* above the sidebar (1200) and every dialog (1300) */
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  padding: max(24px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right))
+    max(24px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+  transition:
+    opacity 520ms ease,
+    transform 520ms ease;
+  animation: splash-bg-in 420ms ease both;
+  -webkit-tap-highlight-color: transparent;
+}
+.splash-leaving {
+  opacity: 0;
+  transform: scale(1.015);
+  pointer-events: none;
+}
+
+/* Dark counterpart of the existing tokens, scoped to this surface only. */
+[data-theme='dark'] .splash {
+  --bg: #07182b;
+  --white: #0d2135;
+  --text: #e9f1f5;
+  --muted: #9db3bf;
+  --line: rgba(255, 255, 255, 0.14);
+}
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme='light']) .splash {
+    --bg: #07182b;
+    --white: #0d2135;
+    --text: #e9f1f5;
+    --muted: #9db3bf;
+    --line: rgba(255, 255, 255, 0.14);
+  }
+}
+
+/* Soft branded accents — radial gradients (no blur filters, no repaint-heavy
+   effects) drifting slowly behind the lockup. */
+.splash-backdrop {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.splash-accent {
+  position: absolute;
+  width: min(74vw, 430px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  will-change: transform;
+}
+.splash-accent-teal {
+  top: -12%;
+  left: -14%;
+  background: radial-gradient(circle, rgba(15, 157, 138, 0.22), transparent 70%);
+  animation: splash-drift-a 17s ease-in-out infinite alternate;
+}
+.splash-accent-coral {
+  bottom: -14%;
+  right: -16%;
+  background: radial-gradient(circle, rgba(242, 107, 91, 0.18), transparent 70%);
+  animation: splash-drift-b 19s ease-in-out infinite alternate;
+}
+
+.splash-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(14px, 3vh, 24px);
+  width: 100%;
+  max-width: min(86vw, 420px);
+  text-align: center;
+}
+
+/* Official logo artwork, unchanged. Height-only sizing preserves the
+   original 552:116 proportions at every breakpoint. */
+.splash-logo {
+  display: grid;
+  place-items: center;
+  max-width: 100%;
+  animation: splash-logo-in 760ms cubic-bezier(0.22, 1, 0.36, 1) 110ms both;
+}
+.splash-logo-art {
+  display: block;
+  width: auto;
+  height: clamp(46px, 13vw, 64px);
+  max-width: 100%;
+  animation: splash-breathe 4.8s ease-in-out 1.05s infinite;
+}
+.splash-logo-art-dark {
+  display: none;
+}
+[data-theme='dark'] .splash-logo-art {
+  display: none;
+}
+[data-theme='dark'] .splash-logo-art-dark {
+  display: block;
+  animation: splash-breathe 4.8s ease-in-out 1.05s infinite;
+}
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme='light']) .splash-logo-art {
+    display: none;
+  }
+  html:not([data-theme='light']) .splash-logo-art-dark {
+    display: block;
+  }
+}
+
+.splash-tagline {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: clamp(12px, 3.1vw, 14px);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  animation: splash-rise 620ms ease 380ms both;
+}
+
+.splash-loader {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  animation: splash-fade 460ms ease 620ms both;
+}
+.splash-loader-ring {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2.5px solid rgba(15, 157, 138, 0.18);
+  border-top-color: var(--teal);
+  border-right-color: var(--coral);
+  animation: splash-spin 900ms linear infinite;
+}
+
+.splash-status {
+  margin: 0;
+  min-height: 1.4em;
+  font-size: clamp(11.5px, 3vw, 13px);
+  letter-spacing: 0.03em;
+  color: var(--muted);
+  animation: splash-fade 420ms ease 740ms both;
+}
+
+.splash-recovery {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  animation: splash-fade 300ms ease both;
+}
+.splash-recovery-text {
+  margin: 0;
+  max-width: 34ch;
+  font-size: clamp(12px, 3.2vw, 13.5px);
+  line-height: 1.55;
+  color: var(--muted);
+}
+.splash-recovery-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+@keyframes splash-bg-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes splash-logo-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes splash-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.022);
+  }
+}
+@keyframes splash-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes splash-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes splash-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes splash-drift-a {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(3%, 4%, 0) scale(1.08);
+  }
+}
+@keyframes splash-drift-b {
+  from {
+    transform: translate3d(0, 0, 0) scale(1.06);
+  }
+  to {
+    transform: translate3d(-4%, -3%, 0) scale(1);
+  }
+}
+
+/* Short/landscape viewports (phones held sideways, zoomed windows): the
+   lockup shrinks so the loading state stays above the fold. */
+@media (max-height: 520px) {
+  .splash-content {
+    gap: 10px;
+  }
+  .splash-logo-art {
+    height: clamp(32px, 9vh, 44px);
+  }
+  .splash-accent {
+    display: none;
+  }
+}
+
+/* Large tablets/desktop: keep the lockup from ever looking stretched. */
+@media (min-width: 768px) {
+  .splash-content {
+    max-width: 460px;
+  }
+  .splash-logo-art {
+    height: clamp(56px, 8vh, 72px);
+  }
+}
+
+/* Reduced motion: simplified presentation, no decorative movement. The
+   spinner keeps a slow rotation because it communicates real activity. */
+@media (prefers-reduced-motion: reduce) {
+  .splash,
+  .splash-logo,
+  .splash-logo-art,
+  .splash-logo-art-dark,
+  .splash-tagline,
+  .splash-loader,
+  .splash-status,
+  .splash-recovery,
+  .splash-accent {
+    animation: none !important;
+  }
+  .splash {
+    transition: opacity 160ms linear;
+  }
+  .splash-leaving {
+    transform: none;
+  }
+  .splash-accent {
+    will-change: auto;
+  }
+  .splash-loader-ring {
+    animation: splash-spin 2.4s linear infinite;
+  }
+}

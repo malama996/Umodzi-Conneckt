@@ -12,10 +12,21 @@
  *   the cached shell is an offline fallback only.
  * - Caches are versioned and old caches are purged on activation.
  */
-const SHELL_CACHE = 'umodzi-shell-v1';
+const SHELL_CACHE = 'umodzi-shell-v2';
 const RUNTIME_CACHE = 'umodzi-runtime-v1';
 
-const SHELL_URLS = ['/', '/matching', '/login', '/register', '/dashboard'];
+/* Brand assets are precached with the shell: the launch splash renders the
+   official logo on every cold start, including offline, so it must never be
+   the one thing missing from cache. */
+const SHELL_URLS = [
+  '/',
+  '/matching',
+  '/login',
+  '/register',
+  '/dashboard',
+  '/branding/umodzi-connect-logo.svg',
+  '/branding/umodzi-connect-logo-dark.svg',
+];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
