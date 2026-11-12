@@ -1,0 +1,1078 @@
+# UMODZI CONNECT — COMPLETE SYSTEM, DOCUMENTATION AND DEFENCE PREPARATION WORKFLOW
+
+## GLOBAL INSTRUCTIONS — APPLY TO ALL FIVE PHASES and Prompts follow them in order and no skipping even one , and make a road map so that maybe if anthing fails other agent can continue and please you reaching the last phase or the last prompt this mean all is ready..
+
+You are acting as a senior full-stack software engineer, software quality assurance engineer, technical documentation specialist, academic report editor, system analyst and professional presentation designer.
+
+Your assignment is to take my existing Umodzi Connect final-year project from its current state to a technically verified, academically consistent and presentation-ready state.
+
+This is an existing project. Do not redesign it unnecessarily, replace its architecture without justification, or introduce new functionality simply to make the project appear more advanced.
+
+### 1. Project identity
+
+- Project: Umodzi Connect
+- Student: Arnold Malama
+- Student ID: 2420996
+- Institution: Zambia University College of Technology
+- Programme: Diploma in Information Technology
+- Project type: Final-year academic software development project.
+- Main purpose: A low-data, mobile-first smart dispatch and trust-verification platform connecting customers with skilled technicians in selected urban areas of Zambia.
+
+Use the existing project's actual branding, logo, interface, source code, documentation and architecture.
+
+### 2. Source-of-truth hierarchy
+
+When information conflicts, follow this priority:
+
+1. Actual implemented source code and verified application behaviour.
+2. Actual database schema, migrations, configuration and deployed architecture.
+3. Existing test results, test reports, Git history and implementation evidence.
+4. Existing final-year project report.
+5. Existing project proposal and earlier planning documents.
+6. Reference PowerPoint supplied for presentation structure only.
+
+The reference PowerPoint belongs to another student. Use it only to understand an academic presentation structure. Never copy its project information, diagrams, wording, screenshots or technical implementation.
+
+### 3. Strict restrictions
+
+- Do not invent functionality.
+- Do not invent test results, survey results or performance measurements.
+- Do not invent implementation dates, development activities or research findings.
+- Do not introduce unsupported academic references.
+- Do not claim a feature works until it has been verified.
+- Do not replace actual system screenshots with fabricated interface illustrations.
+- Do not change the project's name, academic identity or original research objectives.
+- Do not remove important existing report content simply to shorten the document.
+- Do not claim that a test passed if it was not executed.
+- Do not expose credentials, API keys, passwords, private user information or environment secrets.
+- Do not introduce paid dependencies or services unnecessarily.
+- Do not modify production data during testing.
+- Preserve existing working functionality.
+
+If information is missing, label it clearly as requiring confirmation. Never fill a gap with an assumption.
+
+### 4. Working method
+
+Work sequentially. Inspect before modifying. Back up before editing. Implement before documenting. Verify before claiming completion.
+
+Maintain a progress record containing:
+- Phase completed.
+- Files inspected.
+- Files modified.
+- Problems discovered.
+- Corrections made.
+- Tests executed and their actual results.
+- Outstanding issues.
+- Evidence supporting each important claim.
+
+Do not mark a phase complete while critical problems remain unresolved.
+
+---
+
+# PROMPT 1 — WORKSPACE DISCOVERY, DOCUMENT INVENTORY AND PROJECT BASELINE
+
+Begin by examining the entire existing Umodzi Connect workspace.
+
+## A. Locate the project files
+
+Search the workspace, including the `reference` folder and relevant subfolders.
+
+Locate:
+- The final Umodzi Connect Word report, particularly `Umodzi_Connect_Final_Report(1).docx` if that is the available file.
+- The original project proposal, where available.
+- The reference PowerPoint, particularly `DEFENSE PRESENTATION (MWAPE CHIPYOKA).pptx`.
+- The complete source-code repository.
+- Database schema and migrations.
+- Existing screenshots and diagrams.
+- Test files and test reports.
+- Existing README, implementation notes and deployment configuration.
+- Current logo, icons, fonts and other branding assets.
+
+Do not assume the filenames or directory structure are unchanged. Identify the correct files before proceeding.
+
+## B. Inspect the report
+
+Read the complete Word document, including:
+- Cover page.
+- Declaration.
+- Abstract.
+- Table of contents.
+- All six chapters.
+- Every table.
+- Every figure.
+- Captions.
+- References.
+- Appendices.
+- Page numbering and formatting.
+
+Pay particular attention to:
+- Whether the cover still incorrectly says "A RESEARCH PROPOSAL ON".
+- Missing supervisor details or declaration information.
+- Empty Chapter Five evaluation tables.
+- Inconsistent technology descriptions.
+- Inconsistent diagrams and captions.
+- Missing figures or broken references.
+- Incorrect numbering.
+- Inconsistent terminology.
+- Grammatical and academic writing problems.
+
+Preserve the report's existing academic structure and research objectives.
+
+## C. Inspect the reference PowerPoint
+
+Identify its:
+- Slide sequence.
+- Academic presentation flow.
+- Level of detail.
+- Use of diagrams and visual explanations.
+- Conclusion and recommendation structure.
+
+Use it only as a presentation-structure reference.
+
+## D. Inspect the actual application
+
+Identify:
+- Frontend framework and entry points.
+- Backend framework and API routes.
+- Database and actual schema.
+- Authentication and authorization.
+- Customer, technician and administrator functionality.
+- Service request lifecycle.
+- Smart dispatch implementation.
+- Location and geospatial functionality.
+- AI-assisted fault classification and fallback.
+- Messaging and communication.
+- Notifications.
+- Reviews and ratings.
+- Administrative functions.
+- Hosting and deployment architecture.
+
+Trace important features from frontend to backend to database.
+
+## E. Create safe backups
+
+Before editing anything:
+- Create a dated backup of the original Word report.
+- Create a backup of the existing PowerPoint, if present.
+- Preserve the original source files.
+- Do not overwrite the only copy of any document.
+
+## F. Produce a baseline report
+
+Create a clear inventory of:
+1. Files found.
+2. Actual technology stack.
+3. Existing implemented features.
+4. Features that are incomplete or unverified.
+5. Report inconsistencies.
+6. Missing diagrams and evaluation evidence.
+7. Presentation weaknesses.
+8. Risks that must be addressed before defence.
+
+Create a project progress file, such as `DEFENCE_READINESS_TRACKER.md`.
+
+Do not start making large changes in this phase. First establish an accurate baseline.
+
+At the end, provide the findings and identify the next actions. Then proceed to Prompt 2.
+
+---
+
+# PROMPT 2 — COMPLETE SYSTEM AUDIT, CORRECTION AND TESTING
+
+Now work on the actual Umodzi Connect source code.
+
+Your responsibility is to improve the existing implementation, resolve confirmed defects and verify that the system is stable enough for academic demonstration.
+
+Do not introduce unrelated features.
+
+## A. Establish a working baseline
+
+Before changing code:
+- Inspect package scripts.
+- Inspect dependencies.
+- Inspect environment requirements.
+- Run existing tests.
+- Run linting and type checking where configured.
+- Run production builds where possible.
+- Record the actual results.
+- Identify pre-existing failures.
+
+Never conceal failures by deleting tests or weakening assertions.
+
+## B. Inspect and correct the major workflows
+
+### 1. Authentication and user access
+
+Verify:
+- Registration.
+- Login.
+- Logout.
+- Password recovery, where implemented.
+- Session persistence.
+- Role-based access.
+- Protected routes.
+- Unauthorized access handling.
+- User profile management.
+
+Confirm that customer, technician and administrator accounts cannot access functionality they are not authorized to use.
+
+### 2. Customer dashboard and service requests
+
+Pay special attention to the previously identified navigation problems.
+
+Verify:
+- Customers can navigate between the service request panel and their dashboard.
+- Navigation remains correct on desktop, tablet and mobile.
+- Creating a request works.
+- Requests appear in the correct dashboard.
+- Request details load correctly.
+- Request status updates correctly.
+- Customers can access the appropriate request conversation.
+- Back navigation does not send users to an incorrect or inaccessible page.
+- Refreshing the browser does not break the current workflow.
+
+### 3. Technician dashboard
+
+Verify:
+- Technicians can view eligible requests.
+- Request details are correct.
+- Technicians can accept or reject requests where permitted.
+- Availability is handled correctly.
+- Existing jobs are not incorrectly assigned to unavailable technicians.
+- Job status changes are reflected correctly.
+- Technicians can access the correct customer communication workflow.
+
+### 4. Smart dispatch
+
+Trace the real dispatch implementation.
+
+Verify:
+- Skill/category matching.
+- Location and proximity matching.
+- Technician availability.
+- Trust or rating inputs, if implemented.
+- Dispatch ordering.
+- Request acceptance and rejection.
+- Dispatch timeout behaviour, if implemented.
+- Fallback or cascade behaviour.
+- Duplicate dispatch prevention.
+- Concurrent requests.
+- Technician conflicts.
+- Requests that receive no acceptance.
+- Requests that become unavailable or expire.
+
+Confirm that the actual algorithm matches the documentation.
+
+Do not claim fairness weighting, scoring weights, AI automation or other advanced dispatch logic unless it exists in the source code.
+
+### 5. AI fault classification
+
+Verify:
+- Backend integration.
+- API key handling.
+- Classification request and response.
+- Error handling.
+- Fallback classification.
+- Invalid input handling.
+- Network failure handling.
+- Whether the application remains usable when the AI provider is unavailable.
+
+Never expose the AI API key in frontend code.
+
+Do not present keyword fallback as an AI-generated result.
+
+### 6. Chat and communication
+
+Treat this as a high-priority area.
+
+Verify:
+- Customer and technician can access the correct conversation.
+- Conversations are associated with the correct service request or relationship.
+- Messages are persisted.
+- Messages load after refresh.
+- Message ownership is enforced.
+- Unauthorized users cannot read another user's messages.
+- Empty and invalid messages are rejected.
+- Communication remains usable after a request changes status.
+- Call/contact functionality works correctly or is clearly presented according to its actual implementation.
+
+Correct any broken navigation between a request, its conversation and the appropriate dashboard.
+
+### 7. Notifications
+
+Verify actual notification mechanisms:
+- In-app notifications.
+- Realtime updates or polling.
+- Web Push/VAPID, if implemented.
+- SMS integration, if implemented.
+
+Test notification delivery and failure handling.
+
+Do not claim Firebase Cloud Messaging or another provider if the actual implementation uses a different mechanism.
+
+### 8. Database and security
+
+Inspect:
+- Database schema.
+- Foreign keys.
+- Relationships.
+- Constraints.
+- Row-level security policies.
+- Authentication authorization.
+- Request ownership.
+- Message ownership.
+- Input validation.
+- SQL injection exposure.
+- Sensitive data exposure.
+- API error handling.
+- Rate limiting, where implemented.
+- Secrets and environment configuration.
+
+Correct confirmed security defects without damaging existing user data.
+
+Do not disable security controls merely to make tests pass.
+
+## C. Responsive and user-interface quality
+
+Test the actual application at:
+- Mobile phone dimensions.
+- Tablet dimensions.
+- Desktop dimensions.
+
+Inspect:
+- Layout overflow.
+- Navigation.
+- Dashboard usability.
+- Form validation.
+- Modal behaviour.
+- Loading states.
+- Empty states.
+- Error states.
+- Accessibility and readability.
+- Consistency of colours, typography and spacing.
+
+Improve the existing interface while preserving the established Umodzi Connect branding.
+
+Use the current logo.
+
+Do not replace the existing brand identity with a generic template.
+
+## D. Regression and integration testing
+
+Add or improve tests for the actual important workflows.
+
+Test:
+- Authentication.
+- Role authorization.
+- Request creation.
+- Dispatch.
+- Technician acceptance/rejection.
+- Request lifecycle.
+- Chat.
+- Notifications.
+- Reviews.
+- Admin access.
+- Error handling.
+- Responsive navigation.
+
+Execute tests rather than merely writing them.
+
+For each test suite, record:
+- Number of tests.
+- Passed.
+- Failed.
+- Skipped.
+- Execution date.
+- Important findings.
+
+If an external provider is unavailable, identify the limitation and test the available fallback separately.
+
+## E. Completion requirements
+
+At the end:
+1. Fix all critical and high-priority confirmed defects that can safely be fixed.
+2. Run the full available test suite.
+3. Run production builds.
+4. Verify the main customer-to-technician workflow.
+5. Verify the administrator workflow.
+6. Update `DEFENCE_READINESS_TRACKER.md`.
+7. Provide a list of modified files.
+8. Record unresolved issues honestly.
+
+Do not proceed to final documentation corrections until the actual system has been audited and the evidence has been recorded.
+
+Then proceed to Prompt 3.
+
+---
+
+# PROMPT 3 — COMPLETE WORD REPORT CORRECTION, ACADEMIC IMPROVEMENT AND DIAGRAM DESIGN
+
+Now work on the actual Umodzi Connect final report located in the `reference` folder.
+
+The purpose is to produce a polished, technically accurate and academically defensible final report.
+
+Do not write a different research project. Improve the existing report.
+
+## A. Preserve the original academic identity
+
+Retain:
+- Umodzi Connect project title.
+- Student identity.
+- Institution.
+- Programme.
+- Existing research objectives.
+- Research questions.
+- Existing research methodology.
+- Existing survey findings.
+- Existing project scope.
+- Existing six-chapter structure.
+
+Do not invent new research objectives or new survey data.
+
+## B. Correct the cover and preliminary pages
+
+Inspect and correct:
+- Cover page.
+- Project title.
+- Student details.
+- Institution and programme.
+- Declaration.
+- Approval or certification page.
+- Dedication.
+- Acknowledgements.
+- Abstract.
+- Table of contents.
+- List of figures.
+- List of tables.
+- Abbreviations.
+
+Correct any remaining proposal wording that incorrectly describes the document as a proposal.
+
+Do not invent a supervisor's name, signature, approval date or other missing personal information.
+
+Where confirmation is required, use a clearly identified placeholder for the student to complete.
+
+## C. Correct all six chapters
+
+### Chapter One — Introduction
+
+Preserve the original problem context, objectives and scope.
+
+Improve:
+- Background.
+- Problem statement.
+- Aim.
+- Specific objectives.
+- Research questions.
+- Significance.
+- Scope.
+- Limitations.
+
+Ensure every research question maps to an objective.
+
+Do not expand the scope beyond the existing project.
+
+### Chapter Two — Literature Review
+
+Improve the academic flow, comparisons and critical discussion.
+
+Preserve existing sources unless a reference is clearly incorrect or unverifiable.
+
+Do not manufacture citations, publications or statistics.
+
+Ensure the literature review explains the problem and supports the project's existing design decisions.
+
+### Chapter Three — Research Methodology
+
+Improve the explanation of:
+- Research approach.
+- Data collection.
+- Survey participants.
+- Sample size.
+- Sampling method.
+- Analysis.
+- Agile development methodology.
+- Development phases.
+
+Preserve the actual survey size of 18 respondents where supported by the original research records.
+
+Verify all percentages against the source data where available.
+
+Do not invent development sprints, dates or research activities.
+
+### Chapter Four — System Analysis, Design and Implementation
+
+This chapter must accurately describe the actual application.
+
+Verify all technology descriptions against the repository.
+
+Resolve conflicting descriptions of:
+- React versus Next.js.
+- Backend framework and API.
+- Authentication.
+- Database.
+- PostGIS.
+- Storage.
+- SMS provider.
+- Push notification implementation.
+- Deployment architecture.
+- AI integration.
+
+Use the exact implementation rather than speculative alternatives.
+
+Explain actual user roles, workflows, request lifecycle, dispatch and security.
+
+Where the existing report describes a planned feature that was never implemented, distinguish planned functionality from implemented functionality.
+
+### Chapter Five — Results, Testing and Discussion
+
+This chapter needs special attention.
+
+Inspect the existing evaluation tables, especially:
+- Functional testing.
+- AI classification metrics.
+- Dispatch performance.
+- Usability evaluation.
+- Security testing.
+
+Some existing tables may contain blank results.
+
+Do not invent figures to make them look complete.
+
+Use real test reports, actual measurements and available research records.
+
+If precision, recall, F1, dispatch success rate, response time, SUS or other metrics were not measured, do not manufacture them.
+
+Where a measurement is missing:
+- Explain that it has not yet been measured.
+- Provide the appropriate method for measuring it.
+- Clearly mark it for the student's final evaluation if necessary.
+
+Distinguish:
+1. Research findings from the 18-person survey.
+2. Technical functional test results.
+3. Performance measurements.
+4. Usability results.
+5. Security verification.
+
+Discuss the actual findings in relation to the research objectives.
+
+### Chapter Six — Conclusion and Recommendations
+
+Ensure the conclusion answers the research objectives.
+
+Do not claim that objectives were achieved unless the implementation and evidence support the claim.
+
+Make recommendations realistic and consistent with the project's scope and limitations.
+
+## D. Recreate and improve the diagrams
+
+Inspect every existing figure and its relationship to the report.
+
+Improve the diagrams professionally, using consistent:
+- Typography.
+- Colours.
+- Shape styles.
+- Connectors.
+- Arrow directions.
+- Labels.
+- Spacing.
+- Figure numbering.
+
+Use the established Umodzi Connect theme:
+- Navy.
+- Teal.
+- Coral accents.
+- Clean academic presentation style.
+
+Create or improve the relevant existing diagrams:
+
+1. Conceptual framework.
+2. System architecture.
+3. Context diagram.
+4. Use-case diagram.
+5. Sequence diagram.
+6. State-machine diagram.
+7. Activity diagram.
+8. Class diagram.
+9. Entity-relationship diagram.
+10. Smart dispatch algorithm flowchart.
+
+Important:
+- Every diagram must represent actual or explicitly identified conceptual behaviour.
+- Use actual entities, roles, API interactions and database relationships.
+- Do not add components that do not exist.
+- Ensure diagram labels agree with the source code and report.
+- Use correct UML notation where applicable.
+- Ensure all arrows and relationships make technical sense.
+- Do not use screenshots of text as substitutes for diagrams.
+- Embed high-quality diagrams into the Word report.
+- Ensure figures are readable at normal document zoom and when printed.
+- Give every figure a proper number and caption.
+- Ensure the text refers to the correct figure number.
+
+If Figure 1.1 is referenced but missing, verify and restore it.
+
+## E. Professional Word formatting
+
+Format the report consistently:
+- Academic page layout.
+- Appropriate margins.
+- Consistent font family and sizes.
+- Proper heading hierarchy.
+- Consistent paragraph spacing.
+- Professional table formatting.
+- Correct page numbering.
+- Consistent figure captions.
+- Consistent table captions.
+- No overlapping images.
+- No cut-off diagrams.
+- No blank pages caused by formatting errors.
+- No broken table layouts.
+- No missing sections.
+
+Use real Word headings and automatic table of contents functionality where possible.
+
+Preserve editability.
+
+## F. Final document outputs
+
+Produce:
+1. `Umodzi_Connect_Final_Report_CORRECTED.docx`
+2. A PDF export for visual review, if conversion is supported.
+3. Updated diagrams as separate editable or high-resolution source files where practical.
+4. A report correction summary listing important changes and outstanding student confirmations.
+
+Open and inspect the final Word document after saving.
+
+Verify page breaks, tables, diagrams, captions and page numbering.
+
+Do not declare the report complete until the exported document has been visually checked.
+
+Then proceed to Prompt 4.
+
+---
+
+# PROMPT 4 — CREATE THE COMPLETE PROFESSIONAL UMODZI CONNECT DEFENCE POWERPOINT
+
+Now create the actual final-year project defence PowerPoint.
+
+Use:
+1. The corrected Word report.
+2. The verified source code.
+3. Actual system screenshots.
+4. Verified testing evidence.
+5. The existing Umodzi Connect logo and brand assets.
+6. The reference PowerPoint for academic presentation flow only.
+
+The presentation must be complete enough for me to arrange, study and practise my defence without having to build the slides from scratch.
+
+## A. Design direction
+
+Create a professional, modern academic presentation.
+
+Use:
+- Umodzi Connect navy, teal and coral theme.
+- Current project logo.
+- Manrope and Inter where available.
+- Consistent typography.
+- Strong visual hierarchy.
+- High-quality diagrams.
+- Proper spacing.
+- Clean layouts.
+- Readable charts and tables.
+- Consistent slide numbering.
+
+Use a 16:9 widescreen format.
+
+Avoid:
+- Overcrowded slides.
+- Long paragraphs.
+- Excessive animations.
+- Generic AI-generated business presentation templates.
+- Random icons.
+- Fake screenshots.
+- Unverified statistics.
+- Unsupported technical claims.
+
+The presentation should look like a carefully designed final-year IT project defence.
+
+## B. Required slide structure
+
+Build the presentation using the following logical sequence. Combine or expand slides where necessary to preserve clarity.
+
+### Section 1 — Introduction
+
+1. Title slide.
+2. Project background.
+3. Problem statement.
+4. Aim and specific objectives.
+5. Research questions.
+6. Project scope and limitations.
+7. Significance of the project.
+
+### Section 2 — Literature and research
+
+8. Literature review and existing solutions.
+9. Research gap.
+10. Conceptual framework.
+11. Research methodology.
+12. Survey participants and research findings.
+
+### Section 3 — System design
+
+13. Development methodology.
+14. Requirements and user roles.
+15. System architecture.
+16. Context diagram.
+17. Use-case diagram.
+18. Database design and ERD.
+19. Smart dispatch algorithm.
+20. Important system workflows.
+
+### Section 4 — Implementation
+
+21. Technologies and tools used.
+22. Customer interface.
+23. Technician interface.
+24. Administrator interface.
+25. Service request lifecycle.
+26. AI-assisted fault classification, only as implemented.
+27. Chat and notifications, only as implemented.
+28. Security and access control.
+
+### Section 5 — Evaluation
+
+29. System testing approach.
+30. Functional testing results.
+31. Dispatch and classification evaluation, where measured.
+32. Usability and security evaluation, where measured.
+33. Discussion of results.
+34. Challenges and limitations.
+
+### Section 6 — Conclusion
+
+35. Conclusion.
+36. Recommendations and future improvements.
+37. Final appreciation / Questions.
+
+This is a proposed structure, not permission to invent content. Use only the slides and evidence supported by the actual report and system. If an evaluation has not been conducted, state that honestly.
+
+## C. Actual application screenshots
+
+Capture screenshots from the real running application where possible.
+
+Use relevant screens:
+- Landing page.
+- Customer dashboard.
+- Service request form.
+- Request details.
+- Technician dashboard.
+- Dispatch or matching workflow.
+- Chat.
+- Notifications.
+- Administrator dashboard.
+- Other important existing functionality.
+
+Use authentic application screenshots.
+
+Ensure screenshots:
+- Show the real current interface.
+- Are readable.
+- Do not reveal credentials or private personal information.
+- Are cropped neatly.
+- Have short explanatory captions.
+
+Do not create fake interfaces and present them as screenshots of the implemented system.
+
+If the system cannot run or a particular feature cannot be demonstrated, flag it rather than fabricate an image.
+
+## D. Diagrams and visual explanations
+
+Reuse the verified diagrams from the corrected report where appropriate.
+
+Redraw them for presentation readability when necessary.
+
+Include:
+- Architecture overview.
+- User roles and relationships.
+- Dispatch process.
+- Request lifecycle.
+- Database relationships.
+- Relevant workflows.
+
+Do not use screenshots of diagrams that become unreadable when projected.
+
+## E. Charts and statistics
+
+Use the original research data and actual technical evaluation results.
+
+Where the survey has 18 respondents, ensure the denominator is correct.
+
+For every percentage, show or retain the correct sample basis.
+
+Do not convert blank testing tables into fabricated charts.
+
+If a metric is not available, omit it or clearly state that it has not yet been evaluated.
+
+## F. Presentation notes
+
+Add useful speaker notes to the slides.
+
+The notes should explain:
+- What the slide means.
+- What I should say.
+- Important technical details.
+- How the slide relates to the research objectives.
+- Likely questions an examiner could ask.
+- How to explain a diagram or workflow.
+
+Keep notes understandable and technically accurate.
+
+Do not turn the slides into pages of text.
+
+## G. Final PowerPoint output
+
+Create:
+- `Umodzi_Connect_Final_Defence_Presentation.pptx`
+- A PDF export for easy review.
+- A slide-by-slide speaker notes and study guide.
+- A list of any missing screenshots or evidence requiring my attention.
+
+The PPTX must be editable.
+
+Open the finished presentation and inspect every slide.
+
+Verify:
+- No clipped text.
+- No overlapping objects.
+- No missing fonts or images.
+- No broken diagrams.
+- Consistent slide numbers.
+- Readable text.
+- Correct academic sequence.
+- Consistent branding.
+- Correct spelling and grammar.
+
+Then proceed to Prompt 5.
+
+---
+
+# PROMPT 5 — FINAL END-TO-END QUALITY ASSURANCE AND STUDENT HANDOVER
+
+This is the final phase.
+
+Do not introduce new features or redesign the project at this stage unless a critical defect requires correction.
+
+Your responsibility is to ensure the system, report and presentation agree with each other and that I can use the remaining days to test and prepare for my defence.
+
+## A. Cross-check all three deliverables
+
+Compare:
+1. Actual application.
+2. Corrected Word report.
+3. Final PowerPoint.
+
+Check that:
+- The project name is consistent.
+- Student details are consistent.
+- Objectives are consistent.
+- Research questions are consistent.
+- Technology stack is consistent.
+- Architecture diagrams match the application.
+- Database diagrams match the schema.
+- Dispatch explanation matches the actual algorithm.
+- AI explanation matches the actual implementation.
+- Authentication and security explanations are accurate.
+- Screenshots show the actual system.
+- Testing results match recorded evidence.
+- Limitations are acknowledged.
+- Conclusions are supported by findings.
+
+Correct contradictions.
+
+## B. Final system verification
+
+Run the final available:
+- Tests.
+- Type checks.
+- Linting.
+- Production builds.
+- Main integration workflows.
+- Security checks where configured.
+
+Confirm that no documentation or presentation work accidentally broke the source code.
+
+Do not change the working production configuration or production data.
+
+## C. Final document verification
+
+Inspect the complete Word document.
+
+Confirm:
+- Correct cover.
+- Correct academic structure.
+- Complete chapters.
+- Proper tables.
+- Correct diagrams.
+- Proper captions.
+- Updated table of contents.
+- Correct numbering.
+- Proper references.
+- No accidental missing content.
+- No unresolved formatting defects.
+
+## D. Final presentation verification
+
+Inspect every PowerPoint slide.
+
+Confirm:
+- The title slide is correct.
+- All sections are present.
+- Diagrams are readable.
+- Actual screenshots are used.
+- All statistics are verified.
+- Speaker notes are present.
+- No unsupported claims appear.
+- The presentation has a clear beginning, middle and conclusion.
+- The final slides are suitable for an academic defence.
+
+## E. Prepare my study and defence package
+
+Create a separate document called:
+
+`Umodzi_Connect_Defence_Study_Guide.docx`
+
+It must help me understand my entire existing system, not memorise unsupported explanations.
+
+Include:
+
+1. Project overview.
+2. The real problem being solved.
+3. Research objectives and questions.
+4. System architecture explained step by step.
+5. Frontend architecture.
+6. Backend architecture.
+7. Database structure and important relationships.
+8. Authentication and authorization.
+9. Customer workflow.
+10. Technician workflow.
+11. Administrator workflow.
+12. Service request lifecycle.
+13. Smart dispatch logic.
+14. AI classification and fallback.
+15. Messaging and notifications.
+16. Security measures.
+17. Testing methodology and actual results.
+18. Research findings.
+19. System limitations.
+20. Conclusion and recommendations.
+
+For each important feature, explain:
+
+- What it does.
+- Why it exists.
+- How it works.
+- Which part of the system implements it.
+- Which database tables or API routes are involved, where verifiable.
+- What happens when something goes wrong.
+- How to demonstrate it during the defence.
+
+Use beginner-friendly explanations without sacrificing technical accuracy.
+
+## F. Prepare examiner questions
+
+Create:
+
+`Umodzi_Connect_Defence_Questions_and_Answers.docx`
+
+Include realistic questions about:
+- The research problem.
+- Research methodology.
+- System design.
+- Architecture.
+- Database.
+- API development.
+- Authentication.
+- Dispatch algorithm.
+- Geolocation.
+- AI classification.
+- Security.
+- Testing.
+- Limitations.
+- Future improvements.
+
+Provide accurate answers grounded in the actual project.
+
+Include difficult technical questions that an examiner could reasonably ask.
+
+Do not give me answers that claim functionality I have not implemented.
+
+## G. Prepare a practical demonstration checklist
+
+Create:
+
+`Umodzi_Connect_Defence_Demo_Checklist.docx`
+
+Include:
+- Required software and configuration.
+- Test accounts and roles.
+- Database preparation.
+- Application startup.
+- Main demonstration sequence.
+- Expected outcomes.
+- Backup demonstration approach.
+- Known limitations.
+- Things to verify before presenting.
+
+The demo should demonstrate the real customer-to-technician workflow, not just the landing page.
+
+## H. Final folder organisation
+
+Organise final deliverables in a clearly named folder, for example:
+
+`Umodzi_Connect_Defence_Package/`
+
+Include:
+
+- Corrected final Word report.
+- PDF report.
+- Editable PowerPoint.
+- PDF presentation.
+- Study guide.
+- Examiner questions and answers.
+- Demo checklist.
+- Verified diagrams.
+- Final test summary.
+- Outstanding issues and student action list.
+
+Keep original backups separate.
+
+## I. Final completion report
+
+Produce a final handover report showing:
+
+| Area | Required status |
+|---|---|
+| Source code audit | Actual completion status |
+| Critical defects | Fixed or outstanding |
+| Functional tests | Actual results |
+| Security checks | Actual results |
+| Production build | Actual result |
+| Word report | Verified or outstanding |
+| Diagrams | Verified or outstanding |
+| PowerPoint | Verified or outstanding |
+| Speaker notes | Verified or outstanding |
+| Study guide | Verified or outstanding |
+| Examiner questions | Verified or outstanding |
+| Demo checklist | Verified or outstanding |
+
+Finish with three clearly separated lists:
+
+1. **COMPLETED:** Work that was actually implemented and verified.
+2. **STILL REQUIRED FROM THE STUDENT:** Missing information, signatures, approvals, measurements, manual checks or other personal responsibilities.
+3. **RECOMMENDED REMAINING PREPARATION:** Practical testing, presentation rehearsal and study tasks.
+
+Do not claim that the project is completely ready if any critical issue remains.
+
+The final objective is to give me a technically stable project, a correct and professionally formatted report, a complete editable PowerPoint and enough accurate study material to understand and defend the entire Umodzi Connect system confidently.

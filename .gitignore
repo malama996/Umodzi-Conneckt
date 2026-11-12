@@ -23,3 +23,6 @@ backend/scripts/purge-test-fixtures.ts
 # Editor and operating-system files
 .DS_Store
 Thumbs.db
+
+# Microsoft Office lock files created while a document is open (~$name.ext)
+~$*

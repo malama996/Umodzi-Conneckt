@@ -83,7 +83,12 @@ interface WsServerLike {
   emit(event: string, ...args: any[]): boolean;
 }
 type WsModuleLike = {
-  WebSocketServer: new (opts: { noServer: boolean; maxPayload?: number }) => WsServerLike;
+  WebSocketServer: new (opts: {
+    noServer: boolean;
+    maxPayload?: number;
+    /** Selects the subprotocol echoed in the 101 response (RFC 6455 §4.1). */
+    handleProtocols?: (protocols: Set<string>, request: IncomingMessage) => string | false;
+  }) => WsServerLike;
   WebSocket?: { OPEN: number };
 };
 
@@ -136,6 +141,31 @@ export function createWebSocketServer(app: FastifyInstance): { close: () => void
     // Client frames are tiny JSON commands (`subscribe`/`unsubscribe`); a
     // small cap keeps a malformed or hostile peer from forcing large parses.
     maxPayload: 4096,
+    /**
+     * Task 37 — browser handshake fix.
+     *
+     * The browser offers the session token as a subprotocol
+     * (`bearer-<jwt>`), because an upgrade request cannot carry a custom
+     * Authorization header. RFC 6455 §4.1 requires the server's 101 response
+     * to name one of the offered subprotocols; if the client offered any and
+     * the response names none, the browser MUST fail the connection.
+     *
+     * `ws` only emits that header when `handleProtocols` is supplied — with
+     * no hook it sends nothing. Node's `ws` client tolerates the omission,
+     * which is exactly why the realtime suite passed while no browser could
+     * ever connect: chat looked "implemented" and simply never went live.
+     * Echoing the offered `bearer-` entry back satisfies the browser without
+     * weakening anything — the same token already travelled in the request
+     * header, and authorization still happens in `authenticateHandshake`
+     * plus the database-backed conversation check.
+     */
+    handleProtocols: (protocols: Set<string>) => {
+      for (const protocol of protocols) {
+        if (protocol.startsWith('bearer-')) return protocol;
+      }
+      // A client offering no token gets no echo; it is closed with 4001 below.
+      return false;
+    },
   });
 
   httpServer.on('upgrade', (req: IncomingMessage, socket: any, head: any) => {
@@ -198,8 +228,10 @@ export function createWebSocketServer(app: FastifyInstance): { close: () => void
       void handleClientMessage(ws, pendingState, req, raw);
     });
 
-    // 1. Authenticate at the handshake. Failures are closed immediately with
-    //    a protocol-level code rather than being allowed to idle.
+    // 1. Authenticate at the handshake (and echo the offered subprotocol,
+    //    which `handleProtocols` above already selected in the 101 response).
+    //    Failures are closed immediately with a protocol-level code rather
+    //    than being allowed to idle.
     const auth = authenticateHandshake(req);
     if (!auth) {
       safeClose(ws, 4001, 'Authentication failed');

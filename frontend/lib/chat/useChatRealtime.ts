@@ -63,8 +63,10 @@ export function useChatRealtime({
   onReconnect,
   onError,
   enabled = true,
-}: UseChatRealtimeOptions): { status: RealtimeStatus } {
+}: UseChatRealtimeOptions): { status: RealtimeStatus; subscribed: boolean } {
   const [status, setStatus] = useState<RealtimeStatus>('offline');
+  /** True once the server acknowledged this conversation subscription. */
+  const [subscribed, setSubscribed] = useState(false);
   // Latest callbacks in refs so the socket effect never has to re-run just
   // because a handler identity changed (avoids accidental reconnect loops).
   const onMessageRef = useRef(onMessage);
@@ -81,6 +83,7 @@ export function useChatRealtime({
   useEffect(() => {
     if (!enabled || !stableConversation) {
       setStatus('offline');
+      setSubscribed(false);
       return;
     }
     const token = getAccessToken();
@@ -143,6 +146,11 @@ export function useChatRealtime({
           }
           onErrorRef.current?.(data.error);
         }
+        if (data.type === 'subscribed') {
+          // Diagnostics only: exposed so the connection banner can distinguish
+          // "socket open but subscription refused" from "socket refused".
+          setSubscribed(true);
+        }
       };
 
       socket.onclose = () => {
@@ -167,6 +175,7 @@ export function useChatRealtime({
     connect();
 
     return () => {
+      setSubscribed(false);
       closedByUs = true;
       if (socket && socket.readyState <= WebSocket.OPEN) {
         try {
@@ -178,5 +187,5 @@ export function useChatRealtime({
     };
   }, [enabled, stableConversation]);
 
-  return { status };
+  return { status, subscribed };
 }

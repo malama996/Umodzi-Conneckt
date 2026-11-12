@@ -57,14 +57,24 @@ assert(
 // Vocabulary parity with the backend closed set
 assert(
   JSON.stringify([...AUDIT_EVENT_TYPES]) ===
+    // Snapshot of AUDIT_EVENT_TYPES in backend/src/privacy/auditService.ts.
+    // Order and membership both matter: the filter offers exactly what the
+    // server accepts, and the server answers 400 for anything else. Updated
+    // 2026-11-12 after password-recovery, per-document verification and
+    // conversation-metadata events were added — the frontend list had already
+    // been extended, this expectation had not, which is why it failed.
     JSON.stringify([
       'auth.login_failed',
       'auth.login_succeeded',
       'auth.account_locked',
+      'auth.password_reset_requested',
+      'auth.password_reset_completed',
       'privacy.data_exported',
       'privacy.account_deleted',
       'admin.user_status_changed',
       'admin.verification_decision',
+      'admin.verification_document_decision',
+      'admin.conversation_metadata_accessed',
       'security.verification_document_accessed',
       'security.verification_document_deleted',
       'account.suspended',
