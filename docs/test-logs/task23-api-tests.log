@@ -1,0 +1,159 @@
+◇ injected env (19) from .env
+
+public endpoints + unauthenticated rejections
+  ok   GET /health is public
+  ok   GET /categories returns 9
+  ok   GET /technicians is public
+  ok   GET /auth/me requires authentication
+  ok   POST /auth/refresh without cookie → 401
+  ok   POST /requests unauthenticated → 401
+  ok   GET /requests/:id unauthenticated → 401
+
+registration rules
+  ok   customer registration → 201
+  ok   registered role is customer
+  ok   new accounts are active
+  ok   registration response contains no password material
+  ok   duplicate email (case-insensitive) → 409
+  ok   public registration of administrator → 403
+  ok   password below 8 characters → 400
+  ok   technician registration → 201
+  ok   technician without category → 400
+  ok   no administrator exists outside the controlled seed
+  ok   technician account has exactly one linked profile
+
+login negatives — generic errors
+  ok   unknown email → 401
+  ok   wrong password → 401
+  ok   unknown email and wrong password are byte-identical responses
+  ok   generic message matches the specified wording
+  ok   empty credentials use the same generic 401
+
+login positives + refresh cookie policy
+  ok   customer login → 200
+  ok   access token is a 3-part JWT
+  ok   login response never echoes the password
+  ok   login sets the refresh cookie
+  ok   refresh cookie is HttpOnly
+  ok   refresh cookie is scoped to /api/v1/auth
+  ok   refresh cookie is SameSite=Lax
+  ok   no Secure attribute over plain HTTP (set automatically for https)
+  ok   refresh cookie lifetime is 7 days
+  ok   second customer registration → 201
+  ok   technician login → 200
+  ok   technician /auth/me → 200
+  ok   technician /auth/me exposes the linked profile id and name
+  ok   seeded administrator login → 200
+  ok   admin access token issued
+
+access token claims + verification negatives
+  ok   token carries only minimal claims (aud,exp,iat,iss,jti,role,sub)
+  ok   sub is the user id
+  ok   role claim matches the account
+  ok   token algorithm is HS256
+  ok   token contains no PII beyond the role/id claims
+  ok   malformed token → 401
+  ok   tampered signature → 401
+  ok   token signed with a foreign secret → 401
+  ok   wrong issuer → 401
+  ok   wrong audience → 401
+  ok   expired token → 401
+  ok   token without role claim → 401
+  ok   non-UUID sub → 401
+  ok   correctly crafted token with valid claims → 200 (positive control)
+
+role + ownership matrix
+  ok   customer creates a request → 201
+  ok   backend derived ownership from the JWT identity, not the client
+  ok   technician creating a request → 403 (role gate)
+  ok   administrator creating a request → 403 (customer-only endpoint)
+  ok   owner reads own request → 200
+  ok   other customer reads it → 404 (existence hidden)
+  ok   uninvolved technician reads it → 404
+  ok   administrator reads it → 200
+  ok   other customer PATCHes it → 404
+  ok   other customer lists its offers → 404
+  ok   invalid request id → 400 (not 500)
+  ok   technician profile id known to the session
+  ok   technician reads own offers → 200
+  ok   another technician's collection → 403 (endpoint misuse)
+  ok   customer reading a technician collection → 403
+  ok   invalid technician id → 400
+  ok   administrator reads any technician collection → 200
+  FAIL owner customer creates a dispatched offer → 201
+  ok   other customer creating an offer → 404
+  ok   offer targeting a non-existent technician → 404
+  FAIL technician holding an offer reads the request → 200
+  FAIL technician participant lists the offers → 200
+  ok   owner customer lists the offers → 200
+  FAIL technician writing an out-of-scope status → 403
+  FAIL technician participant records matched → 200
+  FAIL owner customer keeps the full status vocabulary → 200
+  FAIL unrelated customer responding to an offer → 404
+  FAIL owning technician accepts its offer → 200
+  FAIL second offer (seeded technician) created → 201
+  FAIL owner customer rejects an offer on their own request → 200
+  ok   invalid offer id → 400 (not 500)
+  ok   admin lists users → 200
+  ok   admin listing contains no password material
+  ok   customer hitting the admin endpoint → 403
+  ok   anonymous admin endpoint → 401
+
+legacy NULL-owner rows (never claimed)
+  ok   legacy fixture row exists with NULL ownership
+  ok   a customer cannot read a legacy NULL-owner request → 404
+  ok   administrator can read a legacy NULL-owner request → 200
+
+account status is authoritative from the database
+  ok   existing access token is rejected immediately after suspension (401, not 200)
+  ok   login with valid password but suspended account → 403
+  ok   suspension message is explicit only after password proof
+  ok   every protected endpoint rejects the suspended account → 401
+  ok   restoring status re-enables the same token (live DB read)
+
+refresh rotation, reuse handling, logout
+  ok   refresh with valid cookie → 200
+  ok   refresh rotates the cookie value
+  ok   refresh issues a fresh access token
+  ok   rotated cookie stays HttpOnly
+  ok   rotated-out cookie inside the grace window → 200 (concurrent tabs)
+  ok   unknown refresh token → 401
+  ok   logout → 200
+  ok   logout clears the refresh cookie
+  ok   logged-out cookie cannot refresh (logout is never grace-bypassable)
+  ok   customer B has an active session
+  ok   replay beyond the grace window → 401
+  ok   reuse detection revokes EVERY session for that user
+  ok   expired session → 401
+  ok   database stores only SHA-256 hashes, never raw tokens
+
+CORS: credentialed, origin allow-list only
+  ok   preflight for /auth/login succeeds
+  ok   preflight echoes exactly the configured origin
+  ok   preflight allows credentials
+  ok   origin is never "*"
+  ok   a foreign origin is never reflected back (browsers reject the mismatch)
+  ok   actual (non-preflight) responses carry the credentialed CORS headers
+
+auth rate limiting (in-memory, auth routes only) — runs LAST
+  ok   pre-limit failed login stays a generic 401 (attempt 1)
+  ok   pre-limit failed login stays a generic 401 (attempt 2)
+  ok   pre-limit failed login stays a generic 401 (attempt 3)
+  ok   pre-limit failed login stays a generic 401 (attempt 4)
+  ok   pre-limit failed login stays a generic 401 (attempt 5)
+  ok   pre-limit failed login stays a generic 401 (attempt 6)
+  ok   pre-limit failed login stays a generic 401 (attempt 7)
+  ok   pre-limit failed login stays a generic 401 (attempt 8)
+  ok   pre-limit failed login stays a generic 401 (attempt 9)
+  ok   pre-limit failed login stays a generic 401 (attempt 10)
+  ok   pre-limit failed login stays a generic 401 (attempt 11)
+  ok   pre-limit failed login stays a generic 401 (attempt 12)
+  ok   429 body is a safe rate-limit message
+  ok   repeated credential guessing trips the per-IP rate limit with 429
+  ok   public endpoints are unaffected by the auth limiter
+  ok   /health is unaffected by the auth limiter
+
+cleanup — restoring the baseline dataset
+  ok   no test rows remain
+
+122 passed, 10 failed

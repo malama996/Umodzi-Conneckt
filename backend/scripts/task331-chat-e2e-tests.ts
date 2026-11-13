@@ -40,9 +40,12 @@ if (!process.env.DATABASE_URL || !adminEmail || !adminPassword) {
   console.error('Need DATABASE_URL + ADMIN_EMAIL/ADMIN_PASSWORD in backend/.env');
   process.exit(1);
 }
+// Local PostgreSQL serves no TLS, so requesting it makes the pool fail before
+// the first assertion. Only a non-local (hosted) database needs SSL.
+const isLocalDb = /^(localhost|127\.0\.0\.1|::1|\[::1\])$/i.test(new URL(process.env.DATABASE_URL).hostname);
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false },
+  ssl: isLocalDb ? false : { rejectUnauthorized: false },
 });
 
 let passed = 0;

@@ -1,0 +1,13 @@
+◇ injected env (19) from .env
+C:\Users\ARNOLD MALAMA\OneDrive\Desktop\umodzi-build\backend\scripts\task28-push-delivery-tests.ts:57
+    throw new Error(
+          ^
+
+Error: Missing stub push-service TLS credentials. Regenerate with: openssl req -x509 -newkey rsa:2048 -keyout %TEMP%\d6-push-test-key.pem -out %TEMP%\d6-push-test-cert.pem -days 3650 -nodes -subj /CN=127.0.0.1 -addext subjectAltName=IP:127.0.0.1
+    at stubCredentials (C:\Users\ARNOLD MALAMA\OneDrive\Desktop\umodzi-build\backend\scripts\task28-push-delivery-tests.ts:57:11)
+    at <anonymous> (C:\Users\ARNOLD MALAMA\OneDrive\Desktop\umodzi-build\backend\scripts\task28-push-delivery-tests.ts:102:33)
+    at ModuleJob.run (node:internal/modules/esm/module_job:430:25)
+    at async node:internal/modules/esm/loader:639:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)
+
+Node.js v25.8.0

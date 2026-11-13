@@ -110,3 +110,30 @@ root. Lint passes when invoked directly; it is simply skipped inside the build.
 
 Non-source deliverables produced this session: corrected report, 14-slide deck,
 four Word documents, seven markdown references, defence package.
+
+---
+
+## Addendum — database-backed run, 13 November 2026
+
+Executed once, sequentially, on a database created, migrated and seeded by the runner
+(PostgreSQL 18, PostGIS 3.7, migrations 001–012, nine technician prototypes + administrator).
+
+- Assertions executed: **839**
+- Passed: **671**
+- Failed: **168**
+- Pass rate over executed assertions: **80.0 %**
+- Scripts that recorded no assertion: **19 of 31**
+- Fully green suites: `task23-migration-tests` (38/0), `task28-3a1-location-privacy-tests` (48/0)
+
+Failures are dominated by login rate limiting — the API log records 13 x HTTP 429, each leaving a
+suite without a token and every dependent assertion failing 401. Remaining causes: missing stub TLS
+certificates for two push suites, and three `task352` helpers that are Supabase-only.
+
+Harness fixes that made this run possible: a migration/seeder host guard that refuses anything but
+loopback, a standalone idempotent seeder (`npm run seed`), SSL selection by host in
+`task331`–`task334`, and runner wiring so the baseline is seeded before any suite runs.
+
+Chapter Five of `project-reference/Umodzi_Connect_Final_Report_CORRECTED.docx` carries these
+figures: the eight-row functional table and a §5.1.1 paragraph stating 839 / 671 / 168, the
+656-assertion table scope, the 183-assertion documentation suite, and 19 scripts without assertions.
+Full account: `docs/DB-TEST-RUN-2026-11-13.md`.

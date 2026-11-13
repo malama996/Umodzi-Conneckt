@@ -1,0 +1,8 @@
+◇ injected env (19) from .env
+A. pooler (current DATABASE_URL):
+  pooler: search_path = "$user", public
+  pooler: st_y(geography) → FAIL: function st_y(geography) does not exist
+B. direct endpoint, plain username:
+  direct-plain: connection failed: getaddrinfo ENOTFOUND .db.supabase.com
+C. direct endpoint, pooler-style username:
+  direct-suffixed: connection failed: getaddrinfo ENOTFOUND .db.supabase.com

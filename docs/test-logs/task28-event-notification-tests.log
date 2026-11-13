@@ -1,0 +1,51 @@
+◇ injected env (19) from .env
+
+fixtures: 2 users (direct SQL — helper takes ids, no auth involved)
+Migrations up to date (12 already applied).
+  ok   fixture users created
+
+persistence
+  ok   valid event → created:true
+  ok   created result carries the notification
+  ok   returned fields match the event exactly (status pending)
+  ok   exactly one row persisted
+  ok   stored status is pending (not sent)
+  ok   sent_at stays NULL
+  ok   provider_message_id stays NULL
+  ok   failure_reason stays NULL
+
+idempotency
+  ok   duplicate key → created:false
+  ok   duplicate returns the EXISTING notification id
+  ok   duplicate event creates no second row
+  ok   5 concurrent duplicates all return created:false
+  ok   concurrent duplicates all return the same existing id
+  ok   still exactly one row after concurrent duplicates
+  ok   different referenceId → separate notification
+  ok   different recipient → separate notification
+
+recipients
+  ok   null userId → safe skip (missing-recipient)
+  ok   undefined userId → safe skip
+  ok   skips create no rows (3 suite rows total)
+  ok   invalid userId UUID → 400
+
+validation
+  ok   empty type → 400
+  ok   empty title → 400
+  ok   empty message → 400
+  ok   bad referenceId → 400
+  ok   unknown referenceType → 400
+  ok   unknown channel → 400
+  ok   oversized title → 400
+  ok   oversized message → 400
+
+silence (no push, no SMS)
+  ok   helper completes with network forbidden
+
+cleanup — restoring the baseline (seeded admin preserved)
+  ok   notifications back to the baseline count (0)
+  FAIL no fixture accounts remain
+  FAIL seeded administrator preserved
+
+31 passed, 2 failed

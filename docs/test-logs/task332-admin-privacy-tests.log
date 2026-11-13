@@ -1,0 +1,68 @@
+◇ injected env (19) from .env
+  ok   registered task332p.customer.mwesvk1x@umodzi.test (201)
+  ok   registered task332p.technician.mwesvk1x@umodzi.test (201)
+  ok   registered task332p.other.mwesvk1x@umodzi.test (201)
+  ok   all fixtures logged in
+  ok   ID document uploaded (201)
+  ok   verification submitted (200)
+  FAIL admin login (401)
+  FAIL fixture tech verified (401)
+  ok   request created (201)
+  FAIL dispatch offered to THIS run’s verified tech (another eligible tech won — clear leftovers and rerun)
+  FAIL offer accepted (400)
+  FAIL conversation resolved by customer
+  FAIL participants posted real content (201/201)
+
+A. anonymous surfaces answer 401
+  ok   anon detail 401
+  ok   anon history 401
+  ok   anon send 401
+  ok   anon read-state 401
+  ok   anon request-scope 401
+  ok   anon list 401
+  ok   anon admin metadata 401
+
+B. administrator cannot reach message content anywhere (404)
+  FAIL admin conversation detail → 404 (401)
+  FAIL admin message history → 404 (401)
+  FAIL admin send → 404 (401)
+  FAIL admin read-state change → 404 (401)
+  FAIL admin request-scoped conversation → 404 (401)
+  FAIL admin phone contact → 404 (401)
+  FAIL admin own list → 200 (self-scoped) (401)
+  FAIL admin own list contains neither fixture conversation nor its content
+  ok   admin denial bodies leak no message or request content
+  FAIL admin probes did not mark messages read
+  ok   no administrator message exists in the thread
+
+C. administrator metadata endpoint: exact fields, no content
+  FAIL admin metadata → 200 (401)
+  FAIL metadata top-level field set exact (no data)
+  ok   metadata payload contains no message or request body text
+
+D. metadata endpoint is role-gated and validates ids
+  ok   customer metadata → 403 (403)
+  ok   technician metadata → 403 (403)
+  ok   unrelated metadata → 403 (403)
+  FAIL malformed id → 400
+  FAIL unknown conversation → 404
+
+E. audit: content-free record, permission-controlled read
+  FAIL repeat metadata read 200
+  FAIL metadata reads audited (0 records)
+  ok   no recent audit row contains message text
+  FAIL admin audit list 200 (401)
+  ok   customer audit list → 403 (403)
+  ok   unrelated audit list → 403 (403)
+  ok   anon audit list 401
+
+F. customer↔technician chat still works (regression)
+  FAIL technician reads customer message
+  FAIL customer reads technician reply
+  FAIL participant read-state 200
+  FAIL technician can still send after admin probes (201)
+  FAIL unrelated user content → 404 (400)
+  cleanup: users=3
+  baseline: users=0 requests=0 techs=9 sessions=0 messages=0 audit=51
+
+24 passed, 27 failed

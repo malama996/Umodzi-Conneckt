@@ -1,0 +1,67 @@
+◇ injected env (19) from .env
+  ok   registered task333.customer.mwesvy00@umodzi.test (201)
+  ok   registered task333.technician.mwesvy00@umodzi.test (201)
+  ok   registered task333.other.mwesvy00@umodzi.test (201)
+  ok   all fixtures logged in
+  ok   ID document uploaded (201)
+  ok   verification submitted (200)
+  FAIL admin login (401)
+  FAIL fixture tech verified (401)
+  ok   request created (201)
+  FAIL dispatch offered to THIS run’s verified tech (another eligible tech won — clear leftovers and rerun)
+  FAIL offer accepted (400)
+  FAIL conversation resolved
+  ok   authenticated WS connection receives `connected` ack
+  FAIL immediate subscribe-from-open is buffered, not dropped
+  ok   unauthenticated handshake closed 4001 (4001 Authentication failed)
+  ok   garbage token closed 4001 (4001 Authentication failed)
+  FAIL participant subscription acknowledged
+  ok   malformed JSON → `Invalid message`
+  ok   bad uuid format → `Invalid conversation id format`
+  ok   unknown conversation → `Conversation not found`
+  ok   unknown command shape → `Unknown message type`
+  FAIL unrelated user subscription denied by DB policy (Unknown message type)
+  FAIL administrator subscription denied (role is not an access grant) (no answer)
+  FAIL technician (participant) subscription acknowledged
+  FAIL customer send persisted 201 (400)
+  FAIL REST response carries the message id
+  FAIL technician received message event
+  FAIL event carries senderId + conversationId
+  FAIL exactly ONE event per persisted message (no duplicates) (0)
+  FAIL sender’s own socket receives exactly one echo event (0)
+  ok   administrator and unrelated user receive no events
+  ok   event payload contains no message content (ids only)
+  ok   invalid sends → 400 (oversized/whitespace/strict)
+  ok   no event generated for failed persistence
+  FAIL technician reply persisted 201
+  FAIL recipient received exactly one event for the reply
+  FAIL REST history still works (200)
+  FAIL REST history holds each message exactly once (stable ids)
+  ok   no duplicate ids in REST history
+  FAIL chronological order preserved
+  FAIL message sent while technician socket is down → 201
+  ok   no replay of missed messages on reconnect (events are live-only)
+  FAIL REST recovers the missed message exactly once on every read
+  FAIL post-reconnect send → 201
+  FAIL live delivery works again after reconnect
+  FAIL unsubscribe acknowledged
+  FAIL send after customer unsubscribe → 201
+  ok   unsubscribed participant receives no events
+  ok   administrator still receives no events
+  ok   unrelated user still receives no events
+  ok   new connection works after rapid open/close churn
+  FAIL send after churn → 201 (server healthy)
+  FAIL delivery continues after churn
+  … waiting up to 34s for the server heartbeat ping
+  ok   server heartbeat ping observed within one interval
+  FAIL administrator HTTP content access still 404/404
+  FAIL unrelated REST send still 404
+  ok   anonymous REST read still 401
+  FAIL read receipt PATCH still 200
+  FAIL readAt set after recipient read (REST regression)
+  ok   no message content ever crossed the WebSocket (all six markers absent)
+  ok   administrator/unrelated sockets saw zero message events end-to-end
+  cleanup: users=3
+  baseline: users=0 requests=0 techs=9 sessions=0 messages=0 audit=55
+
+28 passed, 33 failed

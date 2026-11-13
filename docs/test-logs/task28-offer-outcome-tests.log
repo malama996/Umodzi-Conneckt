@@ -1,0 +1,26 @@
+◇ injected env (19) from .env
+
+fixtures: 1 customer + 1 linked technician
+  ok   registration outcome-a-282d3-mweso9a68347@umodzi.test → 201
+  ok   registration outcome-t-282d3-mweso9a68347@umodzi.test → 201
+  ok   both sessions issued
+  ok   technician profile linked
+
+accept → customer
+  ok   fixture request → 201
+  FAIL fixture offer → 201
+  FAIL accept → 200 (route behavior preserved)
+  FAIL exactly one accept notification
+Test runner crashed: TypeError: Cannot read properties of undefined (reading 'user_id')
+    at testAccept (C:\Users\ARNOLD MALAMA\OneDrive\Desktop\umodzi-build\backend\scripts\task28-offer-outcome-tests.ts:228:21)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async main (C:\Users\ARNOLD MALAMA\OneDrive\Desktop\umodzi-build\backend\scripts\task28-offer-outcome-tests.ts:413:3)
+
+cleanup — restoring the baseline (seeded admin preserved)
+  ok   no notifications remain
+  ok   no requests/offers remain
+  ok   no fixture accounts remain
+  ok   technicians back to the 9 seed prototypes
+  ok   no sessions remain
+  FAIL seeded administrator preserved
+  ok   suite issued exactly 2 logins (saw 2)

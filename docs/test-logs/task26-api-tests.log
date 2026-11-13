@@ -1,0 +1,21 @@
+◇ injected env (19) from .env
+
+fixtures: two technicians + one customer + one seed profile
+  ok   technician A registration → 201
+  ok   technician B registration → 201
+  ok   customer registration → 201
+Test runner crashed: TypeError: Cannot read properties of undefined (reading 'id')
+    at sessionFrom (C:\Users\ARNOLD MALAMA\OneDrive\Desktop\umodzi-build\backend\scripts\task26-api-tests.ts:174:25)
+    at createFixtures (C:\Users\ARNOLD MALAMA\OneDrive\Desktop\umodzi-build\backend\scripts\task26-api-tests.ts:229:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async main (C:\Users\ARNOLD MALAMA\OneDrive\Desktop\umodzi-build\backend\scripts\task26-api-tests.ts:854:20)
+
+cleanup — restoring the baseline (seeded admin preserved)
+  ok   no fixture accounts remain
+  ok   technicians back to the 9 seed prototypes
+  ok   no verification documents remain
+  ok   no sessions remain
+  FAIL seeded administrator preserved
+  ok   no requests/offers touched
+  ok   every uploaded fixture file removed from storage
+  FAIL suite issued exactly 4 logins (saw 1)

@@ -1,0 +1,28 @@
+◇ injected env (19) from .env
+
+fixtures: 1 customer + 1 linked technician
+  ok   registration offer-n282d2-mwesndeu1075@umodzi.test → 201
+  ok   registration offer-t282d2-mwesndeu1075@umodzi.test → 201
+  ok   both sessions issued
+  ok   technician profile linked
+  ok   seed technicians present
+  ok   Chanda M. has user_id NULL (NULL-recipient precondition)
+
+offer-created notification
+  ok   fixture request → 201
+  FAIL eligible offer creation → 201 (hook does not break the route)
+  FAIL created offer id returned
+  FAIL exactly one notification for the created offer
+Test runner crashed: TypeError: Cannot read properties of undefined (reading 'user_id')
+    at testOfferCreatedNotification (C:\Users\ARNOLD MALAMA\OneDrive\Desktop\umodzi-build\backend\scripts\task28-offer-notification-tests.ts:223:18)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async main (C:\Users\ARNOLD MALAMA\OneDrive\Desktop\umodzi-build\backend\scripts\task28-offer-notification-tests.ts:364:19)
+
+cleanup — restoring the baseline (seeded admin preserved)
+  ok   no notifications remain
+  ok   no requests/offers remain
+  ok   no fixture accounts remain
+  ok   technicians back to the 9 seed prototypes
+  ok   no sessions remain
+  FAIL seeded administrator preserved
+  ok   suite issued exactly 2 logins (saw 2)

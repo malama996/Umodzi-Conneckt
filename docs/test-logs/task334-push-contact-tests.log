@@ -1,0 +1,85 @@
+◇ injected env (19) from .env
+
+fixtures: 3 users + verified-technician relationship
+  ok   registered task334.customer.mwesxwpr@umodzi.test (201)
+  ok   registered task334.technician.mwesxwpr@umodzi.test (201)
+  ok   registered task334.other.mwesxwpr@umodzi.test (201)
+  ok   all fixtures logged in
+  ok   ID document uploaded (201)
+  ok   verification submitted (200)
+  FAIL admin login (401)
+  FAIL fixture tech verified (401)
+  FAIL admin user list carries no phone field
+  ok   request created (201)
+  FAIL dispatch offered to THIS run’s verified tech (another eligible tech won — clear leftovers and rerun)
+  FAIL offer accepted (400)
+  FAIL conversation resolved
+
+A. push subscription registration/removal
+  ok   anonymous register → 401 (401)
+  ok   non-HTTPS endpoint → 400 (400)
+  ok   user_id in body rejected by strict schema (400)
+  ok   register device A → 201
+  ok   response exposes id/endpoint only — never the key material [id,endpoint,userAgent,createdAt,updatedAt]
+  ok   stored against the AUTHENTICATED user with the exact keys
+  ok   re-register same endpoint → 200 update (200)
+  ok   re-register rotates keys on ONE row (no duplicate)
+  ok   second endpoint → second row (multi-device)
+  ok   other user’s DELETE → 404, row retained
+  ok   anonymous DELETE → 401 (401)
+  ok   malformed DELETE id → 400 (400)
+  ok   owner DELETE → 200, row removed
+  ok   double DELETE → 404 (404)
+  ok   owner DELETE device B → 200
+
+B. chat → notification pipeline (recipient, payload, ordering)
+  ok   no chat notifications exist before any message
+  FAIL M1 persisted (400)
+  FAIL M1 → exactly one row for the RECIPIENT (0)
+  ok   M1 → zero rows for the SENDER
+  ok   M1 → zero rows for an UNRELATED user
+  FAIL M2 persisted (400)
+  FAIL M2 → recipient gets a SECOND row (not suppressed) (0)
+  ok   M2 → sender still has zero rows
+  ok   rows are distinct (one row per message)
+  ok   recipient registers unreachable subscription
+  FAIL M3 persisted despite failing push delivery (400)
+  FAIL M3 → one row for customer (the recipient) (0)
+  ok   M3 → sender (technician) gains nothing
+  FAIL M3 message persisted and retrievable
+  ok   network failure does NOT prune the subscription (only 404/410 do)
+  FAIL failed sends rejected (400/400/400/401)
+  ok   failed sends created NO notifications (3 messages → 3 rows) (0 → 0)
+  FAIL exactly one notification row per persisted message (0)
+
+C. contact/call authorization & phone correctness
+  ok   customer stores own number → normalized +260971234567 (200)
+  ok   invalid number → 400, never stored (400)
+  ok   invalid write left the stored number untouched
+  ok   technician stores own number → normalized +260977654321 (200)
+  ok   GET /me/phone → own number (customer)
+  ok   GET /me/phone → own number (technician)
+  ok   GET /me/phone → null when none (never someone else’s)
+  FAIL customer contact → the TECHNICIAN’s exact stored number [undefined]
+  FAIL tel: is the properly encoded form of the normalized number [undefined]
+  FAIL contact echoes the requested request id
+  FAIL technician contact → the CUSTOMER’s exact stored number [undefined]
+  ok   a participant never receives their OWN number as "the contact"
+  FAIL technician side tel: encoded correctly
+  ok   unrelated participant → 404 (404)
+  ok   anonymous contact → 401 (401)
+  FAIL admin re-login for contact check (401)
+  FAIL administrator → 404 (role is never a grant) (401)
+  ok   denied contact response leaks no number
+  ok   missing number → 404 (404)
+  FAIL missing number → honest, human-readable reason
+  FAIL the other direction still resolves (only the missing side fails)
+
+cleanup
+  cleanup: users=3, admin sessions revoked+removed=0
+  ok   all task fixtures removed [{"users":0,"subs":0,"phones":0,"notifs":0,"convMsgs":0}]
+  FAIL seeded admin preserved
+  ok   audit history intact (never deleted: 55 → 60)
+  baseline: users=0 requests=0 conversations=0 messages=0 subs=0 phones=0 sessions=0 audit=60
+
+45 passed, 25 failed

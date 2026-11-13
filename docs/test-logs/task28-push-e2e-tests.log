@@ -1,0 +1,13 @@
+◇ injected env (19) from .env
+C:\Users\ARNOLD MALAMA\OneDrive\Desktop\umodzi-build\backend\scripts\task28-push-e2e-tests.ts:114
+    throw new Error('Missing stub push-service TLS credentials in the OS temp dir.');
+          ^
+
+Error: Missing stub push-service TLS credentials in the OS temp dir.
+    at stubCredentials (C:\Users\ARNOLD MALAMA\OneDrive\Desktop\umodzi-build\backend\scripts\task28-push-e2e-tests.ts:114:11)
+    at <anonymous> (C:\Users\ARNOLD MALAMA\OneDrive\Desktop\umodzi-build\backend\scripts\task28-push-e2e-tests.ts:118:33)
+    at ModuleJob.run (node:internal/modules/esm/module_job:430:25)
+    at async node:internal/modules/esm/loader:639:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)
+
+Node.js v25.8.0

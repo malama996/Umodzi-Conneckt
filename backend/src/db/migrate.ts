@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Pool } from 'pg';
 import { pool as runtimePool } from './client.js';
+import { assertLocalDatabase } from './assertLocalDatabase.js';
 
 /**
  * Lightweight deterministic migration runner (Task 23).
@@ -51,6 +52,9 @@ function migrationsDir(): string {
 }
 
 export async function runMigrations(): Promise<MigrationResult> {
+  assertLocalDatabase(process.env.MIGRATIONS_DATABASE_URL, 'MIGRATIONS_DATABASE_URL', 'migrate');
+  assertLocalDatabase(process.env.DATABASE_URL, 'DATABASE_URL', 'migrate');
+
   const dir = migrationsDir();
   const files = fs
     .readdirSync(dir)

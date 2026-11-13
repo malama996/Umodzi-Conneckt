@@ -1,0 +1,84 @@
+◇ injected env (0) from .env
+
+main database — runner behaviour over a populated schema
+Migrations up to date (12 already applied).
+  ok   first contact processes every migration file (applied or already recorded)
+Migrations up to date (12 already applied).
+  ok   immediate re-run applies nothing
+  ok   immediate re-run skips every file via the ledger
+  ok   ledger contains exactly the ordered migration files
+Applied migrations: 001_initial_schema.sql, 002_authentication.sql, 003_technician_verification.sql, 004_reviews.sql, 005_notifications_and_push.sql, 006_privacy_and_audit.sql, 007_communication.sql, 008_communication_phone.sql, 009_revoke_data_api_privileges.sql, 010_enable_rls_and_app_policies.sql, 011_verification_review_and_password_reset.sql, 012_dispatch_integrity.sql
+  ok   re-running from an empty ledger applies every file again
+  ok   nothing is skipped on a clean-ledger re-run
+  ok   legacy fixture row survives a full migration re-run
+  ok   legacy request keeps customer_user_id = NULL (never claimed)
+  ok   legacy request content is unchanged
+  ok   no rows are added, removed, or rewritten by re-running migrations
+  ok   ledger is restored to the full ordered file list
+  ok   migrations directory holds at least the four migration files
+  ok   every migration filename follows NNN_description.sql
+  ok   001_initial_schema.sql contains no DROP/TRUNCATE/data-clearing SQL
+  ok   001_initial_schema.sql contains no embedded credentials
+  ok   002_authentication.sql contains no DROP/TRUNCATE/data-clearing SQL
+  ok   002_authentication.sql contains no embedded credentials
+  ok   003_technician_verification.sql contains no DROP/TRUNCATE/data-clearing SQL
+  ok   003_technician_verification.sql contains no embedded credentials
+  ok   004_reviews.sql contains no DROP/TRUNCATE/data-clearing SQL
+  ok   004_reviews.sql contains no embedded credentials
+  ok   005_notifications_and_push.sql contains no DROP/TRUNCATE/data-clearing SQL
+  ok   005_notifications_and_push.sql contains no embedded credentials
+  ok   006_privacy_and_audit.sql contains no DROP/TRUNCATE/data-clearing SQL
+  ok   006_privacy_and_audit.sql contains no embedded credentials
+  ok   007_communication.sql contains no DROP/TRUNCATE/data-clearing SQL
+  ok   007_communication.sql contains no embedded credentials
+  ok   008_communication_phone.sql contains no DROP/TRUNCATE/data-clearing SQL
+  ok   008_communication_phone.sql contains no embedded credentials
+  ok   009_revoke_data_api_privileges.sql contains no DROP/TRUNCATE/data-clearing SQL
+  ok   009_revoke_data_api_privileges.sql contains no embedded credentials
+  ok   010_enable_rls_and_app_policies.sql contains no DROP/TRUNCATE/data-clearing SQL
+  ok   010_enable_rls_and_app_policies.sql contains no embedded credentials
+  ok   011_verification_review_and_password_reset.sql contains no DROP/TRUNCATE/data-clearing SQL
+  ok   011_verification_review_and_password_reset.sql contains no embedded credentials
+  ok   012_dispatch_integrity.sql contains no DROP/TRUNCATE/data-clearing SQL
+  ok   012_dispatch_integrity.sql contains no embedded credentials
+◇ injected env (0) from .env
+
+fresh database — full schema on first run, no-op on second
+Applied migrations: 001_initial_schema.sql, 002_authentication.sql, 003_technician_verification.sql, 004_reviews.sql, 005_notifications_and_push.sql, 006_privacy_and_audit.sql, 007_communication.sql, 008_communication_phone.sql, 009_revoke_data_api_privileges.sql, 010_enable_rls_and_app_policies.sql, 011_verification_review_and_password_reset.sql, 012_dispatch_integrity.sql
+  ok   first run applies every migration
+  ok   files apply in ascending filename order
+  ok   table technicians exists
+  ok   table service_requests exists
+  ok   table dispatch_offers exists
+  ok   table users exists
+  ok   table sessions exists
+  ok   table schema_migrations exists
+  ok   table technician_verification_documents exists
+  ok   table reviews exists
+  ok   ownership columns (customer_user_id, technicians.user_id) exist
+  ok   index uq_users_email exists
+  ok   index uq_sessions_token_hash exists
+  ok   index uq_technicians_user_id exists
+  ok   index idx_service_requests_customer_user_id exists
+  ok   index uq_reviews_service_request exists
+  ok   index idx_reviews_technician_id exists
+  ok   ownership FK (ON DELETE SET NULL) exists
+  ok   users.role CHECK enforces the three roles
+  ok   users.account_status CHECK enforces active/suspended/disabled
+  ok   technicians carry the 7 Task 26 columns
+  ok   technicians.verification_status CHECK enforces the lifecycle
+  ok   documents.document_type CHECK enforces the vocabulary
+  ok   document storage-key uniqueness + technician index exist
+  ok   reviews.rating CHECK enforces 1..5 stars
+  ok   reviews carry three foreign keys (request, customer, technician)
+  ok   one-review-per-service unique index exists
+  ok   PostGIS extension is present
+Migrations up to date (12 already applied).
+  ok   second run applies nothing
+  ok   second run skips all files via the ledger
+  ok   fresh ledger lists exactly the ordered migration files
+
+31 passed, 0 failed
+  ok   fresh-database child phase completed successfully
+
+38 passed, 0 failed

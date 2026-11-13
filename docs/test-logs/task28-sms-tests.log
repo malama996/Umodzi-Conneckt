@@ -1,0 +1,70 @@
+◇ injected env (19) from .env
+
+fixtures: 1 user (direct SQL — provider takes ids, no auth involved)
+  ok   fixture user created
+
+provider selection + credential validation
+  ok   SMS_PROVIDER=africas_talking reaches the AT adapter (id passed through)
+  ok   adapter posts to the real Africa's Talking endpoint
+  ok   adapter sends username + recipient (no credential values asserted beyond presence)
+  ok   africastalking alias routes identically (legacy SMS_* names as fallback)
+  ok   missing credentials → success:false (never fabricated)
+  ok   missing-credential error names the required variables
+  ok   missing credentials → no network call attempted
+  ok   empty recipient → failure, no call
+
+adapter honesty (mocked HTTP boundary)
+  ok   provider-reported failure stays a failure with its reason
+  ok   HTTP 400 → success:false
+  ok   network throw → failure carrying the cause
+
+persistence + provider replaceability
+  ok   sendSmsNotification reports real success
+  ok   success row stores channel/status/real provider id
+  ok   provider failure propagates
+  ok   failure row stores failed status + reason
+  ok   custom provider used verbatim (no hidden AT call)
+
+SMS policy gate
+  ok   policy allows dispatch_offer_accepted
+  ok   policy allows technician_verification_approved
+  ok   policy allows technician_verification_rejected
+  ok   policy excludes dispatch_offer_created
+  ok   policy excludes dispatch_offer_rejected
+  ok   policy excludes dispatch_offer_timed_out
+  ok   policy excludes request_status_completed
+  ok   policy excludes request_status_matched
+  ok   policy excludes technician_verification_submitted
+  ok   policy excludes anything_else
+  ok   policy excludes (empty)
+
+secret hygiene
+  ok   frontend .env.example carries no SMS/VAPID-private credential names
+  ok   frontend lib/api/client.ts carries no SMS/VAPID-private credential names
+  ok   frontend lib/api/pushApi.ts carries no SMS/VAPID-private credential names
+  ok   no backend SMS/VAPID secret enters NEXT_PUBLIC_*
+  ok   backend .env.example assigns no real secret (DATABASE_URL)
+  ok   backend .env.example assigns no real secret (PORT)
+  ok   backend .env.example assigns no real secret (NODE_ENV)
+  ok   backend .env.example assigns no real secret (FRONTEND_ORIGIN)
+  ok   backend .env.example assigns no real secret (TRUST_PROXY)
+  ok   backend .env.example assigns no real secret (COOKIE_SECURE)
+  ok   backend .env.example assigns no real secret (COOKIE_SAME_SITE)
+  ok   backend .env.example assigns no real secret (JWT_SECRET)
+  ok   backend .env.example assigns no real secret (JWT_ISSUER)
+  ok   backend .env.example assigns no real secret (JWT_AUDIENCE)
+  ok   backend .env.example assigns no real secret (ACCESS_TOKEN_TTL)
+  ok   backend .env.example assigns no real secret (REFRESH_TOKEN_TTL)
+  ok   backend .env.example assigns no real secret (ADMIN_EMAIL)
+  ok   backend .env.example assigns no real secret (ADMIN_PASSWORD)
+  ok   backend .env.example assigns no real secret (STORAGE_DIR)
+  ok   backend .env.example assigns no real secret (STORAGE_PROVIDER)
+  ok   backend .env.example assigns no real secret (RATE_LIMIT_WINDOW)
+  ok   backend .env.example assigns no real secret (SEED_DEMO_DATA)
+
+cleanup — restoring the baseline (seeded admin preserved)
+  ok   no notifications remain
+  ok   no fixture accounts remain
+  FAIL seeded administrator preserved
+
+52 passed, 1 failed

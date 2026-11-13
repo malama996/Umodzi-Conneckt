@@ -1,0 +1,108 @@
+◇ injected env (19) from .env
+
+GET /me/data — access & export
+  ok   unauthenticated export → 401
+  ok   authenticated customer export → 200
+  ok   export body is present
+  ok   export declares its format
+  ok   export records a generation timestamp
+  ok   export contains the subject's own account
+  ok   serviceRequests is an array
+  ok   notifications is an array
+  ok   reviewsWritten is an array
+  ok   securityEvents is an array
+  ok   export reports real counts
+  FAIL export contains no "password_hash"
+  ok   export contains no "token_hash"
+  ok   export contains no "storage_key"
+  FAIL export contains no "p256dh"
+  ok   export contains no "AFRICASTALKING"
+  ok   export contains no "VAPID"
+  ok   export contains no "postgres://"
+  ok   export never echoes the password
+  ok   export states its exclusions
+  ok   customer export has a null technicianProfile
+  ok   customer export has null verification
+  ok   data export produced an audit event
+  ok   the export audit event is attributed to the exporter
+  ok   audit metadata holds no password
+  ok   audit metadata holds no request text
+
+GET /me/data — ownership isolation
+  ok   fixture request created for account A
+  ok   A sees their own request description
+  ok   B does NOT see A's request description
+  ok   B's export describes B's own account
+  ok   B's export does not leak A's email
+  ok   B's export has an honest empty request list
+
+GET /me/account/deletion-preview
+  ok   unauthenticated preview → 401
+  ok   authenticated preview → 200
+  ok   preview reports real service-request count
+  ok   preview discloses retained security events
+  ok   preview carries a warning
+  ok   preview removed nothing (account still authenticates)
+
+DELETE /me/account — permanent deletion
+  ok   wrong confirmation phrase → 400
+  ok   missing password → 400
+  ok   wrong password → 401 (re-authentication enforced)
+  ok   failed deletion attempts removed nothing
+  ok   a denied deletion is audited as denied
+  ok   unauthenticated deletion → 401
+  ok   correct credentials → 200
+  ok   deletion reports success
+  ok   deletion was not a no-op
+  ok   report states the real request count removed
+  ok   report states the session count removed
+  ok   the account row is actually removed (not flagged)
+  ok   the account's request is removed, not orphaned by ON DELETE SET NULL
+  ok   the deleted account can no longer authenticate
+  ok   the deleted account cannot log in again
+  ok   security events are RETAINED after deletion (no FK to users by design)
+  FAIL retained audit rows contain no password material
+
+DELETE /me/account — technician profile & documents
+  ok   the technician has a linked profile
+  ok   the fixture document exists in storage before deletion
+  FAIL technician deletion → 200
+  FAIL the technician profile was deleted
+  FAIL the report states the real document count removed
+  FAIL stored objects were unlinked through the real FileStorage abstraction
+  FAIL the technician profile row is gone
+  FAIL the verification document rows are gone
+  FAIL the stored document bytes were actually removed
+
+GET /me/notifications — inbox (G-02)
+  ok   unauthenticated inbox → 401
+  ok   authenticated empty inbox → 200
+  ok   an account with no notifications gets an honest empty list
+  ok   unread count is 0 when there is nothing
+  ok   hasMore is false when empty
+  ok   the inbox lists the real notification
+  ok   unread count reflects the unread row
+  ok   items are returned for the session subject only
+  ok   marking another account's notification → 404
+  ok   the foreign mark attempt changed nothing
+  ok   the owner can mark their notification read
+  ok   the row is genuinely read
+  ok   read_at was recorded
+  ok   malformed notification id → 400
+  ok   mark-all-read → 200
+  ok   mark-all returns a real count
+  ok   mark-all is idempotent (second run changes 0)
+  ok   out-of-range limit → 400
+  ok   negative offset → 400
+
+audit events — protected and honest
+  ok   anonymous audit read → 401
+  ok   a non-administrator audit read → 403
+
+Suite error: Error: admin login failed (401): {"error":"Invalid email or password"}
+    at adminAccount (C:\Users\ARNOLD MALAMA\OneDrive\Desktop\umodzi-build\backend\scripts\task28-3-privacy-tests.ts:132:21)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async testAuditProtection (C:\Users\ARNOLD MALAMA\OneDrive\Desktop\umodzi-build\backend\scripts\task28-3-privacy-tests.ts:613:17)
+    at async main (C:\Users\ARNOLD MALAMA\OneDrive\Desktop\umodzi-build\backend\scripts\task28-3-privacy-tests.ts:816:5)
+
+75 passed, 11 failed

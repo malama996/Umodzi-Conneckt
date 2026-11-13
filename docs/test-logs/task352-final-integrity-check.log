@@ -1,0 +1,10 @@
+{
+  "users": 0,
+  "technicians": 9,
+  "sessions": 0,
+  "service_requests": 0,
+  "messages": 0,
+  "notifications": 0,
+  "audit_events": 60,
+  "push_subscriptions": 0
+}

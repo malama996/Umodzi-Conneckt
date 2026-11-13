@@ -1,0 +1,21 @@
+◇ injected env (19) from .env
+pooler host: localhost:5432 (hostname only — URL never printed)
+
+=== A. PG-negotiated TLS, verified against SYSTEM trust ===
+  negotiation failed: server refused TLS negotiation (reply byte 0x4e)
+
+=== B. Capture served chain (public material) ===
+C:\Users\ARNOLD MALAMA\OneDrive\Desktop\umodzi-build\backend\scripts\task352-tls-probe.ts:58
+        reject(new Error(`server refused TLS negotiation (reply byte 0x${byte[0]?.toString(16)})`));
+               ^
+
+Error: server refused TLS negotiation (reply byte 0x4e)
+    at Socket.<anonymous> (C:\Users\ARNOLD MALAMA\OneDrive\Desktop\umodzi-build\backend\scripts\task352-tls-probe.ts:58:16)
+    at Object.onceWrapper (node:events:623:12)
+    at Socket.emit (node:events:508:20)
+    at addChunk (node:internal/streams/readable:564:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:515:3)
+    at Readable.push (node:internal/streams/readable:395:5)
+    at TCP.onStreamRead (node:internal/stream_base_commons:189:23)
+
+Node.js v25.8.0

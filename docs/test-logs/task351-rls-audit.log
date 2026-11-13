@@ -1,0 +1,168 @@
+◇ injected env (19) from .env
+
+=== 1. Runtime role & role attributes ===
+[
+  {
+    "current_user_": "postgres",
+    "session_user_": "postgres",
+    "rolsuper": true,
+    "rolcreaterole": true,
+    "rolcreatedb": true,
+    "rolbypassrls": true
+  }
+]
+
+=== 1b. All non-system roles (names + attributes only) ===
+  attachtrack super=true bypassrls=true login=true
+  postgres super=true bypassrls=true login=true
+  umodzi_app super=false bypassrls=false login=false
+  umulopa super=false bypassrls=false login=true
+
+=== 2. RLS enablement + ownership per public table ===
+  audit_events: RLS=true forced=false owner=postgres
+  conversations: RLS=true forced=false owner=postgres
+  dispatch_offers: RLS=true forced=false owner=postgres
+  messages: RLS=true forced=false owner=postgres
+  notifications: RLS=true forced=false owner=postgres
+  password_reset_tokens: RLS=true forced=false owner=postgres
+  push_subscriptions: RLS=true forced=false owner=postgres
+  reviews: RLS=true forced=false owner=postgres
+  schema_migrations: RLS=false forced=false owner=postgres
+  service_request_events: RLS=true forced=false owner=postgres
+  service_requests: RLS=true forced=false owner=postgres
+  sessions: RLS=true forced=false owner=postgres
+  spatial_ref_sys: RLS=false forced=false owner=postgres
+  technician_verification_documents: RLS=true forced=false owner=postgres
+  technicians: RLS=true forced=false owner=postgres
+  user_phones: RLS=true forced=false owner=postgres
+  users: RLS=true forced=false owner=postgres
+  verification_reviews: RLS=true forced=false owner=postgres
+
+=== 3. RLS policies (pg_policies) ===
+  audit_events.p_app_all roles={{umodzi_app}} cmd=ALL permissive=PERMISSIVE
+    qual: true
+  conversations.p_app_all roles={{umodzi_app}} cmd=ALL permissive=PERMISSIVE
+    qual: true
+  dispatch_offers.p_app_all roles={{umodzi_app}} cmd=ALL permissive=PERMISSIVE
+    qual: true
+  messages.p_app_all roles={{umodzi_app}} cmd=ALL permissive=PERMISSIVE
+    qual: true
+  notifications.p_app_all roles={{umodzi_app}} cmd=ALL permissive=PERMISSIVE
+    qual: true
+  password_reset_tokens.p_app_all roles={{umodzi_app}} cmd=ALL permissive=PERMISSIVE
+    qual: true
+  push_subscriptions.p_app_all roles={{umodzi_app}} cmd=ALL permissive=PERMISSIVE
+    qual: true
+  reviews.p_app_all roles={{umodzi_app}} cmd=ALL permissive=PERMISSIVE
+    qual: true
+  service_request_events.p_app_all roles={{umodzi_app}} cmd=ALL permissive=PERMISSIVE
+    qual: true
+  service_requests.p_app_all roles={{umodzi_app}} cmd=ALL permissive=PERMISSIVE
+    qual: true
+  sessions.p_app_all roles={{umodzi_app}} cmd=ALL permissive=PERMISSIVE
+    qual: true
+  technician_verification_documents.p_app_all roles={{umodzi_app}} cmd=ALL permissive=PERMISSIVE
+    qual: true
+  technicians.p_app_all roles={{umodzi_app}} cmd=ALL permissive=PERMISSIVE
+    qual: true
+  user_phones.p_app_all roles={{umodzi_app}} cmd=ALL permissive=PERMISSIVE
+    qual: true
+  users.p_app_all roles={{umodzi_app}} cmd=ALL permissive=PERMISSIVE
+    qual: true
+  verification_reviews.p_app_all roles={{umodzi_app}} cmd=ALL permissive=PERMISSIVE
+    qual: true
+
+=== 4. Read-access probe (COUNT only, no values exposed) ===
+  users: readable, 0 rows
+  sessions: readable, 0 rows
+  technicians: readable, 9 rows
+  service_requests: readable, 0 rows
+  dispatch_offers: readable, 0 rows
+  conversations: readable, 0 rows
+  messages: readable, 0 rows
+  notifications: readable, 0 rows
+  push_subscriptions: readable, 0 rows
+  user_phones: readable, 0 rows
+  technician_verification_documents: readable, 0 rows
+  audit_events: readable, 60 rows
+
+=== 5. Table grants for runtime role ===
+  audit_events: DELETE, INSERT, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE
+  conversations: DELETE, INSERT, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE
+  dispatch_offers: DELETE, INSERT, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE
+  geography_columns: DELETE, INSERT, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE
+  geometry_columns: DELETE, INSERT, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE
+  messages: DELETE, INSERT, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE
+  notifications: DELETE, INSERT, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE
+  password_reset_tokens: DELETE, INSERT, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE
+  push_subscriptions: DELETE, INSERT, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE
+  reviews: DELETE, INSERT, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE
+  schema_migrations: DELETE, INSERT, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE
+  service_request_events: DELETE, INSERT, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE
+  service_requests: DELETE, INSERT, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE
+  sessions: DELETE, INSERT, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE
+  spatial_ref_sys: DELETE, INSERT, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE
+  technician_verification_documents: DELETE, INSERT, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE
+  technicians: DELETE, INSERT, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE
+  user_phones: DELETE, INSERT, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE
+  users: DELETE, INSERT, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE
+  verification_reviews: DELETE, INSERT, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE
+
+=== 6. Applied migrations (ledger) ===
+  001_initial_schema.sql
+  002_authentication.sql
+  003_technician_verification.sql
+  004_reviews.sql
+  005_notifications_and_push.sql
+  006_privacy_and_audit.sql
+  007_communication.sql
+  008_communication_phone.sql
+  009_revoke_data_api_privileges.sql
+  010_enable_rls_and_app_policies.sql
+  011_verification_review_and_password_reset.sql
+  012_dispatch_integrity.sql
+
+=== 7. Grants held by Supabase API roles (anon/authenticated/service_role) ===
+  anon: NO grants on any public table
+  authenticated: NO grants on any public table
+  service_role: NO grants on any public table
+  → no public-table grants for any Supabase API role
+
+=== 8. Connection TLS parameter (sslmode only) ===
+  sslmode = (not set → default)
+
+=== 9. Supabase API role attributes ===
+
+=== 10. Sequences + functions in public schema ===
+  sequences: (none)
+  functions: _postgis_check_library_version, _postgis_deprecate, _postgis_index_extent, _postgis_join_selectivity, _postgis_pgsql_version, _postgis_scripts_pgsql_version, _postgis_scripts_version_cmp_key, _postgis_selectivity, _postgis_stats, _st_3ddfullywithin, _st_3ddwithin, _st_3dintersects, _st_asgml, _st_asx3d, _st_bestsrid, _st_bestsrid, _st_contains, _st_containsproperly, _st_coveredby, _st_coveredby, _st_covers, _st_covers, _st_crosses, _st_dfullywithin, _st_distancetree, _st_distancetree, _st_distanceuncached, _st_distanceuncached, _st_distanceuncached, _st_dwithin, _st_dwithin, _st_dwithinuncached, _st_dwithinuncached, _st_equals, _st_expand, _st_geomfromgml, _st_intersects, _st_linecrossingdirection, _st_longestline, _st_maxdistance, _st_orderingequals, _st_overlaps, _st_pointoutside, _st_sortablehash, _st_touches, _st_voronoi, _st_within, addgeometrycolumn, addgeometrycolumn, addgeometrycolumn, box, box, box2d, box2d, box2d_in, box2d_out, box2df_in, box2df_out, box3d, box3d, box3d_in, box3d_out, box3dtobox, bytea, bytea, contains_2d, contains_2d, contains_2d, dropgeometrycolumn, dropgeometrycolumn, dropgeometrycolumn, dropgeometrytable, dropgeometrytable, dropgeometrytable, equals, find_srid, geog_brin_inclusion_add_value, geog_brin_inclusion_merge, geog_brin_inclusion_mergeable, geography, geography, geography, geography_analyze, geography_cmp, geography_distance_knn, geography_eq, geography_ge, geography_gist_compress, geography_gist_consistent, geography_gist_decompress, geography_gist_distance, geography_gist_penalty, geography_gist_picksplit, geography_gist_same, geography_gist_union, geography_gt, geography_in, geography_le, geography_lt, geography_out, geography_overlaps, geography_recv, geography_send, geography_spgist_choose_nd, geography_spgist_compress_nd, geography_spgist_config_nd, geography_spgist_inner_consistent_nd, geography_spgist_leaf_consistent_nd, geography_spgist_picksplit_nd, geography_typmod_in, geography_typmod_out, geom2d_brin_inclusion_add_value, geom2d_brin_inclusion_merge, geom3d_brin_inclusion_add_value, geom3d_brin_inclusion_merge, geom3d_brin_inclusion_mergeable, geom4d_brin_inclusion_add_value, geom4d_brin_inclusion_merge, geom4d_brin_inclusion_mergeable, geometry, geometry, geometry, geometry, geometry, geometry, geometry, geometry, geometry, geometry_above, geometry_analyze, geometry_below, geometry_cmp, geometry_contained_3d, geometry_contains, geometry_contains_3d, geometry_contains_nd, geometry_distance_box, geometry_distance_centroid, geometry_distance_centroid_nd, geometry_distance_cpa, geometry_eq, geometry_ge, geometry_gist_compress_2d, geometry_gist_compress_nd, geometry_gist_consistent_2d, geometry_gist_consistent_nd, geometry_gist_decompress_2d, geometry_gist_decompress_nd, geometry_gist_distance_2d, geometry_gist_distance_nd, geometry_gist_penalty_2d, geometry_gist_penalty_nd, geometry_gist_picksplit_2d, geometry_gist_picksplit_nd, geometry_gist_same_2d, geometry_gist_same_nd, geometry_gist_sortsupport_2d, geometry_gist_union_2d, geometry_gist_union_nd, geometry_gt, geometry_hash, geometry_in, geometry_le, geometry_left, geometry_lt, geometry_neq, geometry_out, geometry_overabove, geometry_overbelow, geometry_overlaps, geometry_overlaps_3d, geometry_overlaps_nd, geometry_overleft, geometry_overright, geometry_recv, geometry_right, geometry_same, geometry_same_3d, geometry_same_nd, geometry_send, geometry_sortsupport, geometry_spgist_choose_2d, geometry_spgist_choose_3d, geometry_spgist_choose_nd, geometry_spgist_compress_2d, geometry_spgist_compress_3d, geometry_spgist_compress_nd, geometry_spgist_config_2d, geometry_spgist_config_3d, geometry_spgist_config_nd, geometry_spgist_inner_consistent_2d, geometry_spgist_inner_consistent_3d, geometry_spgist_inner_consistent_nd, geometry_spgist_leaf_consistent_2d, geometry_spgist_leaf_consistent_3d, geometry_spgist_leaf_consistent_nd, geometry_spgist_picksplit_2d, geometry_spgist_picksplit_3d, geometry_spgist_picksplit_nd, geometry_typmod_in, geometry_typmod_out, geometry_within, geometry_within_nd, geometrytype, geometrytype, geomfromewkb, geomfromewkt, get_proj4_from_srid, gidx_in, gidx_out, gserialized_gist_joinsel_2d, gserialized_gist_joinsel_nd, gserialized_gist_sel_2d, gserialized_gist_sel_nd, is_contained_2d, is_contained_2d, is_contained_2d, json, jsonb, overlaps_2d, overlaps_2d, overlaps_2d, overlaps_geog, overlaps_geog, overlaps_geog, overlaps_nd, overlaps_nd, overlaps_nd, path, pgis_asflatgeobuf_finalfn, pgis_asflatgeobuf_transfn, pgis_asflatgeobuf_transfn, pgis_asflatgeobuf_transfn, pgis_asgeobuf_finalfn, pgis_asgeobuf_transfn, pgis_asgeobuf_transfn, pgis_asmvt_combinefn, pgis_asmvt_deserialfn, pgis_asmvt_finalfn, pgis_asmvt_serialfn, pgis_asmvt_transfn, pgis_asmvt_transfn, pgis_asmvt_transfn, pgis_asmvt_transfn, pgis_asmvt_transfn, pgis_geometry_accum_transfn, pgis_geometry_accum_transfn, pgis_geometry_accum_transfn, pgis_geometry_clusterintersecting_finalfn, pgis_geometry_clusterwithin_finalfn, pgis_geometry_collect_finalfn, pgis_geometry_coverageunion_finalfn, pgis_geometry_makeline_finalfn, pgis_geometry_polygonize_finalfn, pgis_geometry_union_parallel_combinefn, pgis_geometry_union_parallel_deserialfn, pgis_geometry_union_parallel_finalfn, pgis_geometry_union_parallel_serialfn, pgis_geometry_union_parallel_transfn, pgis_geometry_union_parallel_transfn, point, polygon, populate_geometry_columns, populate_geometry_columns, postgis_addbbox, postgis_cache_bbox, postgis_constraint_dims, postgis_constraint_srid, postgis_constraint_type, postgis_dropbbox, postgis_extensions_upgrade, postgis_full_version, postgis_geos_compiled_version, postgis_geos_noop, postgis_geos_version, postgis_getbbox, postgis_hasbbox, postgis_index_supportfn, postgis_lib_build_date, postgis_lib_revision, postgis_lib_version, postgis_libjson_version, postgis_liblwgeom_version, postgis_libprotobuf_version, postgis_libxml_version, postgis_noop, postgis_proj_compiled_version, postgis_proj_version, postgis_scripts_build_date, postgis_scripts_installed, postgis_scripts_released, postgis_srs, postgis_srs_all, postgis_srs_codes, postgis_srs_search, postgis_svn_version, postgis_transform_geometry, postgis_transform_pipeline_geometry, postgis_type_name, postgis_typmod_dims, postgis_typmod_srid, postgis_typmod_type, postgis_version, postgis_wagyu_version, spheroid_in, spheroid_out, st_3dclosestpoint, st_3ddfullywithin, st_3ddistance, st_3ddwithin, st_3dextent, st_3dinterpolatepoint, st_3dintersects, st_3dlength, st_3dlineinterpolatepoint, st_3dlongestline, st_3dmakebox, st_3dmaxdistance, st_3dperimeter, st_3dshortestline, st_addmeasure, st_addpoint, st_addpoint, st_affine, st_affine, st_angle, st_angle, st_area, st_area, st_area, st_area2d, st_asbinary, st_asbinary, st_asbinary, st_asbinary, st_asencodedpolyline, st_asewkb, st_asewkb, st_asewkt, st_asewkt, st_asewkt, st_asewkt, st_asewkt, st_asflatgeobuf, st_asflatgeobuf, st_asflatgeobuf, st_asgeobuf, st_asgeobuf, st_asgeojson, st_asgeojson, st_asgeojson, st_asgeojson, st_asgml, st_asgml, st_asgml, st_asgml, st_asgml, st_ashexewkb, st_ashexewkb, st_askml, st_askml, st_askml, st_aslatlontext, st_asmarc21, st_asmvt, st_asmvt, st_asmvt, st_asmvt, st_asmvt, st_asmvtgeom, st_assvg, st_assvg, st_assvg, st_astext, st_astext, st_astext, st_astext, st_astext, st_astwkb, st_astwkb, st_asx3d, st_azimuth, st_azimuth, st_bdmpolyfromtext, st_bdpolyfromtext, st_boundary, st_boundingdiagonal, st_box2dfromgeohash, st_buffer, st_buffer, st_buffer, st_buffer, st_buffer, st_buffer, st_buffer, st_buffer, st_buildarea, st_catmullromsmoothing, st_centroid, st_centroid, st_centroid, st_chaikinsmoothing, st_cleangeometry, st_clipbybox2d, st_closestpoint, st_closestpoint, st_closestpoint, st_closestpointofapproach, st_clusterdbscan, st_clusterintersecting, st_clusterintersecting, st_clusterintersectingwin, st_clusterkmeans, st_clusterrelatewin, st_clusterwithin, st_clusterwithin, st_clusterwithinwin, st_collect, st_collect, st_collect, st_collectionextract, st_collectionextract, st_collectionhomogenize, st_combinebbox, st_combinebbox, st_combinebbox, st_concavehull, st_contains, st_containsproperly, st_controlpoints, st_convexhull, st_coorddim, st_coverageclean, st_coverageedges, st_coverageedges, st_coverageinvalidedges, st_coveragesimplify, st_coverageunion, st_coverageunion, st_coveredby, st_coveredby, st_coveredby, st_covers, st_covers, st_covers, st_cpawithin, st_crosses, st_curven, st_curvetoline, st_degree, st_delaunaytriangles, st_dfullywithin, st_difference, st_dimension, st_disjoint, st_distance, st_distance, st_distance, st_distancecpa, st_distancesphere, st_distancesphere, st_distancespheroid, st_distancespheroid, st_dump, st_dumppoints, st_dumprings, st_dumpsegments, st_dwithin, st_dwithin, st_dwithin, st_endm, st_endpoint, st_envelope, st_equals, st_estimatedextent, st_estimatedextent, st_estimatedextent, st_evaluate, st_expand, st_expand, st_expand, st_expand, st_expand, st_expand, st_extent, st_exteriorring, st_filterbym, st_findextent, st_findextent, st_flipcoordinates, st_force2d, st_force3d, st_force3dm, st_force3dz, st_force4d, st_forcecollection, st_forcecurve, st_forcepolygonccw, st_forcepolygoncw, st_forcerhr, st_forcesfs, st_forcesfs, st_frechetdistance, st_fromflatgeobuf, st_fromflatgeobuftotable, st_generatepoints, st_generatepoints, st_geogfromtext, st_geogfromwkb, st_geographyfromtext, st_geohash, st_geohash, st_geomcollfromtext, st_geomcollfromtext, st_geomcollfromwkb, st_geomcollfromwkb, st_geometricmedian, st_geometryfromtext, st_geometryfromtext, st_geometryn, st_geometrytype, st_geomfromewkb, st_geomfromewkt, st_geomfromgeohash, st_geomfromgeojson, st_geomfromgeojson, st_geomfromgeojson, st_geomfromgml, st_geomfromgml, st_geomfromkml, st_geomfrommarc21, st_geomfromtext, st_geomfromtext, st_geomfromtwkb, st_geomfromwkb, st_geomfromwkb, st_gmltosql, st_gmltosql, st_hasarc, st_hasm, st_hasz, st_hausdorffdistance, st_hausdorffdistance, st_hexagon, st_hexagongrid, st_interiorringn, st_interpolatepoint, st_intersection, st_intersection, st_intersection, st_intersects, st_intersects, st_intersects, st_inversetransformpipeline, st_isclosed, st_iscollection, st_isempty, st_isnurbscurve, st_ispolygonccw, st_ispolygoncw, st_isring, st_issimple, st_issimpledetail, st_isvalid, st_isvalid, st_isvaliddetail, st_isvalidreason, st_isvalidreason, st_isvalidtrajectory, st_knots, st_largestemptycircle, st_length, st_length, st_length, st_length2d, st_length2dspheroid, st_lengthspheroid, st_letters, st_linecrossingdirection, st_lineextend, st_linefromencodedpolyline, st_linefrommultipoint, st_linefromtext, st_linefromtext, st_linefromwkb, st_linefromwkb, st_lineinterpolatepoint, st_lineinterpolatepoint, st_lineinterpolatepoint, st_lineinterpolatepoints, st_lineinterpolatepoints, st_lineinterpolatepoints, st_linelocatepoint, st_linelocatepoint, st_linelocatepoint, st_linemerge, st_linemerge, st_linestringfromwkb, st_linestringfromwkb, st_linesubstring, st_linesubstring, st_linesubstring, st_linetocurve, st_locatealong, st_locatebetween, st_locatebetweenelevations, st_longestline, st_longestline, st_m, st_makebox2d, st_makeenvelope, st_makeline, st_makeline, st_makeline, st_makenurbscurve, st_makepoint, st_makepoint, st_makepoint, st_makepointm, st_makepolygon, st_makepolygon, st_makevalid, st_makevalid, st_maxdistance, st_maxdistance, st_maximuminscribedcircle, st_memsize, st_memunion, st_minimumboundingcircle, st_minimumboundingradius, st_minimumclearance, st_minimumclearanceline, st_minimumspanningtree, st_mlinefromtext, st_mlinefromtext, st_mlinefromwkb, st_mlinefromwkb, st_mmax, st_mmin, st_mpointfromtext, st_mpointfromtext, st_mpointfromwkb, st_mpointfromwkb, st_mpolyfromtext, st_mpolyfromtext, st_mpolyfromwkb, st_mpolyfromwkb, st_msize, st_multi, st_multilinefromwkb, st_multilinestringfromtext, st_multilinestringfromtext, st_multipointfromtext, st_multipointfromwkb, st_multipointfromwkb, st_multipolyfromwkb, st_multipolyfromwkb, st_multipolygonfromtext, st_multipolygonfromtext, st_ndims, st_node, st_normalize, st_npoints, st_nrings, st_numcontrolpoints, st_numcurves, st_numgeometries, st_numinteriorring, st_numinteriorrings, st_numpatches, st_numpoints, st_nurbscurveisrational, st_nurbstolinestring, st_offsetcurve, st_orderingequals, st_orientedenvelope, st_overlaps, st_patchn, st_perimeter, st_perimeter, st_perimeter2d, st_point, st_point, st_pointfromgeohash, st_pointfromtext, st_pointfromtext, st_pointfromwkb, st_pointfromwkb, st_pointinsidecircle, st_pointm, st_pointn, st_pointonsurface, st_points, st_pointz, st_pointzm, st_polyfromtext, st_polyfromtext, st_polyfromwkb, st_polyfromwkb, st_polygon, st_polygonfromtext, st_polygonfromtext, st_polygonfromwkb, st_polygonfromwkb, st_polygonize, st_polygonize, st_project, st_project, st_project, st_project, st_quantizecoordinates, st_reduceprecision, st_relate, st_relate, st_relate, st_relatematch, st_removeirrelevantpointsforview, st_removepoint, st_removerepeatedpoints, st_removesmallparts, st_reverse, st_rotate, st_rotate, st_rotate, st_rotatex, st_rotatey, st_rotatez, st_scale, st_scale, st_scale, st_scale, st_scroll, st_segmentize, st_segmentize, st_seteffectivearea, st_setendm, st_setpoint, st_setsrid, st_setsrid, st_setstartm, st_sharedpaths, st_shiftlongitude, st_shortestline, st_shortestline, st_shortestline, st_simplify, st_simplify, st_simplifypolygonhull, st_simplifypreservetopology, st_simplifyvw, st_snap, st_snaptogrid, st_snaptogrid, st_snaptogrid, st_snaptogrid, st_split, st_square, st_squaregrid, st_srid, st_srid, st_startm, st_startpoint, st_subdivide, st_summary, st_summary, st_swapordinates, st_symdifference, st_symmetricdifference, st_tileenvelope, st_touches, st_transform, st_transform, st_transform, st_transform, st_transformpipeline, st_translate, st_translate, st_transscale, st_triangulatepolygon, st_unaryunion, st_union, st_union, st_union, st_union, st_union, st_voronoilines, st_voronoipolygons, st_weights, st_within, st_wkbtosql, st_wkttosql, st_wrapx, st_x, st_xmax, st_xmin, st_xsize, st_y, st_ymax, st_ymin, st_ysize, st_z, st_zmax, st_zmflag, st_zmin, st_zsize, text, updategeometrysrid, updategeometrysrid, updategeometrysrid
+
+=== 11. Default ACLs touching schema public ===
+  (no default ACLs on public)
+
+=== 12. Schema public USAGE/CREATE per role ===
+  anon: role does not exist
+  authenticated: role does not exist
+  service_role: role does not exist
+  umodzi_app: USAGE=true CREATE=false
+
+=== 13. supabase_realtime publication membership ===
+  (no tables published)
+
+=== 14. Runtime role umodzi_app existence ===
+  present: super=false createrole=false createdb=false bypassrls=false login=false
+
+=== 15. umodzi_app effective table privileges ===
+  users: SELECT=false INSERT=false UPDATE=false DELETE=false TRUNCATE=false
+  sessions: SELECT=false INSERT=false UPDATE=false DELETE=false TRUNCATE=false
+  technicians: SELECT=false INSERT=false UPDATE=false DELETE=false TRUNCATE=false
+  service_requests: SELECT=false INSERT=false UPDATE=false DELETE=false TRUNCATE=false
+  dispatch_offers: SELECT=false INSERT=false UPDATE=false DELETE=false TRUNCATE=false
+  conversations: SELECT=false INSERT=false UPDATE=false DELETE=false TRUNCATE=false
+  messages: SELECT=false INSERT=false UPDATE=false DELETE=false TRUNCATE=false
+  notifications: SELECT=false INSERT=false UPDATE=false DELETE=false TRUNCATE=false
+  push_subscriptions: SELECT=false INSERT=false UPDATE=false DELETE=false TRUNCATE=false
+  user_phones: SELECT=false INSERT=false UPDATE=false DELETE=false TRUNCATE=false
+  technician_verification_documents: SELECT=false INSERT=false UPDATE=false DELETE=false TRUNCATE=false
+  audit_events: SELECT=false INSERT=false UPDATE=false DELETE=false TRUNCATE=false
+  schema_migrations: SELECT=false (must be false)

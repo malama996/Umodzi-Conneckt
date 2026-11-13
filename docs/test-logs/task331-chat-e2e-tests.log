@@ -1,0 +1,39 @@
+◇ injected env (19) from .env
+  ok   registered task331e.customer.mwesvbx2@umodzi.test (201)
+  ok   registered task331e.technician.mwesvbx2@umodzi.test (201)
+  ok   registered task331e.other.mwesvbx2@umodzi.test (201)
+  ok   all fixtures logged in
+  ok   ID document uploaded (201)
+  ok   verification submitted (200)
+  FAIL admin login (401)
+  FAIL fixture tech verified (401)
+  ok   request created (201)
+  FAIL dispatch offered to THIS run’s verified tech (another eligible tech won — clear leftovers and rerun)
+  FAIL offer accepted (400)
+  FAIL both resolve via request scope (200/200)
+  FAIL same conversation id both sides
+  FAIL technician direct access 200 (was 404 pre-fix)
+  FAIL consumer send 201
+  FAIL echo verbatim, sender = customer
+  FAIL tech retrieves exact message
+  FAIL technician reply 201
+  FAIL consumer retrieves exact reply
+  FAIL chronological order, no interleaving
+  ok   no duplicate ids
+  ok   whitespace → 400 (400)
+  ok   oversized → 400 (400)
+  ok   strict mode rejects senderId (400)
+  FAIL mark-read 200
+  FAIL readAt set after recipient read
+  ok   anon read 401
+  ok   anon send 401
+  FAIL unrelated detail 404 (400)
+  FAIL unrelated messages 404 (400)
+  FAIL unrelated send 404 (400)
+  FAIL unrelated read 404 (400)
+  FAIL recipient has chat_message notification
+  ok   unrelated user sees no conversation notifications
+  cleanup: users=3
+  baseline: users=0 requests=0 techs=9 sessions=0 audit=47
+
+14 passed, 20 failed

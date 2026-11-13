@@ -1,0 +1,7 @@
+role: postgres (superuser: on)
+technicians total: 9
+technicians with service_area='Kitwe': 5
+within 50 km of the Kitwe probe point: 7
+within  1 m of the Kitwe probe point: 1
+within 50 km of a far (non-Kitwe) probe point: 0
+VERDICT: unexpected — the predicate did NOT exclude rows; investigate before classifying the 3a1 failure as drift.

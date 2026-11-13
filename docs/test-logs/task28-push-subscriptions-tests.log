@@ -1,0 +1,65 @@
+◇ injected env (19) from .env
+
+fixtures: 2 customers + 1 technician
+  ok   registration push-a-282b-mwesrsei8405@umodzi.test → 201
+  ok   registration push-b-282b-mwesrsei8405@umodzi.test → 201
+  ok   registration push-c-282b-mwesrsei8405@umodzi.test → 201
+  ok   all three sessions issued
+
+authentication
+  ok   unauthenticated POST → 401
+  ok   unauthenticated DELETE → 401
+  ok   forged token POST → 401
+
+validation
+  ok   empty object → 400
+  ok   missing endpoint → 400
+  ok   missing p256dh → 400
+  ok   missing auth → 400
+  ok   empty endpoint → 400
+  ok   whitespace endpoint → 400
+  ok   http endpoint → 400
+  ok   non-URL endpoint → 400
+  ok   ftp endpoint → 400
+  ok   oversized endpoint → 400
+  ok   oversized p256dh → 400
+  ok   oversized auth → 400
+  ok   oversized userAgent → 400
+  ok   non-string endpoint → 400
+  ok   user_id in body → 400 (strict schema)
+  ok   rejected body created nothing for the other user
+
+persistence
+  ok   valid POST → 201
+  ok   response carries id + endpoint
+  ok   response leaks no keys, user id, or db internals
+  ok   subscription row stored
+  ok   row carries the caller id + exact endpoint/keys/metadata
+  ok   duplicate same-user POST → 200 (idempotent update)
+  ok   duplicate returns the same subscription id
+  ok   no second row for the duplicate
+  ok   duplicate refreshes keys + metadata
+  ok   same endpoint, different user → 201
+  ok   different user gets a different subscription id
+  ok   technician POST → 201 (no role gate on /me/)
+  ok   timestamps present on the created subscription
+
+ownership
+  ok   A cannot delete B's subscription → safe 404
+  ok   B's subscription survives the cross-user delete
+  ok   unknown id → 404
+  ok   malformed id → 400
+  ok   owner DELETE → 200 {deleted:true}
+  ok   owner delete removes the row
+  ok   re-delete → 404
+  ok   B deletes own subscription → 200
+
+cleanup — restoring the baseline (seeded admin preserved)
+  ok   no push subscriptions remain
+  ok   no fixture accounts remain
+  ok   technicians back to the baseline count (9)
+  ok   no sessions remain
+  FAIL seeded administrator preserved
+  ok   suite issued exactly 3 logins (saw 3)
+
+49 passed, 1 failed

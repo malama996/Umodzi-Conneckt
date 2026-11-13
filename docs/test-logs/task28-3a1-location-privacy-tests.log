@@ -1,0 +1,61 @@
+◇ injected env (19) from .env
+
+GET /technicians — no precise coordinates
+  ok   list → 200 (behavior preserved, still public)
+  ok   list response carries no coordinate keys
+  ok   list still returns technicians
+  ok   coarse/public field retained: id
+  ok   coarse/public field retained: name
+  ok   coarse/public field retained: category
+  ok   coarse/public field retained: skills
+  ok   coarse/public field retained: serviceArea
+  ok   coarse/public field retained: rating
+  ok   coarse/public field retained: jobs
+  ok   coarse/public field retained: verified
+  ok   coarse/public field retained: availability
+  ok   coarse/public field retained: bio
+  ok   coarse/public field retained: hasPhoto
+  ok   coarse/public field retained: createdAt
+  ok   coarse/public field retained: updatedAt
+  ok   coarse location is conveyed by serviceArea
+
+GET /technicians/:id — no precise coordinates
+  ok   a technician id was resolved for the detail check
+  ok   detail → 200
+  ok   detail response carries no coordinate keys
+  ok   detail still returns the requested technician
+  ok   detail still returns coarse serviceArea
+  ok   unknown technician → 404 (behavior preserved)
+  ok   malformed technician id → a safe error status (400/500, pre-existing 500 noted)
+  ok   malformed-id error leaks no coordinate keys
+  ok   malformed-id error exposes no internals or stack
+
+GET /technicians/nearby — PostGIS preserved, coordinates not
+  ok   a Kitwe technician location exists in the database
+  ok   the stored PostGIS point is still readable internally
+  ok   nearby → 200 (radius search still functions)
+  ok   nearby response carries no coordinate keys
+  ok   radius search still returns the Kitwe technicians
+  ok   distance_meters is coarsened to 100 m buckets (no metre-precision leak)
+  ok   results remain ordered by distance ascending (internal ranking preserved)
+  ok   tiny-radius query → 200
+  ok   PostGIS radius filter still excludes out-of-range technicians
+  ok   out-of-range latitude → 400 (validation preserved)
+  ok   out-of-range longitude → 400 (validation preserved)
+  ok   non-numeric latitude → 400 (validation preserved)
+  ok   zero radius → 400 (validation preserved)
+  ok   oversized radius → 400 (validation preserved)
+  ok   unknown category → 400 (validation preserved)
+
+internal dispatch capability preserved
+  ok   stored coordinates remain in the database for internal dispatch use
+  ok   internal ST_Distance eligibility path still reads coordinates directly
+  ok   internal PostGIS distance calculation is untouched
+
+no other public route leaks coordinates
+  ok   /technicians/1ad95a63-26fa-45b9-8439-238e496b8702/reviews → 200
+  ok   /technicians/1ad95a63-26fa-45b9-8439-238e496b8702/reviews carries no coordinate keys
+  ok   /categories → 200
+  ok   /categories carries no coordinate keys
+
+48 passed, 0 failed

@@ -1,0 +1,8 @@
+◇ injected env (19) from .env
+connected as postgres, current_schema=public
+  ok   plain users count (1 row(s))
+  ok   postgis cast (task28-3a1 pattern) (1 row(s))
+  FAIL postgis direct geography fn: function st_y(geography) does not exist [routine=ParseFuncOrColumn code=42883]
+  ok   type of location column (1 row(s))
+  ok   search_path (null row(s))
+  ok   geometry type visible (1 row(s))

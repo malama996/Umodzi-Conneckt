@@ -194,13 +194,14 @@ export async function seedInitialTechnicians() {
       t.availabilityStatus,
       t.accountStatus,
       `POINT(${t.longitude} ${t.latitude})`, // PostGIS point
+      t.verified ? 'verified' : 'unverified', // keep verification_status consistent with the flag
     ]);
 
     // Use client for bulk insert to avoid serialization issues
     const client = await getClient();
     for (const v of values) {
       await client.query(
-        'INSERT INTO technicians (name, category, skills, service_area, latitude, longitude, rating, jobs, verified, availability, availability_status, account_status, location) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,ST_GeomFromText($13, 4326))',
+        'INSERT INTO technicians (name, category, skills, service_area, latitude, longitude, rating, jobs, verified, availability, availability_status, account_status, location, verification_status) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,ST_GeomFromText($13, 4326),$14)',
         v
       );
     }

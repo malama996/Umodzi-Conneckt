@@ -1,0 +1,21 @@
+◇ injected env (19) from .env
+
+fixtures: 2 customers + 2 technicians + admin session
+  ok   registration status-a-282d4-mwestqfl7790@umodzi.test → 201
+  ok   registration status-b-282d4-mwestqfl7790@umodzi.test → 201
+  ok   registration status-t-282d4-mwestqfl7790@umodzi.test → 201
+  ok   registration status-u-282d4-mwestqfl7790@umodzi.test → 201
+Test runner crashed: TypeError: Cannot read properties of undefined (reading 'id')
+    at sessionFrom (C:\Users\ARNOLD MALAMA\OneDrive\Desktop\umodzi-build\backend\scripts\task28-request-status-notification-tests.ts:123:25)
+    at createFixtures (C:\Users\ARNOLD MALAMA\OneDrive\Desktop\umodzi-build\backend\scripts\task28-request-status-notification-tests.ts:150:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async main (C:\Users\ARNOLD MALAMA\OneDrive\Desktop\umodzi-build\backend\scripts\task28-request-status-notification-tests.ts:450:20)
+
+cleanup — restoring the baseline (seeded admin preserved)
+  ok   no notifications remain
+  ok   no requests/offers remain
+  ok   no fixture accounts remain
+  ok   technicians back to the 9 seed prototypes
+  ok   no sessions remain
+  FAIL seeded administrator preserved
+  FAIL suite issued exactly 5 logins (saw 1)

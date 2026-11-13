@@ -1,0 +1,18 @@
+◇ injected env (19) from .env
+
+fixtures: two accounts, one request, one offer, one legacy row
+  ok   fixture customer registration → 201
+  ok   fixture technician registration → 201
+Test runner crashed: TypeError: Cannot read properties of undefined (reading 'id')
+    at sessionFrom (C:\Users\ARNOLD MALAMA\OneDrive\Desktop\umodzi-build\backend\scripts\task25-api-tests.ts:209:25)
+    at createFixtures (C:\Users\ARNOLD MALAMA\OneDrive\Desktop\umodzi-build\backend\scripts\task25-api-tests.ts:253:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async main (C:\Users\ARNOLD MALAMA\OneDrive\Desktop\umodzi-build\backend\scripts\task25-api-tests.ts:806:20)
+
+cleanup — restoring the baseline (seeded admin preserved)
+  ok   no TASK25 request rows remain
+  ok   no fixture offers remain
+  ok   no fixture accounts remain
+  ok   no linked technician profiles remain (seed profiles untouched)
+  FAIL seeded administrator still exists (excluded from cleanup)
+  ok   administrator session rows cleaned

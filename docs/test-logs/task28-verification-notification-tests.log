@@ -1,0 +1,20 @@
+◇ injected env (19) from .env
+
+fixtures: 2 technicians + admin session
+  ok   registration verify-a-282d5-mwesuuqa8060@umodzi.test → 201
+  ok   registration verify-b-282d5-mwesuuqa8060@umodzi.test → 201
+Test runner crashed: TypeError: Cannot read properties of undefined (reading 'id')
+    at sessionFrom (C:\Users\ARNOLD MALAMA\OneDrive\Desktop\umodzi-build\backend\scripts\task28-verification-notification-tests.ts:138:25)
+    at createFixtures (C:\Users\ARNOLD MALAMA\OneDrive\Desktop\umodzi-build\backend\scripts\task28-verification-notification-tests.ts:172:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async main (C:\Users\ARNOLD MALAMA\OneDrive\Desktop\umodzi-build\backend\scripts\task28-verification-notification-tests.ts:517:20)
+
+cleanup — restoring the baseline (seeded admin preserved)
+  ok   no notifications remain
+  ok   no verification documents remain
+  ok   no fixture accounts remain
+  ok   technicians back to the 9 seed prototypes
+  ok   no sessions remain
+  FAIL seeded administrator preserved
+  FAIL suite issued exactly 4 logins (saw 1)
+  ok   no stray files at the uploads root

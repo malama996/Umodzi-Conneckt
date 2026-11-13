@@ -1,0 +1,47 @@
+script,passed,failed,exit
+task352-set-search-path.ts,0,0,0,"umodzi_app rolconfig AFTER: search_path="$user"  public  extensions"
+task352-final-integrity-check.ts,0,0,0,"}"
+task28-3a1-location-privacy-tests.ts,47,1,1
+task28-request-status-notification-tests.ts,0,0,1
+task23-api-tests.ts,0,0,1
+task352-switch-connection.ts,0,0,1,"FATAL: APP_DATABASE_URL missing — run task352-create-runtime-role.ts first"
+task352-grant-extensions-usage.ts,0,0,0,"extensions schema AFTER:  USAGE=true CREATE=false (CREATE must stay false)"
+task23-migration-tests.ts,0,0,1
+task28-event-notification-tests.ts,33,0,0
+task28-sms-tests.ts,53,0,0
+task352-radius-predicate-check.ts,0,0,1,"VERDICT: unexpected — the predicate did NOT exclude rows; investigate before classifying the 3a1 failure as drift."
+task352-tls-probe.ts,0,0,0,"  correctly REJECTED: self-signed certificate in certificate chain"
+task25-api-tests.ts,0,0,1
+task352-runtime-sanity.ts,0,0,0,"  ok   geometry type visible (1 row(s))"
+task28-offer-notification-tests.ts,0,0,1
+verify-28-3a-docs.ts,111,36,1,"NOTE: schema checks were SKIPPED (no database). They are NOT included above."
+task28-verification-notification-tests.ts,0,0,1
+task352-searchpath-debug.ts,0,0,0,"  direct-suffixed: connection failed: getaddrinfo ENOTFOUND csmdtpvainccqnxasxqe.db.supabase.com"
+task26-api-tests.ts,0,0,1
+task28-offer-outcome-tests.ts,0,0,1
+task331-chat-e2e-tests.ts,34,0,0
+task352-set-search-path.ts,0,0,0,"umodzi_app rolconfig AFTER: search_path="$user"  public  extensions"
+task28-push-delivery-tests.ts,0,0,1
+task27-api-tests.ts,0,0,1
+task332-admin-privacy-tests.ts,60,1,1
+task352-switch-connection.ts,0,0,1,"FATAL: APP_DATABASE_URL missing — run task352-create-runtime-role.ts first"
+task28-push-e2e-tests.ts,0,0,1
+task352-tls-probe.ts,0,0,0,"  correctly REJECTED: self-signed certificate in certificate chain"
+task28-3-privacy-tests.ts,52,4,1
+task28-push-subscriptions-tests.ts,0,0,1
+task28-3a1-location-privacy-tests.ts,0,0,1
+verify-28-3a-docs.ts,111,36,1,"NOTE: schema checks were SKIPPED (no database). They are NOT included above."
+task333-realtime-tests.ts,58,3,1
+task28-request-status-notification-tests.ts,0,0,1
+task334-push-contact-tests.ts,0,0,1
+task28-event-notification-tests.ts,33,0,0
+task28-sms-tests.ts,53,0,0
+task28-offer-notification-tests.ts,0,0,1
+task351-rls-audit.ts,0,0,0
+task28-verification-notification-tests.ts,0,0,1
+task352-create-runtime-role.ts,0,0,1
+task28-offer-outcome-tests.ts,0,0,1
+task331-chat-e2e-tests.ts,0,0,1
+task352-final-integrity-check.ts,0,0,0
+task28-push-delivery-tests.ts,0,0,1
+task332-admin-privacy-tests.ts,0,0,1

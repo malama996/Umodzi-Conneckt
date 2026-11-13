@@ -1,0 +1,6 @@
+◇ injected env (19) from .env
+per-role settings BEFORE:
+  postgres: (none)
+  umodzi_app: search_path="$user", public, extensions
+applied: ALTER ROLE umodzi_app SET search_path = "$user", public, extensions
+umodzi_app rolconfig AFTER: search_path="$user", public, extensions

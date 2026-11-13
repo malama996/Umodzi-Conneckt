@@ -1,0 +1,198 @@
+◇ injected env (19) from .env
+
+schema claims
+  ok   table users exists (inventory lists it)
+  ok   table sessions exists (inventory lists it)
+  ok   table technicians exists (inventory lists it)
+  ok   table service_requests exists (inventory lists it)
+  ok   table dispatch_offers exists (inventory lists it)
+  ok   table technician_verification_documents exists (inventory lists it)
+  ok   table reviews exists (inventory lists it)
+  ok   table notifications exists (inventory lists it)
+  ok   table push_subscriptions exists (inventory lists it)
+  FAIL exactly five migrations, 005 last
+  ok   all documented users columns present
+  ok   NO phone column on users (SMS dead end is real)
+  ok   notifications.user_id documented and present
+  ok   notifications.type documented and present
+  ok   notifications.title documented and present
+  ok   notifications.message documented and present
+  ok   notifications.channel documented and present
+  ok   notifications.reference_type documented and present
+  ok   notifications.reference_id documented and present
+  ok   notifications.read documented and present
+  ok   notifications.status documented and present
+  ok   notifications.provider_message_id documented and present
+  ok   notifications.failure_reason documented and present
+  ok   notifications.sent_at documented and present
+  ok   notifications.read_at documented and present
+  ok   push_subscriptions.endpoint documented and present
+  ok   push_subscriptions.p256dh documented and present
+  ok   push_subscriptions.auth documented and present
+  ok   push_subscriptions.user_agent documented and present
+  ok   push_subscriptions.user_id documented and present
+  ok   technicians.location documented and present
+  ok   technicians.latitude documented and present
+  ok   technicians.longitude documented and present
+  ok   technicians.bio documented and present
+  ok   technicians.photo_key documented and present
+  ok   technicians.verification_status documented and present
+  ok   technicians.verification_rejection_reason documented and present
+  ok   technicians.verification_submitted_at documented and present
+  ok   technicians.verification_reviewed_at documented and present
+  ok   technicians.verification_reviewed_by documented and present
+  ok   technicians.user_id documented and present
+  ok   technicians.location is geography(Point,4326) as documented (actual: geography(Point,4326))
+  ok   technicians.latitude is double precision as documented
+  ok   service request coordinates are unpopulated, as documented
+  FAIL no later-stage tables exist (audit/consent/export/deletion/retention/phone)
+
+route and visibility claims
+  FAIL route present: '/api/v1/technicians'
+  ok   '/api/v1/technicians' carries no requireAuth (public — as documented)
+  FAIL route present: '/api/v1/technicians/:id'
+  ok   '/api/v1/technicians/:id' carries no requireAuth (public — as documented)
+  FAIL route present: '/api/v1/technicians/nearby'
+  ok   '/api/v1/technicians/nearby' carries no requireAuth (public — as documented)
+  FAIL technician list route body was located for inspection
+  FAIL technician detail route body was located for inspection
+  FAIL technician nearby route body was located for inspection
+  ok   GET /technicians projects no stored coordinate (G-01 corrected)
+  FAIL GET /technicians still conveys coarse location via serviceArea
+  ok   GET /technicians/:id projects no stored coordinate (G-01 corrected)
+  FAIL GET /technicians/:id still conveys coarse location via serviceArea
+  ok   GET /technicians/nearby does not SELECT a technician coordinate
+  ok   GET /technicians/nearby does not project raw PostGIS geometry
+  FAIL GET /technicians/nearby coarsens distance_meters to 100 m buckets
+  FAIL GET /technicians/nearby is rate limited (added 28.3A.1 to bound probing)
+  ok   internal dispatch still performs PostGIS distance calculation
+  FAIL GET /technicians/nearby still filters and ranks by PostGIS distance
+  ok   public reviews bundle exists as documented
+  ok   review pseudonymisation "First L." matches documentation
+  ok   G-02 confirmed: no notification HTTP route exists
+  ok   request status route documented and present
+  ok   authorization helper in use: requireRole
+  ok   authorization helper in use: requireAuth
+  FAIL authorization helper in use: assertRequestStatusWriteScope
+  ok   authorization helper in use: assertOfferEligibility
+  ok   event type documented and present: dispatch_offer_created
+  ok   event type documented and present: dispatch_offer_accepted
+  ok   event type documented and present: dispatch_offer_rejected
+  ok   event type documented and present: dispatch_offer_timed_out
+  ok   event type documented and present: technician_verification_submitted
+  ok   event type documented and present: technician_verification_approved
+  ok   event type documented and present: technician_verification_rejected
+  ok   request_status_<status> event family documented and present
+  ok   verification-submitted copy naming the technician is documented accurately
+  ok   rejection copy embedding admin reason is documented accurately
+  ok   deliverPendingNotification exists as documented
+  ok   PushService.sendPushToUser exists as documented
+  ok   real web-push send path exists (no simulated delivery)
+  ok   G-09 confirmed: classify is a deterministic keyword chain, not AI
+  FAIL classify route is unauthenticated as documented
+  ok   no Supabase SDK import in backend runtime code (storage claim is correct)
+  ok   storage is the local adapter behind the FileStorage interface, as documented
+  ok   documented 5 MB upload ceiling matches the multipart limit
+  ok   documented magic-byte validation is really wired in
+
+frontend and env boundary claims
+  ok   frontend sources scanned (125 files)
+  FAIL no geolocation API CALL in the frontend code (comments may mention it)
+  ok   the only geolocation mentions are comments (mapData.ts replacement seam)
+  ok   no sessionStorage USAGE in frontend code (auth comment mentions it)
+  ok   localStorage is genuinely used in frontend code
+  FAIL documented localStorage key present: umodzi:matching:category
+  FAIL documented localStorage key present: umodzi:matching:area
+  ok   documented localStorage key present: umodzi:profile:
+  ok   no token/identity-bearing localStorage key exists
+  ok   no Supabase client in the frontend (service-role boundary holds)
+  ok   frontend public env limited to API base + public VAPID key
+  ok   no backend secret exposed through the frontend env template
+
+documentation hygiene
+  ok   required document present: DATA_INVENTORY.md
+  ok   required document present: RECORD_OF_PROCESSING_ACTIVITIES.md
+  ok   required document present: DATA_FLOW_DIAGRAM.md
+  ok   required document present: PRIVACY_IMPLEMENTATION_GAP_ANALYSIS.md
+  FAIL no test-database personal records in the docs
+  FAIL no local credentials in the docs
+  ok   DATA_INVENTORY no longer lists latitude/longitude as publicly exposed fields
+  ok   DATA_INVENTORY states that public technician routes expose no coordinate
+  ok   PRIVACY_IMPLEMENTATION_GAP_ANALYSIS marks G-01 as RESOLVED
+  ok   DATA_FLOW_DIAGRAM shows the coordinate edge as remediated, not as a leak
+  ok   RECORD_OF_PROCESSING_ACTIVITIES no longer claims /nearby is unrate limited
+  ok   DATA_INVENTORY.md records the 28.3A.1 location correction
+  ok   RECORD_OF_PROCESSING_ACTIVITIES.md records the 28.3A.1 location correction
+  ok   DATA_FLOW_DIAGRAM.md records the 28.3A.1 location correction
+  ok   PRIVACY_IMPLEMENTATION_GAP_ANALYSIS.md records the 28.3A.1 location correction
+  ok   cross-border position is recorded as unconfirmed rather than assumed
+  ok   no asserted compliance claim: "legally compliant" (0 asserted)
+  ok   no asserted compliance claim: "registered with the DPC" (0 asserted)
+  ok   no asserted compliance claim: "data protection officer" (0 asserted)
+  ok   no asserted compliance claim: "fully compliant" (0 asserted)
+  ok   DATA_INVENTORY.md states the academic/non-compliance scope
+  ok   RECORD_OF_PROCESSING_ACTIVITIES.md states the academic/non-compliance scope
+  ok   DATA_FLOW_DIAGRAM.md states the academic/non-compliance scope
+  ok   PRIVACY_IMPLEMENTATION_GAP_ANALYSIS.md states the academic/non-compliance scope
+
+Task 28.3 implementation (28.3B–28.3J)
+  ok   migration 006 creates audit_events
+  ok   audit_events has NO foreign key to users (so deletion can proceed)
+  ok   migration 006 documents the deliberate absence of IP collection
+  FAIL privacy route present: '/api/v1/me/data'
+  FAIL privacy route present: '/api/v1/me/account/deletion-preview'
+  FAIL privacy route present: '/api/v1/me/account'
+  FAIL privacy route present: '/api/v1/me/notifications'
+  FAIL privacy route present: '/api/v1/me/notifications/:id/read'
+  FAIL privacy route present: '/api/v1/me/notifications/read-all'
+  FAIL privacy route present: '/api/v1/admin/audit-events'
+  FAIL the export route derives its subject from the session
+  ok   the export route never takes a client-supplied subject
+  FAIL permanent deletion requires authentication
+  FAIL permanent deletion requires password re-authentication
+  FAIL permanent deletion requires the exact confirmation phrase
+  FAIL the inbox (G-02) reuses the existing NotificationService reader
+  ok   the inbox introduces no second notification store
+  FAIL mark-read is owner-scoped by the session subject
+  FAIL the audit log is administrator-only
+  ok   a permanent deletion service exists
+  ok   the account row itself is deleted (not flagged)
+  ok   owned service requests are removed explicitly (ON DELETE SET NULL would orphan them)
+  ok   the owned technician profile is removed explicitly
+  ok   stored objects are unlinked through the real FileStorage abstraction
+  ok   deletion uses the provider-neutral FileStorage, with no Supabase assumption
+  ok   no Supabase Storage client is assumed anywhere in 28.3 code
+  ok   the export SELECT omits password_hash
+  ok   the export omits session token_hash
+  ok   the export states its exclusions
+  ok   push endpoints are reduced to a host, never the full delivery URL
+  ok   audit metadata is constrained by an allow-list
+  ok   no IP address column exists in the audit code
+  ok   audit failures are logged and swallowed (never fail the business action)
+  ok   authentication failures are audited
+  ok   no email is ever passed into audit metadata
+  ok   the retention module registers NO autonomous scheduler
+  ok   the retention module implements the safe purges
+  ok   only read, delivered notifications are eligible for purge
+  FAIL verification document responses are no-store
+  FAIL verification document access is audited
+  FAIL the document download returns raw bytes and never a storage key
+  ok   the data export never includes a document storage key
+
+Task 28.3 documents
+  ok   required document present: PRIVACY_POLICY.md
+  ok   required document present: DATA_RETENTION_POLICY.md
+  ok   required document present: THIRD_PARTY_PROCESSORS.md
+  ok   required document present: DATA_PROTECTION_IMPACT_ASSESSMENT.md
+  ok   no fabricated provider fact: /data (is )?stored in (europe|ireland|frankfurt)/i
+  ok   no fabricated provider fact: /aws region|eu-west-1|us-east-1/i
+  ok   no fabricated provider fact: /standard contractual clauses are in place/i
+  ok   no fabricated provider fact: /we have a dpa with/i
+  ok   the provider register states that locations are not established
+  FAIL SMS is documented as inactive with no phone storage
+  ok   classification is explicitly documented as NOT an AI model
+  ok   classification is documented as deterministic
+  ok   the provider register uses the "IMPLEMENTED" label
+  ok   the provider register uses the "PLANNED" label
+
+145 passed, 38 failed
