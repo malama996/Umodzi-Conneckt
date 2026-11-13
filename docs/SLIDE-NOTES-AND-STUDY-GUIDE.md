@@ -1,6 +1,6 @@
 # UMODZI CONNECT — SLIDE NOTES AND STUDY GUIDE
 
-Generated from `Umodzi_Connect_Final_Defence_Presentation.pptx` on 2026-11-12 (16-slide deck). Speaker notes are also embedded in the deck itself; this file is the printable study copy.
+Generated from `Umodzi_Connect_Final_Defence_Presentation.pptx` on 2026-11-12. Slides 1–14 follow the reference defence arrangement (Mwape Chipyoka's 14-slide order); the two system diagrams are kept as backup slides 15–16, after the closing slide, to be shown only if a panelist asks. Speaker notes are also embedded in the deck itself; this file is the printable study copy.
 
 ---
 
@@ -91,23 +91,7 @@ Likely question: "Why PostGIS?" — Geographic filtering and distance work belon
 
 ---
 
-## Slide 12 — SYSTEM ARCHITECTURE
-
-Walk the three tiers top to bottom: the Netlify client never holds a provider key; the Render API exposes eight modules; Supabase PostgreSQL with PostGIS holds sixteen tables behind row-level security.
-Emphasise the red EXTERNAL band: Gemini, Resend and Web Push are server-side only — that is the answer to any credential-exposure question.
-Likely question: "Why is the browser not allowed to call Gemini directly?" — A key in the browser is a public key; classification therefore happens server-side with a keyword fallback.
-
----
-
-## Slide 13 — SMART DISPATCH FLOWCHART
-
-This is the core contribution. Stress that there is no weighted score: an eligibility filter narrows candidates, deterministic ordering picks one, exactly ONE live offer exists at a time, and accept is atomic under a unique index so two technicians can never both hold the same job.
-Reject or timeout cascades to the next candidate; exhaustion yields no_match and the retry queue.
-Likely question: "What stops double assignment?" — The unique index on accepted offer per request; the second concurrent accept fails at the database, not in application code.
-
----
-
-## Slide 14 — FINDINGS
+## Slide 12 — FINDINGS
 
 Read the table row by row: objective, what was actually built, and what it means.
 Be honest about the last box — those measurements are still outstanding and will be reported only when executed.
@@ -115,7 +99,7 @@ Likely question: "So what are your test results?" — Static gates and the produ
 
 ---
 
-## Slide 15 — CONCLUSION
+## Slide 13 — CONCLUSION
 
 Return to the four research questions and answer each in one sentence.
 Own the limitation: no controlled evaluation yet, therefore no causal claims.
@@ -123,11 +107,29 @@ Likely question: "Did you achieve your objectives?" — Objectives 1 to 3 are me
 
 ---
 
-## Slide 16 — RECOMMENDATIONS
+## Slide 14 — RECOMMENDATIONS
 
 Finish on recommendations, then invite questions.
 Prepare for: "What would you do with three more months?" — controlled pilot, labelled dataset, and fairness measurement across technicians.
 Keep the closing slide on screen while answering questions.
+
+---
+
+## Slide 15 — SYSTEM ARCHITECTURE (BACKUP)
+
+Backup slide, outside the 14-slide core flow — shown only if a panelist asks about the architecture.
+Walk the three tiers top to bottom: the Netlify client never holds a provider key; the Render API exposes eight modules; Supabase PostgreSQL with PostGIS holds sixteen tables behind row-level security.
+Emphasise the red EXTERNAL band: Gemini, Resend and Web Push are server-side only — that is the answer to any credential-exposure question.
+Likely question: "Why is the browser not allowed to call Gemini directly?" — A key in the browser is a public key; classification therefore happens server-side with a keyword fallback.
+
+---
+
+## Slide 16 — SMART DISPATCH FLOWCHART (BACKUP)
+
+Backup slide for the core contribution, outside the 14-slide core flow — shown on request after the closing slide.
+Stress that there is no weighted score: an eligibility filter narrows candidates, deterministic ordering picks one, exactly ONE live offer exists at a time, and accept is atomic under a unique index so two technicians can never both hold the same job.
+Reject or timeout cascades to the next candidate; exhaustion yields no_match and the retry queue.
+Likely question: "What stops double assignment?" — The unique index on accepted offer per request; the second concurrent accept fails at the database, not in application code.
 
 ---
 
@@ -145,7 +147,7 @@ Actors (customer, technician, administrator, pilot participant) and the three ex
 Say: survey respondents supplied pilot data but never touch the deployed system.
 Question: "Why is the pilot participant dashed?" — They interact with the study, not the software.
 
-**Figure 4.3 — System Architecture** (Chapter 4; also deck slide 12)
+**Figure 4.3 — System Architecture** (Chapter 4; also deck slide 15 — backup)
 Three tiers: Netlify client, Render Fastify API with eight modules, Supabase PostgreSQL + PostGIS; external services server-side only.
 Say: the browser never holds a provider key.
 Question: "Where does RLS sit?" — In the data tier, with a restricted runtime role.
@@ -180,7 +182,7 @@ The sixteen tables; foreign keys carry ownership, and service_request_events plu
 Say: the unique accepted-offer-per-request index lives on dispatch_offers.
 Question: "How is audit integrity kept?" — Append-only event tables; no updates or deletes.
 
-**Figure 4.10 — Smart Dispatch Flowchart** (Chapter 4; also deck slide 13)
+**Figure 4.10 — Smart Dispatch Flowchart** (Chapter 4; also deck slide 16 — backup)
 Eligibility filter → deterministic order → one live offer → accept/reject/timeout → atomic accept, with the cascade back to ordering.
 Say: there is no weighted score; selection is filter then deterministic ordering.
 Question: "Why not score technicians?" — Deterministic ordering is auditable and avoids opaque weighting.

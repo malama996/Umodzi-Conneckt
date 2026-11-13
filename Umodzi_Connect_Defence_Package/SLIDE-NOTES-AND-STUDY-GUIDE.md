@@ -1,6 +1,6 @@
 # UMODZI CONNECT — SLIDE NOTES AND STUDY GUIDE
 
-Generated from `Umodzi_Connect_Final_Defence_Presentation.pptx` on 2026-11-12. Speaker notes are also embedded in the deck itself; this file is the printable study copy.
+Generated from `Umodzi_Connect_Final_Defence_Presentation.pptx` on 2026-11-12. Slides 1–14 follow the reference defence arrangement (Mwape Chipyoka's 14-slide order); the two system diagrams are kept as backup slides 15–16, after the closing slide, to be shown only if a panelist asks. Speaker notes are also embedded in the deck itself; this file is the printable study copy.
 
 ---
 
@@ -112,3 +112,79 @@ Likely question: "Did you achieve your objectives?" — Objectives 1 to 3 are me
 Finish on recommendations, then invite questions.
 Prepare for: "What would you do with three more months?" — controlled pilot, labelled dataset, and fairness measurement across technicians.
 Keep the closing slide on screen while answering questions.
+
+---
+
+## Slide 15 — SYSTEM ARCHITECTURE (BACKUP)
+
+Backup slide, outside the 14-slide core flow — shown only if a panelist asks about the architecture.
+Walk the three tiers top to bottom: the Netlify client never holds a provider key; the Render API exposes eight modules; Supabase PostgreSQL with PostGIS holds sixteen tables behind row-level security.
+Emphasise the red EXTERNAL band: Gemini, Resend and Web Push are server-side only — that is the answer to any credential-exposure question.
+Likely question: "Why is the browser not allowed to call Gemini directly?" — A key in the browser is a public key; classification therefore happens server-side with a keyword fallback.
+
+---
+
+## Slide 16 — SMART DISPATCH FLOWCHART (BACKUP)
+
+Backup slide for the core contribution, outside the 14-slide core flow — shown on request after the closing slide.
+Stress that there is no weighted score: an eligibility filter narrows candidates, deterministic ordering picks one, exactly ONE live offer exists at a time, and accept is atomic under a unique index so two technicians can never both hold the same job.
+Reject or timeout cascades to the next candidate; exhaustion yields no_match and the retry queue.
+Likely question: "What stops double assignment?" — The unique index on accepted offer per request; the second concurrent accept fails at the database, not in application code.
+
+---
+
+## THE TEN DIAGRAMS — STUDY NOTES
+
+Every diagram was generated from the implemented system and ships as a PNG plus an editable SVG in `docs/diagrams/`. Each appears once in the report body with its canonical number; Appendix D is a cross-reference index, not a second copy. Know one sentence and one likely question per figure.
+
+**Figure 1.1 — Conceptual Framework** (Chapter 1)
+Inputs → classification → dispatch engine → outputs → outcomes, with reviews feeding the trust signal back into the next dispatch.
+Say: outcomes are expected benefits, not measured results.
+Question: "Is the feedback loop real?" — Yes for ratings/reviews influencing ordering; the outcome box is aspirational.
+
+**Figure 4.2 — Context Diagram** (Chapter 4)
+Actors (customer, technician, administrator, pilot participant) and the three external services (Gemini, Resend, Web Push) around the system boundary.
+Say: survey respondents supplied pilot data but never touch the deployed system.
+Question: "Why is the pilot participant dashed?" — They interact with the study, not the software.
+
+**Figure 4.3 — System Architecture** (Chapter 4; also deck slide 15 — backup)
+Three tiers: Netlify client, Render Fastify API with eight modules, Supabase PostgreSQL + PostGIS; external services server-side only.
+Say: the browser never holds a provider key.
+Question: "Where does RLS sit?" — In the data tier, with a restricted runtime role.
+
+**Figure 4.4 — Use-Case Diagram** (Chapter 4)
+The three roles and the use cases each may perform; administrator use cases are governance, never message content.
+Say: conversation access is participant-only, enforced in the communication authorization layer.
+Question: "Can an admin read chats?" — No; authorisation is participant-only.
+
+**Figure 4.5 — Sequence Diagram: Accepting an Offer** (Chapter 4)
+The atomic accept path: begin, lock rows, conditional update, unique index admits one accepted offer, status → matched, conversation created.
+Say: the guard is the database unique index, not application logic.
+Question: "What if two technicians tap accept together?" — One succeeds; the other fails the unique index and cascades.
+
+**Figure 4.6 — State-Machine Diagram: Request Lifecycle** (Chapter 4)
+The seven persisted statuses and the guarded transitions; cancelled and completed are terminal.
+Say: transitions are validated against a server-side matrix and every transition writes an audit event.
+Question: "Can a completed job be reopened?" — No; terminal states have no outgoing transitions.
+
+**Figure 4.7 — Activity Diagram: Requesting a Service** (Chapter 4)
+Three swimlanes (customer, system, technician) and the branch that produces no_match into the retry queue.
+Say: classification suggests, the customer confirms, then the request persists as pending.
+Question: "What happens on no_match?" — Retry queue, swept at a configurable interval.
+
+**Figure 4.8 — Class Diagram (implemented modules)** (Chapter 4)
+The eight service modules and their shared Database (pg Pool) dependency; responsibilities mirror source files.
+Say: each box maps to a real module — auth, authorization, dispatch, communicationAuth, requests, notifications, ai, realtime.
+Question: "Is this design or code?" — Code: the methods listed exist in the repository.
+
+**Figure 4.9 — Entity-Relationship Diagram** (Chapter 4)
+The sixteen tables; foreign keys carry ownership, and service_request_events plus the audit/verification tables are append-only.
+Say: the unique accepted-offer-per-request index lives on dispatch_offers.
+Question: "How is audit integrity kept?" — Append-only event tables; no updates or deletes.
+
+**Figure 4.10 — Smart Dispatch Flowchart** (Chapter 4; also deck slide 16 — backup)
+Eligibility filter → deterministic order → one live offer → accept/reject/timeout → atomic accept, with the cascade back to ordering.
+Say: there is no weighted score; selection is filter then deterministic ordering.
+Question: "Why not score technicians?" — Deterministic ordering is auditable and avoids opaque weighting.
+
+Known cosmetic note: five diagrams (4.2, 4.5, 4.6, 4.7, 4.9) have small label collisions in their legend or footnote regions. Content and numbering are correct; the SVG sources in `docs/diagrams/` can be re-exported if a clean reprint is ever required.

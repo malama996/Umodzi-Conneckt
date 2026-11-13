@@ -1,0 +1,482 @@
+{
+  "split": "test",
+  "corpusSize": 45,
+  "accuracy": 40,
+  "macroPrecision": 79.6,
+  "macroRecall": 40,
+  "macroF1": 50.8,
+  "perCategory": [
+    {
+      "label": "Plumbing",
+      "support": 5,
+      "tp": 3,
+      "fp": 1,
+      "fn": 2,
+      "precision": 75,
+      "recall": 60,
+      "f1": 66.7
+    },
+    {
+      "label": "Electrical",
+      "support": 5,
+      "tp": 3,
+      "fp": 1,
+      "fn": 2,
+      "precision": 75,
+      "recall": 60,
+      "f1": 66.7
+    },
+    {
+      "label": "Automotive",
+      "support": 5,
+      "tp": 2,
+      "fp": 0,
+      "fn": 3,
+      "precision": 100,
+      "recall": 40,
+      "f1": 57.1
+    },
+    {
+      "label": "HVAC",
+      "support": 5,
+      "tp": 1,
+      "fp": 0,
+      "fn": 4,
+      "precision": 100,
+      "recall": 20,
+      "f1": 33.3
+    },
+    {
+      "label": "Appliance Repair",
+      "support": 5,
+      "tp": 1,
+      "fp": 0,
+      "fn": 4,
+      "precision": 100,
+      "recall": 20,
+      "f1": 33.3
+    },
+    {
+      "label": "Refrigeration",
+      "support": 5,
+      "tp": 3,
+      "fp": 0,
+      "fn": 2,
+      "precision": 100,
+      "recall": 60,
+      "f1": 75
+    },
+    {
+      "label": "Electronics",
+      "support": 5,
+      "tp": 0,
+      "fp": 0,
+      "fn": 5,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0
+    },
+    {
+      "label": "ICT",
+      "support": 5,
+      "tp": 3,
+      "fp": 0,
+      "fn": 2,
+      "precision": 100,
+      "recall": 60,
+      "f1": 75
+    },
+    {
+      "label": "Handyman",
+      "support": 5,
+      "tp": 2,
+      "fp": 1,
+      "fn": 3,
+      "precision": 66.7,
+      "recall": 40,
+      "f1": 50
+    }
+  ],
+  "confusion": {
+    "Plumbing": {
+      "Plumbing": 3,
+      "Electrical": 0,
+      "Automotive": 0,
+      "HVAC": 0,
+      "Appliance Repair": 0,
+      "Refrigeration": 0,
+      "Electronics": 0,
+      "ICT": 0,
+      "Handyman": 0,
+      "(none)": 2
+    },
+    "Electrical": {
+      "Plumbing": 0,
+      "Electrical": 3,
+      "Automotive": 0,
+      "HVAC": 0,
+      "Appliance Repair": 0,
+      "Refrigeration": 0,
+      "Electronics": 0,
+      "ICT": 0,
+      "Handyman": 0,
+      "(none)": 2
+    },
+    "Automotive": {
+      "Plumbing": 0,
+      "Electrical": 0,
+      "Automotive": 2,
+      "HVAC": 0,
+      "Appliance Repair": 0,
+      "Refrigeration": 0,
+      "Electronics": 0,
+      "ICT": 0,
+      "Handyman": 0,
+      "(none)": 3
+    },
+    "HVAC": {
+      "Plumbing": 0,
+      "Electrical": 0,
+      "Automotive": 0,
+      "HVAC": 1,
+      "Appliance Repair": 0,
+      "Refrigeration": 0,
+      "Electronics": 0,
+      "ICT": 0,
+      "Handyman": 0,
+      "(none)": 4
+    },
+    "Appliance Repair": {
+      "Plumbing": 0,
+      "Electrical": 0,
+      "Automotive": 0,
+      "HVAC": 0,
+      "Appliance Repair": 1,
+      "Refrigeration": 0,
+      "Electronics": 0,
+      "ICT": 0,
+      "Handyman": 0,
+      "(none)": 4
+    },
+    "Refrigeration": {
+      "Plumbing": 1,
+      "Electrical": 0,
+      "Automotive": 0,
+      "HVAC": 0,
+      "Appliance Repair": 0,
+      "Refrigeration": 3,
+      "Electronics": 0,
+      "ICT": 0,
+      "Handyman": 1,
+      "(none)": 0
+    },
+    "Electronics": {
+      "Plumbing": 0,
+      "Electrical": 0,
+      "Automotive": 0,
+      "HVAC": 0,
+      "Appliance Repair": 0,
+      "Refrigeration": 0,
+      "Electronics": 0,
+      "ICT": 0,
+      "Handyman": 0,
+      "(none)": 5
+    },
+    "ICT": {
+      "Plumbing": 0,
+      "Electrical": 1,
+      "Automotive": 0,
+      "HVAC": 0,
+      "Appliance Repair": 0,
+      "Refrigeration": 0,
+      "Electronics": 0,
+      "ICT": 3,
+      "Handyman": 0,
+      "(none)": 1
+    },
+    "Handyman": {
+      "Plumbing": 0,
+      "Electrical": 0,
+      "Automotive": 0,
+      "HVAC": 0,
+      "Appliance Repair": 0,
+      "Refrigeration": 0,
+      "Electronics": 0,
+      "ICT": 0,
+      "Handyman": 2,
+      "(none)": 3
+    }
+  },
+  "rows": [
+    {
+      "id": "PL-02",
+      "expected": "Plumbing",
+      "predicted": "Plumbing",
+      "correct": true
+    },
+    {
+      "id": "PL-04",
+      "expected": "Plumbing",
+      "predicted": "Plumbing",
+      "correct": true
+    },
+    {
+      "id": "PL-06",
+      "expected": "Plumbing",
+      "predicted": "(none)",
+      "correct": false
+    },
+    {
+      "id": "PL-08",
+      "expected": "Plumbing",
+      "predicted": "(none)",
+      "correct": false
+    },
+    {
+      "id": "PL-10",
+      "expected": "Plumbing",
+      "predicted": "Plumbing",
+      "correct": true
+    },
+    {
+      "id": "EL-02",
+      "expected": "Electrical",
+      "predicted": "Electrical",
+      "correct": true
+    },
+    {
+      "id": "EL-04",
+      "expected": "Electrical",
+      "predicted": "(none)",
+      "correct": false
+    },
+    {
+      "id": "EL-06",
+      "expected": "Electrical",
+      "predicted": "(none)",
+      "correct": false
+    },
+    {
+      "id": "EL-08",
+      "expected": "Electrical",
+      "predicted": "Electrical",
+      "correct": true
+    },
+    {
+      "id": "EL-10",
+      "expected": "Electrical",
+      "predicted": "Electrical",
+      "correct": true
+    },
+    {
+      "id": "AU-02",
+      "expected": "Automotive",
+      "predicted": "Automotive",
+      "correct": true
+    },
+    {
+      "id": "AU-04",
+      "expected": "Automotive",
+      "predicted": "Automotive",
+      "correct": true
+    },
+    {
+      "id": "AU-06",
+      "expected": "Automotive",
+      "predicted": "(none)",
+      "correct": false
+    },
+    {
+      "id": "AU-08",
+      "expected": "Automotive",
+      "predicted": "(none)",
+      "correct": false
+    },
+    {
+      "id": "AU-10",
+      "expected": "Automotive",
+      "predicted": "(none)",
+      "correct": false
+    },
+    {
+      "id": "HV-02",
+      "expected": "HVAC",
+      "predicted": "(none)",
+      "correct": false
+    },
+    {
+      "id": "HV-04",
+      "expected": "HVAC",
+      "predicted": "(none)",
+      "correct": false
+    },
+    {
+      "id": "HV-06",
+      "expected": "HVAC",
+      "predicted": "(none)",
+      "correct": false
+    },
+    {
+      "id": "HV-08",
+      "expected": "HVAC",
+      "predicted": "(none)",
+      "correct": false
+    },
+    {
+      "id": "HV-10",
+      "expected": "HVAC",
+      "predicted": "HVAC",
+      "correct": true
+    },
+    {
+      "id": "AP-02",
+      "expected": "Appliance Repair",
+      "predicted": "Appliance Repair",
+      "correct": true
+    },
+    {
+      "id": "AP-04",
+      "expected": "Appliance Repair",
+      "predicted": "(none)",
+      "correct": false
+    },
+    {
+      "id": "AP-06",
+      "expected": "Appliance Repair",
+      "predicted": "(none)",
+      "correct": false
+    },
+    {
+      "id": "AP-08",
+      "expected": "Appliance Repair",
+      "predicted": "(none)",
+      "correct": false
+    },
+    {
+      "id": "AP-10",
+      "expected": "Appliance Repair",
+      "predicted": "(none)",
+      "correct": false
+    },
+    {
+      "id": "RF-02",
+      "expected": "Refrigeration",
+      "predicted": "Refrigeration",
+      "correct": true
+    },
+    {
+      "id": "RF-04",
+      "expected": "Refrigeration",
+      "predicted": "Handyman",
+      "correct": false
+    },
+    {
+      "id": "RF-06",
+      "expected": "Refrigeration",
+      "predicted": "Plumbing",
+      "correct": false
+    },
+    {
+      "id": "RF-08",
+      "expected": "Refrigeration",
+      "predicted": "Refrigeration",
+      "correct": true
+    },
+    {
+      "id": "RF-10",
+      "expected": "Refrigeration",
+      "predicted": "Refrigeration",
+      "correct": true
+    },
+    {
+      "id": "EC-02",
+      "expected": "Electronics",
+      "predicted": "(none)",
+      "correct": false
+    },
+    {
+      "id": "EC-04",
+      "expected": "Electronics",
+      "predicted": "(none)",
+      "correct": false
+    },
+    {
+      "id": "EC-06",
+      "expected": "Electronics",
+      "predicted": "(none)",
+      "correct": false
+    },
+    {
+      "id": "EC-08",
+      "expected": "Electronics",
+      "predicted": "(none)",
+      "correct": false
+    },
+    {
+      "id": "EC-10",
+      "expected": "Electronics",
+      "predicted": "(none)",
+      "correct": false
+    },
+    {
+      "id": "IC-02",
+      "expected": "ICT",
+      "predicted": "Electrical",
+      "correct": false
+    },
+    {
+      "id": "IC-04",
+      "expected": "ICT",
+      "predicted": "ICT",
+      "correct": true
+    },
+    {
+      "id": "IC-06",
+      "expected": "ICT",
+      "predicted": "ICT",
+      "correct": true
+    },
+    {
+      "id": "IC-08",
+      "expected": "ICT",
+      "predicted": "(none)",
+      "correct": false
+    },
+    {
+      "id": "IC-10",
+      "expected": "ICT",
+      "predicted": "ICT",
+      "correct": true
+    },
+    {
+      "id": "HM-02",
+      "expected": "Handyman",
+      "predicted": "Handyman",
+      "correct": true
+    },
+    {
+      "id": "HM-04",
+      "expected": "Handyman",
+      "predicted": "Handyman",
+      "correct": true
+    },
+    {
+      "id": "HM-06",
+      "expected": "Handyman",
+      "predicted": "(none)",
+      "correct": false
+    },
+    {
+      "id": "HM-08",
+      "expected": "Handyman",
+      "predicted": "(none)",
+      "correct": false
+    },
+    {
+      "id": "HM-10",
+      "expected": "Handyman",
+      "predicted": "(none)",
+      "correct": false
+    }
+  ]
+}

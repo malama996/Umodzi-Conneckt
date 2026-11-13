@@ -44,7 +44,7 @@ submitted", "Supabase Auth", "Firebase", "Cloud deployment platform", the
 
 | Gap | Effect on the defence | Fix |
 |---|---|---|
-| Ten diagrams exist in the report (Appendix D) but not in the deck | The deck's design slide describes the architecture in words; the report now carries all ten figures | Decide whether to add two diagram slides (architecture, dispatch) — the 14-slide reference arrangement has no slot for them |
+| Ten diagrams exist in the report (Appendix D); the two key ones (architecture, dispatch) were added to the deck | The 14-slide reference arrangement has no slot for standalone diagram slides | Resolved — the two diagrams are backup slides 15–16, after the closing slide, so the presented core flow (1–14) matches the reference exactly; the other eight stay report-only |
 | No application screenshots in the deck | The deck describes the system but never shows it | Capture from the running app once the database exists |
 | Chapter Five evaluation tables blank | Cannot quote a system-wide result yet | §5.1.1 now states what has been measured (484 assertions, 0 failures) and, for each gap, the method and sample size |
 | Report Table of Contents not refreshed | Page numbers may be stale after edits | Open in Word and update the field |

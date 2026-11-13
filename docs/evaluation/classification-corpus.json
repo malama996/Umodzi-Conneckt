@@ -1,0 +1,542 @@
+[
+  {
+    "id": "PL-01",
+    "expected": "Plumbing",
+    "description": "The kitchen tap has been dripping for three days and now there is water pooling under the sink.",
+    "split": "dev"
+  },
+  {
+    "id": "PL-02",
+    "expected": "Plumbing",
+    "description": "A pipe burst behind the bathroom wall last night, water is running down into the passage.",
+    "split": "test"
+  },
+  {
+    "id": "PL-03",
+    "expected": "Plumbing",
+    "description": "The toilet will not flush properly and keeps filling up with dirty water.",
+    "split": "dev"
+  },
+  {
+    "id": "PL-04",
+    "expected": "Plumbing",
+    "description": "Water drains very slowly in the shower and the drain smells bad.",
+    "split": "test"
+  },
+  {
+    "id": "PL-05",
+    "expected": "Plumbing",
+    "description": "The geyser is leaking from the bottom and the ceiling board above it is wet.",
+    "split": "dev"
+  },
+  {
+    "id": "PL-06",
+    "expected": "Plumbing",
+    "description": "There is almost no water pressure in the whole house since yesterday morning.",
+    "split": "test"
+  },
+  {
+    "id": "PL-07",
+    "expected": "Plumbing",
+    "description": "Sewage is coming up through the floor drain outside the kitchen door.",
+    "split": "dev"
+  },
+  {
+    "id": "PL-08",
+    "expected": "Plumbing",
+    "description": "The water tank stand is broken and the tank is leaning, I need someone to fix the plumbing and the stand.",
+    "split": "test"
+  },
+  {
+    "id": "PL-09",
+    "expected": "Plumbing",
+    "description": "The shower mixer is loose and water sprays out from the joint when I turn it on.",
+    "split": "dev"
+  },
+  {
+    "id": "PL-10",
+    "expected": "Plumbing",
+    "description": "Please help, the outside tap was left open and now the yard is flooded and the pipe connection is broken.",
+    "split": "test"
+  },
+  {
+    "id": "EL-01",
+    "expected": "Electrical",
+    "description": "The socket in the bedroom sparked when I plugged in the heater and now that side of the house is dead.",
+    "split": "dev"
+  },
+  {
+    "id": "EL-02",
+    "expected": "Electrical",
+    "description": "The main breaker keeps tripping every few minutes, I have to keep resetting it.",
+    "split": "test"
+  },
+  {
+    "id": "EL-03",
+    "expected": "Electrical",
+    "description": "The lights in the sitting room flicker badly whenever the fridge starts.",
+    "split": "dev"
+  },
+  {
+    "id": "EL-04",
+    "expected": "Electrical",
+    "description": "There is a burning smell coming from the distribution board and one switch is warm.",
+    "split": "test"
+  },
+  {
+    "id": "EL-05",
+    "expected": "Electrical",
+    "description": "No electricity in the house at all but the neighbours have power, the meter is showing nothing.",
+    "split": "dev"
+  },
+  {
+    "id": "EL-06",
+    "expected": "Electrical",
+    "description": "The plug on the iron melted into the extension cord, the plug point needs replacing.",
+    "split": "test"
+  },
+  {
+    "id": "EL-07",
+    "expected": "Electrical",
+    "description": "I need new wiring for a small extension, two rooms and a bathroom light.",
+    "split": "dev"
+  },
+  {
+    "id": "EL-08",
+    "expected": "Electrical",
+    "description": "The security light outside stays on all day and does not come on at night anymore.",
+    "split": "test"
+  },
+  {
+    "id": "EL-09",
+    "expected": "Electrical",
+    "description": "The wall switch in the corridor gives a shock when I touch it with wet hands.",
+    "split": "dev"
+  },
+  {
+    "id": "EL-10",
+    "expected": "Electrical",
+    "description": "The prepaid meter is beeping and the display shows an error, no power is coming through.",
+    "split": "test"
+  },
+  {
+    "id": "AU-01",
+    "expected": "Automotive",
+    "description": "My car will not start in the morning, it just clicks and nothing happens.",
+    "split": "dev"
+  },
+  {
+    "id": "AU-02",
+    "expected": "Automotive",
+    "description": "The brakes are grinding when I stop and the pedal goes down too far.",
+    "split": "test"
+  },
+  {
+    "id": "AU-03",
+    "expected": "Automotive",
+    "description": "I have a punctured tyre and the spare is also flat, I need help on the roadside.",
+    "split": "dev"
+  },
+  {
+    "id": "AU-04",
+    "expected": "Automotive",
+    "description": "The engine temperature gauge goes into the red after ten minutes of driving.",
+    "split": "test"
+  },
+  {
+    "id": "AU-05",
+    "expected": "Automotive",
+    "description": "The clutch is slipping badly, the car revs but does not move properly.",
+    "split": "dev"
+  },
+  {
+    "id": "AU-06",
+    "expected": "Automotive",
+    "description": "The battery keeps going flat overnight even after I replaced it.",
+    "split": "test"
+  },
+  {
+    "id": "AU-07",
+    "expected": "Automotive",
+    "description": "There is a knocking noise from the suspension when I go over bumps.",
+    "split": "dev"
+  },
+  {
+    "id": "AU-08",
+    "expected": "Automotive",
+    "description": "The gearbox is hard to engage in second gear and grinds sometimes.",
+    "split": "test"
+  },
+  {
+    "id": "AU-09",
+    "expected": "Automotive",
+    "description": "The alternator is not charging, the battery light stays on while driving.",
+    "split": "dev"
+  },
+  {
+    "id": "AU-10",
+    "expected": "Automotive",
+    "description": "A stone cracked the windscreen on the driver side, I need it replaced before the rains.",
+    "split": "test"
+  },
+  {
+    "id": "HV-01",
+    "expected": "HVAC",
+    "description": "The air conditioner in the bedroom is running but it is not cooling at all.",
+    "split": "dev"
+  },
+  {
+    "id": "HV-02",
+    "expected": "HVAC",
+    "description": "I need routine servicing for two split air conditioning units before the hot season.",
+    "split": "test"
+  },
+  {
+    "id": "HV-03",
+    "expected": "HVAC",
+    "description": "The aircon needs a gas refill, it stopped blowing cold air last week.",
+    "split": "dev"
+  },
+  {
+    "id": "HV-04",
+    "expected": "HVAC",
+    "description": "The duct vents in the office are blowing dust and the airflow is very weak.",
+    "split": "test"
+  },
+  {
+    "id": "HV-05",
+    "expected": "HVAC",
+    "description": "The air conditioner is dripping water onto the floor from the indoor unit.",
+    "split": "dev"
+  },
+  {
+    "id": "HV-06",
+    "expected": "HVAC",
+    "description": "I want a new split unit installed in the sitting room, the wall bracket is already there.",
+    "split": "test"
+  },
+  {
+    "id": "HV-07",
+    "expected": "HVAC",
+    "description": "The thermostat on the aircon does not respond, it stays on the same setting.",
+    "split": "dev"
+  },
+  {
+    "id": "HV-08",
+    "expected": "HVAC",
+    "description": "The ceiling extractor fan in the bathroom stopped working and the room stays damp.",
+    "split": "test"
+  },
+  {
+    "id": "HV-09",
+    "expected": "HVAC",
+    "description": "The air conditioner makes a loud rattling noise when it starts up.",
+    "split": "dev"
+  },
+  {
+    "id": "HV-10",
+    "expected": "HVAC",
+    "description": "The heating unit in the guest house is blowing cold air instead of warm air.",
+    "split": "test"
+  },
+  {
+    "id": "AP-01",
+    "expected": "Appliance Repair",
+    "description": "The washing machine fills with water but the drum does not spin.",
+    "split": "dev"
+  },
+  {
+    "id": "AP-02",
+    "expected": "Appliance Repair",
+    "description": "The microwave runs but does not heat the food anymore.",
+    "split": "test"
+  },
+  {
+    "id": "AP-03",
+    "expected": "Appliance Repair",
+    "description": "The stove oven will not light and I smell gas when I turn the knob.",
+    "split": "dev"
+  },
+  {
+    "id": "AP-04",
+    "expected": "Appliance Repair",
+    "description": "The dishwasher leaves water standing in the bottom after every cycle.",
+    "split": "test"
+  },
+  {
+    "id": "AP-05",
+    "expected": "Appliance Repair",
+    "description": "My steam iron stopped producing steam and the plate is not heating.",
+    "split": "dev"
+  },
+  {
+    "id": "AP-06",
+    "expected": "Appliance Repair",
+    "description": "The vacuum cleaner motor is screaming and there is no suction.",
+    "split": "test"
+  },
+  {
+    "id": "AP-07",
+    "expected": "Appliance Repair",
+    "description": "The blender blade spins but the jug leaks at the base.",
+    "split": "dev"
+  },
+  {
+    "id": "AP-08",
+    "expected": "Appliance Repair",
+    "description": "The tumble dryer takes three hours to dry a small load and gets very hot.",
+    "split": "test"
+  },
+  {
+    "id": "AP-09",
+    "expected": "Appliance Repair",
+    "description": "The electric kettle switches itself off before the water boils.",
+    "split": "dev"
+  },
+  {
+    "id": "AP-10",
+    "expected": "Appliance Repair",
+    "description": "The cooker hob has two plates that no longer heat up, only the small one works.",
+    "split": "test"
+  },
+  {
+    "id": "RF-01",
+    "expected": "Refrigeration",
+    "description": "The fridge is running constantly but the food inside is warm.",
+    "split": "dev"
+  },
+  {
+    "id": "RF-02",
+    "expected": "Refrigeration",
+    "description": "The freezer has a thick layer of ice and the door will not close properly.",
+    "split": "test"
+  },
+  {
+    "id": "RF-03",
+    "expected": "Refrigeration",
+    "description": "The cold room at the butchery is not holding temperature overnight.",
+    "split": "dev"
+  },
+  {
+    "id": "RF-04",
+    "expected": "Refrigeration",
+    "description": "The display chiller in the shop is warm on the bottom shelf.",
+    "split": "test"
+  },
+  {
+    "id": "RF-05",
+    "expected": "Refrigeration",
+    "description": "The freezer compressor is hot and humming but not starting up.",
+    "split": "dev"
+  },
+  {
+    "id": "RF-06",
+    "expected": "Refrigeration",
+    "description": "There is water leaking from under the fridge onto the kitchen floor.",
+    "split": "test"
+  },
+  {
+    "id": "RF-07",
+    "expected": "Refrigeration",
+    "description": "The deep freeze stopped working after the power came back on.",
+    "split": "dev"
+  },
+  {
+    "id": "RF-08",
+    "expected": "Refrigeration",
+    "description": "The fridge door seal is torn so cold air escapes and it runs all day.",
+    "split": "test"
+  },
+  {
+    "id": "RF-09",
+    "expected": "Refrigeration",
+    "description": "The drinks cooler in the bar is not getting cold, the fan is noisy.",
+    "split": "dev"
+  },
+  {
+    "id": "RF-10",
+    "expected": "Refrigeration",
+    "description": "The bar fridge thermostat is broken, everything freezes solid on the bottom shelf.",
+    "split": "test"
+  },
+  {
+    "id": "EC-01",
+    "expected": "Electronics",
+    "description": "The television switches on but the screen stays black with no picture.",
+    "split": "dev"
+  },
+  {
+    "id": "EC-02",
+    "expected": "Electronics",
+    "description": "The home theatre amplifier has no sound on the left channel.",
+    "split": "test"
+  },
+  {
+    "id": "EC-03",
+    "expected": "Electronics",
+    "description": "The radio receiver only picks up one station and there is heavy static.",
+    "split": "dev"
+  },
+  {
+    "id": "EC-04",
+    "expected": "Electronics",
+    "description": "My soundbar pairs but the volume buttons on the remote do nothing.",
+    "split": "test"
+  },
+  {
+    "id": "EC-05",
+    "expected": "Electronics",
+    "description": "The LED television has dark patches along the bottom edge of the screen.",
+    "split": "dev"
+  },
+  {
+    "id": "EC-06",
+    "expected": "Electronics",
+    "description": "The game console overheats and shuts down after twenty minutes of play.",
+    "split": "test"
+  },
+  {
+    "id": "EC-07",
+    "expected": "Electronics",
+    "description": "The CCTV camera at the gate shows a grey image at night.",
+    "split": "dev"
+  },
+  {
+    "id": "EC-08",
+    "expected": "Electronics",
+    "description": "The speakers crackle badly when I turn the volume above half.",
+    "split": "test"
+  },
+  {
+    "id": "EC-09",
+    "expected": "Electronics",
+    "description": "The DVD player refuses to read discs, it says no disc every time.",
+    "split": "dev"
+  },
+  {
+    "id": "EC-10",
+    "expected": "Electronics",
+    "description": "The digital camera will not charge and the battery indicator flashes red.",
+    "split": "test"
+  },
+  {
+    "id": "IC-01",
+    "expected": "ICT",
+    "description": "My laptop is extremely slow and the fan runs loud all the time.",
+    "split": "dev"
+  },
+  {
+    "id": "IC-02",
+    "expected": "ICT",
+    "description": "The wifi router shows a red light and no devices can connect.",
+    "split": "test"
+  },
+  {
+    "id": "IC-03",
+    "expected": "ICT",
+    "description": "The office printer is offline and jobs stay stuck in the queue.",
+    "split": "dev"
+  },
+  {
+    "id": "IC-04",
+    "expected": "ICT",
+    "description": "I need Microsoft Office installed and the laptop set up for the new semester.",
+    "split": "test"
+  },
+  {
+    "id": "IC-05",
+    "expected": "ICT",
+    "description": "The desktop computer beeps and shows a disk error on start up.",
+    "split": "dev"
+  },
+  {
+    "id": "IC-06",
+    "expected": "ICT",
+    "description": "Our small office network drops every afternoon and we lose internet.",
+    "split": "test"
+  },
+  {
+    "id": "IC-07",
+    "expected": "ICT",
+    "description": "The computer has a virus, adverts keep opening by themselves in the browser.",
+    "split": "dev"
+  },
+  {
+    "id": "IC-08",
+    "expected": "ICT",
+    "description": "I cannot send email from Outlook, it keeps asking for the password.",
+    "split": "test"
+  },
+  {
+    "id": "IC-09",
+    "expected": "ICT",
+    "description": "The external hard drive is not recognised by any of my computers.",
+    "split": "dev"
+  },
+  {
+    "id": "IC-10",
+    "expected": "ICT",
+    "description": "We need the shop till software updated and a backup taken of the sales data.",
+    "split": "test"
+  },
+  {
+    "id": "HM-01",
+    "expected": "Handyman",
+    "description": "I need someone to assemble a flat pack wardrobe and mount it to the wall.",
+    "split": "dev"
+  },
+  {
+    "id": "HM-02",
+    "expected": "Handyman",
+    "description": "The kitchen door hinge is broken and the door hangs off the frame.",
+    "split": "test"
+  },
+  {
+    "id": "HM-03",
+    "expected": "Handyman",
+    "description": "The sitting room needs painting, the walls are peeling near the window.",
+    "split": "dev"
+  },
+  {
+    "id": "HM-04",
+    "expected": "Handyman",
+    "description": "Some floor tiles in the bathroom came loose and two are cracked.",
+    "split": "test"
+  },
+  {
+    "id": "HM-05",
+    "expected": "Handyman",
+    "description": "The plaster on the passage wall is crumbling and needs patching before painting.",
+    "split": "dev"
+  },
+  {
+    "id": "HM-06",
+    "expected": "Handyman",
+    "description": "The metal gate at the entrance is sagging and does not close all the way.",
+    "split": "test"
+  },
+  {
+    "id": "HM-07",
+    "expected": "Handyman",
+    "description": "I want a curtain rail fitted across the bedroom window and the curtains hung.",
+    "split": "dev"
+  },
+  {
+    "id": "HM-08",
+    "expected": "Handyman",
+    "description": "The wooden fence panels at the back are rotten and need replacing.",
+    "split": "test"
+  },
+  {
+    "id": "HM-09",
+    "expected": "Handyman",
+    "description": "A shelf collapsed in the pantry, I need new brackets fitted and the shelf rehung.",
+    "split": "dev"
+  },
+  {
+    "id": "HM-10",
+    "expected": "Handyman",
+    "description": "The burglar bars on the bedroom window are loose in the wall and rattle at night.",
+    "split": "test"
+  }
+]
