@@ -70,10 +70,11 @@ be established from source.
 | Check | Command | Result |
 |---|---|---|
 | Frontend type check | `cd frontend && npx tsc --noEmit -p tsconfig.json` | PASS, exit 0 |
+| Frontend lint | `cd frontend && npx next lint` | PASS — "No ESLint warnings or errors" |
+| Production build | `cd frontend && npx next build` | PASS — Next.js 15.5.29, all 25 routes emitted, shared JS 102 kB, `/manifest.webmanifest` prerendered, zero errors |
 
-Not run in this session, by instruction: the 45-script suite, lint, and `next build`. The build is
-the one gate worth running before the presentation, since B1–B3 touch client components and
-`globals.css`.
+The build was run **after** the B1–B3 edits, so it covers them. Not run in this session, by
+instruction: the 45-script test suite and browser-driven checks.
 
 ## F. Outstanding issues
 
@@ -90,9 +91,11 @@ the one gate worth running before the presentation, since B1–B3 touch client c
 **READY WITH LIMITATIONS.**
 
 The P0 set — authentication, role-based access, chat, persistence, request navigation, no known
-authorization hole, no crash path found in the audited surfaces — is implemented and was reviewed
-end to end. The limitations are evidential, not architectural: the live chat test and the device
-installs have not been performed, and the production build has not been re-run since these edits.
+authorization hole, no crash path found in the audited surfaces — is implemented and reviewed, and
+the production build compiles cleanly with the new code in it.
 
-Before Wednesday: run `next build`, then perform the chat walkthrough on the actual presentation
-hardware with two browser profiles.
+The remaining limitations are evidential, not architectural: the two-session live chat test, the
+responsive viewport matrix and the physical-device installs have not been performed.
+
+Before Wednesday: perform the chat walkthrough on the actual presentation hardware with two browser
+profiles, and install once on the phone you will demonstrate with.
