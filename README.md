@@ -1,4 +1,4 @@
-# Umodzi Connect — v0.1 / v0.2
+# Umodzi Connect v0.1 / v0.2
 
 This build follows the supplied implementation prompt and Theme B (Navy + Teal + Coral).
 
@@ -42,11 +42,11 @@ npm run typecheck -w backend
 ```
 
 ## Main routes
-- `/` — landing page
-- `/login` — login
-- `/register` — registration
-- `/matching` — v0.1 manual matching + v0.2 classification
-- `/technicians/Chanda%20M.` — v0.2 technician profile example
+- `/` landing page
+- `/login` login
+- `/register` registration
+- `/matching`  v0.1 manual matching + v0.2 classification
+- `/technicians/Chanda%20M.` v0.2 technician profile example
 
 ## Image configuration
 
