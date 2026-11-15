@@ -1,6 +1,6 @@
 'use client';
 /**
- * React binding for the in-app notification store (Task 22).
+ * React binding for the in-app notification store.
  * Uses useSyncExternalStore so server and client snapshots stay
  * consistent (the store is empty during SSR/hydration).
  */

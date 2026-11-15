@@ -1,5 +1,5 @@
 /**
- * Task 28.2D2 tests: offer-created notification (POST /api/v1/offers →
+ * 2 tests: offer-created notification (POST /api/v1/offers →
  * NotificationService.recordEventNotification) against a RUNNING backend
  * (start it first) backed by the LOCAL scratch database — never Supabase.
  *

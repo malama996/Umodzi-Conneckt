@@ -4,7 +4,7 @@ import fastifyJwt from '@fastify/jwt';
 import type { UserRole } from '../types/api.js';
 
 /**
- * JWT access tokens (Task 23).
+ * JWT access tokens.
  *
  * Design:
  *   - HS256 signed with JWT_SECRET, which MUST come from the environment

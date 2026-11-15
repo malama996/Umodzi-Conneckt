@@ -1,5 +1,5 @@
 /**
- * In-app notification store (Task 22 + follow-up pass).
+ * In-app notification store.
  *
  * A deliberately small, in-memory, session-scoped store:
  *

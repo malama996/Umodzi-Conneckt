@@ -1,5 +1,5 @@
 /**
- * Task 28.2D4 tests: request-status notifications (PATCH
+ * 4 tests: request-status notifications (PATCH
  * /api/v1/requests/:id/status → the OTHER participant) against a RUNNING
  * backend (start it first) backed by the LOCAL scratch database — never
  * Supabase.

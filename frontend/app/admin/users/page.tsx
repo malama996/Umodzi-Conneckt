@@ -38,7 +38,7 @@ const IMPACT: Record<AccountStatus, string> = {
 };
 
 /**
- * Administrator user management (Task 25 §3) — /admin/users.
+ * Administrator user management — /admin/users.
  *
  * Server-authorized end to end: RequireAuth gates the route for UX, and
  * every data call plus the status mutation is enforced by

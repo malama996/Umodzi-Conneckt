@@ -119,7 +119,7 @@ async function main() {
     await admin.query(
       `GRANT TEMPORARY ON DATABASE ${adminUrlParsed.pathname.replace('/', '')} TO ${ROLE}`,
     );
-    // Task 35.2 hotfixes (Phase 4 discoveries), both reversible:
+    //  hotfixes, both reversible:
     // (a) PostGIS lives in the `extensions` schema on this project; schema
     //     visibility needs BOTH the search_path entry AND the USAGE grant
     //     (Supabase grants USAGE on extensions only to its built-in API

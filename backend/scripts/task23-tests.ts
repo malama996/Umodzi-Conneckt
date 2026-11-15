@@ -1,5 +1,5 @@
 /**
- * Task 23 focused unit tests: password hashing (argon2id), JWT config,
+ *  focused unit tests: password hashing (argon2id), JWT config,
  * refresh-session primitives, registration/login validation rules, and
  * shared id/email helpers.
  *

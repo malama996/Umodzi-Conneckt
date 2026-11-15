@@ -18,7 +18,7 @@ import type { ConversationSummary } from '@/lib/types/communication';
  * count all come from the backend's owner-scoped query. An account with no
  * conversations gets an honest empty state rather than placeholder rows.
  *
- * Phase 2: wrapped in RequireAuth like every other dashboard route, so an
+ * wrapped in RequireAuth like every other dashboard route, so an
  * anonymous visitor is redirected to /login?next=… instead of receiving a
  * raw 401 from the conversation list.
  */
@@ -105,7 +105,7 @@ function ConversationsList() {
     };
   }, [load]);
 
-  // Contact/call (Task 33.4): shared state machine — the number comes
+  // Contact/call: shared state machine — the number comes
   // from the backend and is shown with a tel: link + copy action, so the
   // desktop fallback is never a silent no-op.
   const contact = useContactCall();

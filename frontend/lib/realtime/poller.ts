@@ -1,5 +1,5 @@
 /**
- * Shared polling engine (Task 22).
+ * Shared polling engine.
  *
  * One short-interval loop per resource key, shared by every
  * subscriber of that resource (refcounted), so the same request or

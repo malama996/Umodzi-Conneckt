@@ -1,8 +1,7 @@
 import { get, post, patch, del, ApiError } from './client';
 
 /**
- * Data-subject privacy API client (Task 28.3C / 28.3D) and the notification
- * inbox (28.3C, closing gap G-02).
+ * Data-subject privacy API client and notification inbox.
  *
  * Every call here is owner-scoped by the BACKEND: the recipient/owner is
  * always taken from the authenticated session, so there is deliberately no
@@ -10,10 +9,6 @@ import { get, post, patch, del, ApiError } from './client';
  * identifiers sent are the notification ids the caller already owns and the
  * one account they are acting on.
  */
-
-/* ------------------------------------------------------------------ */
-/* Types — mirror the real API payloads                                */
-/* ------------------------------------------------------------------ */
 
 export interface AccountDeletionCounts {
   service_requests?: number;
@@ -97,19 +92,11 @@ interface Envelope<T> {
   data: T;
 }
 
-/* ------------------------------------------------------------------ */
-/* 28.3C — access / export                                            */
-/* ------------------------------------------------------------------ */
-
 /** Fetch the caller's own data export (real data, assembled server-side). */
 export async function getMyData(): Promise<AccountExport> {
   const body = await get<Envelope<AccountExport>>('/me/data');
   return body.data;
 }
-
-/* ------------------------------------------------------------------ */
-/* 28.3D — permanent deletion                                         */
-/* ------------------------------------------------------------------ */
 
 /** Read what deletion would remove. Removes nothing. */
 export async function getDeletionPreview(): Promise<DeletionPreview> {
@@ -138,10 +125,6 @@ export async function deleteMyAccount(
 /** The exact acknowledgement literal the API requires. Single source of truth. */
 export const DELETION_CONFIRMATION_PHRASE = 'DELETE MY ACCOUNT';
 
-/* ------------------------------------------------------------------ */
-/* Notification inbox (G-02)                                          */
-/* ------------------------------------------------------------------ */
-
 export async function getMyNotifications(limit = 25, offset = 0): Promise<NotificationPage> {
   const body = await get<Envelope<NotificationPage>>(
     `/me/notifications?limit=${limit}&offset=${offset}`,
@@ -158,10 +141,6 @@ export async function markAllNotificationsRead(): Promise<number> {
   const body = await post<Envelope<{ updated: number }>>('/me/notifications/read-all');
   return body.data.updated;
 }
-
-/* ------------------------------------------------------------------ */
-/* Human-readable error text                                           */
-/* ------------------------------------------------------------------ */
 
 /** Safe, user-facing message for a privacy action failure. */
 export function privacyErrorMessage(error: unknown): string {

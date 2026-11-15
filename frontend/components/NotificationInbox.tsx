@@ -22,7 +22,7 @@ import {
 } from '@/lib/api/privacyApi';
 
 /**
- * Notification inbox (Task 28.3C — closes gap G-02).
+ * Notification inbox.
  *
  * Before 28.3C the application persisted notifications and could push them to
  * a device, but exposed NO route for a person to read their own history. That
@@ -277,8 +277,7 @@ export default function NotificationInbox() {
               </span>
             </button>
             {/* Real deep links: one per persisted reference type, rendered
-                only when the row actually carries that reference (Task
-                28.4B + follow-up pass). No reference, no link — nothing
+                only when the row actually carries that reference. No reference, no link — nothing
                 is invented for rows without one. Opening a link also
                 marks the row read. */}
             {(() => {

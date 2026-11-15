@@ -19,7 +19,7 @@ import { useAuth } from '@/lib/auth';
 import { logout } from '@/lib/auth/authStore';
 
 /**
- * Privacy settings (Task 28.3C access/export, 28.3D permanent deletion).
+ * Privacy settings for data access, export, and permanent deletion.
  *
  * Two genuinely destructive-capable controls live here, and they are kept
  * visually and behaviourally distinct:
@@ -73,7 +73,6 @@ export default function PrivacySettings() {
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
-  // ---------------- Phone (28.4B) ----------------
   const [phone, setPhone] = useState('');
   const [phoneSaving, setPhoneSaving] = useState(false);
   const [phoneError, setPhoneError] = useState<string | null>(null);

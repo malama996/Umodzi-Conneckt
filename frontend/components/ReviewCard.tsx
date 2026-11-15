@@ -14,7 +14,7 @@ import {
 import { formatTimestamp } from '@/lib/services/adminService';
 
 /**
- * Customer review card (Task 27 §17) — shown on /matching once the active
+ * Customer review card shown on /matching once the active
  * request is completed.
  *
  * The backend decides eligibility; this card only renders the form when

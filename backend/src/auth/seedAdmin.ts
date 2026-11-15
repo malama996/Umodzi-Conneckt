@@ -3,7 +3,7 @@ import { normalizeEmail } from './authService.js';
 import { hashPassword } from './password.js';
 
 /**
- * Controlled administrator provisioning (Task 23).
+ * Controlled administrator provisioning.
  *
  * Public registration can NEVER create an administrator — admins come
  * exclusively from this explicit environment-driven seed

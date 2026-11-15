@@ -1,5 +1,5 @@
 /**
- * Task 33 OPTIONAL live smoke test: one real Gemini call through the
+ *  OPTIONAL live smoke test: one real Gemini call through the
  * running backend's POST /api/v1/classify-fault as an authenticated
  * customer. Requires GEMINI_API_KEY in backend/.env AND a customer
  * session (TASK33_CUSTOMER_EMAIL / TASK33_CUSTOMER_PASSWORD for a

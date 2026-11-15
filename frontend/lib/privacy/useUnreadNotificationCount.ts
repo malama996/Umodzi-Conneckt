@@ -5,7 +5,7 @@ import { getMyNotifications } from '@/lib/api/privacyApi';
 import { useAuth } from '@/lib/auth';
 
 /**
- * Real unread notification count for the sidebar badge (Task 28.3, G-02).
+ * Real unread notification count for the sidebar badge.
  *
  * Replaces what used to be a hardcoded "2" in the sidebar — a fabricated
  * number that misrepresented an application with no notification history at

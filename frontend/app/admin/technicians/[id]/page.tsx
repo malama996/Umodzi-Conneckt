@@ -40,7 +40,7 @@ import {
 import { adminErrorMessage, formatTimestamp } from '@/lib/services/adminService';
 
 /**
- * Administrator verification review (Task 26 §13) — /admin/technicians/<id>.
+ * Administrator verification review — /admin/technicians/<id>.
  *
  * One technician's full verification bundle: profile, lifecycle state,
  * linked account, and every submitted document (bytes fetched through the

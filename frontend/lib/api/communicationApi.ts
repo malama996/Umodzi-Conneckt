@@ -1,7 +1,7 @@
 import { get, post, patch, ApiError } from './client';
 
 /**
- * Communication API client (Task 28.4B).
+ * Communication API client.
  *
  * Follows the same boundary rule as every other API module: all calls go
  * through the single HTTP client in `./client`, which attaches the session

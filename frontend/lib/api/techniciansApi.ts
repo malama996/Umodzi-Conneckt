@@ -20,15 +20,15 @@ export interface ApiTechnician {
   availabilityStatus: string;
   accountStatus: string;
   /**
-   * Task 28.3A.1 (G-01): the public technician endpoints no longer return
+   * Public technician endpoints do not return
    * precise coordinates, so these are optional and are absent in practice.
    * The map derives a COARSE service-area marker instead (see lib/mapData).
    */
   latitude?: number;
   longitude?: number;
-  /** Task 26: optional public bio (null until the technician writes one). */
+  /** Optional public bio. */
   bio?: string | null;
-  /** Task 26: true when a profile photo exists (bytes via GET /technicians/:id/photo). */
+  /** Whether a profile photo is available. */
   hasPhoto?: boolean;
   /**
    * §5 trust indicators: the document categories an administrator has

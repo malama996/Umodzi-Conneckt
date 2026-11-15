@@ -1,11 +1,10 @@
 /**
  * Loopback-only guard for anything that writes schema or demo rows.
  *
- * On 13 November 2026 `backend/.env` supplied a hosted MIGRATIONS_DATABASE_URL
- * and one un-overridden invocation applied all twelve migrations to the live
- * database. Both the runner and the seeder check their connection host through
- * this function, and there is deliberately no environment variable that
- * disables the check.
+ * This protection applies to manual seed/demo commands only. Those commands
+ * must never write to a hosted database. The API migration runner is separate:
+ * it runs as part of the controlled deployment startup sequence with a
+ * dedicated administrative connection and an advisory lock.
  */
 const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '::1']);
 

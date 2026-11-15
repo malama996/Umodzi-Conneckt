@@ -1,9 +1,3 @@
-// Backend API types for Service Request, Technician, Offer, etc.
-
-// Local copies of the lifecycle/offer status unions (mirroring the
-// frontend domain contract in frontend/lib/types.ts). The backend
-// persists and validates these values but does not implement the
-// dispatch state machine.
 export type ServiceRequestStatus =
   | 'pending'
   | 'matching'
@@ -15,7 +9,6 @@ export type ServiceRequestStatus =
 
 export type DispatchOfferStatus = 'pending' | 'accepted' | 'rejected' | 'timed_out';
 
-// Technician API shape (mirrors the frontend Technician but with additional DB fields)
 export interface TechnicianApi {
   id: string;
   name: string;
@@ -29,7 +22,7 @@ export interface TechnicianApi {
   availabilityStatus: string;
   accountStatus: string;
   /**
-   * Task 28.3A.1 (G-01): precise coordinates are NEVER included in a public
+   * Precise coordinates are never included in a public
    * technician projection, so these are optional and in practice always
    * `undefined` on public routes. They exist on the type only so an
    * owner-scoped/internal caller that legitimately holds a coordinate still
@@ -37,9 +30,7 @@ export interface TechnicianApi {
    */
   latitude?: number;
   longitude?: number;
-  /** Task 26: optional public bio (null until the technician writes one). */
   bio?: string | null;
-  /** Task 26: true when a retrievable profile photo exists (photo bytes are served by GET /technicians/:id/photo; storage keys are never exposed). */
   hasPhoto?: boolean;
   /**
    * Audit §5.D — customer-facing trust indicators. The document CATEGORIES
@@ -54,7 +45,6 @@ export interface TechnicianApi {
   updatedAt: string;
 }
 
-// Service Request API shape (mirrors frontend ServiceRequest)
 export interface ServiceRequestApi {
   id: string;
   description: string;
@@ -63,8 +53,8 @@ export interface ServiceRequestApi {
   /**
    * Reserved for a future opt-in location capture. The current API never
    * accepts or returns request coordinates, and no projection populates these —
-   * do not start emitting them without the Task 28.3 location/retention
-   * decision that would follow (see docs/DATA_RETENTION_POLICY.md).
+   * do not start emitting them without a corresponding location-retention
+   * decision (see docs/DATA_RETENTION_POLICY.md).
    */
   latitude?: number;
   longitude?: number;
@@ -72,7 +62,7 @@ export interface ServiceRequestApi {
   createdAt: string;
   updatedAt: string;
   /**
-   * Additive detail fields (Task 36, Stage 3). Only `GET /requests/:id`
+   * Additive detail fields. Only `GET /requests/:id`
    * populates them; other projections omit them, so consumers must treat
    * both as nullable rather than assume presence.
    */
@@ -80,7 +70,6 @@ export interface ServiceRequestApi {
   conversationId?: string | null;
 }
 
-// Offer API shape
 export interface OfferApi {
   id: string;
   requestId: string;
@@ -91,7 +80,6 @@ export interface OfferApi {
   updatedAt: string;
 }
 
-// API response wrapper
 export interface ApiResponse<T> {
   data?: T;
   error?: string;
@@ -99,17 +87,12 @@ export interface ApiResponse<T> {
   details?: any;
 }
 
-// For nearby technicians query
 export interface NearbyTechniciansQuery {
   latitude: number;
   longitude: number;
-  radius?: number; // in kilometers (default 50)
+  radius?: number;
   category?: string;
 }
-
-// ---------------------------------------------------------------------------
-// Task 23 — authentication & authorization types
-// ---------------------------------------------------------------------------
 
 /** The three roles of the system (strongly typed union — never raw strings). */
 export type UserRole = 'customer' | 'technician' | 'administrator';
@@ -139,16 +122,6 @@ export interface AuthUserApi {
 export interface AuthResponseApi<T> {
   data: T;
 }
-
-// ---------------------------------------------------------------------------
-// Task 25 — administrator / platform management types
-//
-// Every shape below is a SAFE projection: no password hashes, no session
-// rows, no tokens — only the fields an administrator needs to operate the
-// platform. Role/account-status values are constrained by database CHECK
-// constraints, and request/offer statuses are validated at the mapping
-// boundary (toRequestStatus/toOfferStatus) before entering a response.
-// ---------------------------------------------------------------------------
 
 /** Safe user listing row for administrators (never password/session material). */
 export interface AdminUserApi {
@@ -269,20 +242,10 @@ export interface AdminOverviewApi {
   recent: AdminActivityEventApi[];
 }
 
-// ---------------------------------------------------------------------------
-// Task 26 — technician profile, verification documents & lifecycle
-//
-// The legacy `verified` boolean remains the canonical "is verified" flag
-// (dispatch trust score, public badges, Task 25 admin surface) and is kept
-// consistent with `verification_status` in application code at every write
-// (verified ⟺ verification_status = 'verified'). Storage keys are NEVER
-// part of any wire shape — files are streamed by authorized endpoints.
-// ---------------------------------------------------------------------------
-
 /**
  * Verification lifecycle for account-linked technicians.
  *
- * 'partially_verified' (audit §5) means some evidence documents have been
+ * 'partially_verified' means some evidence documents have been
  * approved but the required identity evidence and/or other submitted
  * documents are still outstanding, pending, or rejected. The overall status
  * is DERIVED from the individual document review outcomes by the backend
@@ -295,7 +258,7 @@ export type TechnicianVerificationStatus =
   | 'verified'
   | 'rejected';
 
-/** Evidence document categories a technician can submit (audit §5.B). */
+/** Evidence document categories a technician can submit. */
 export type VerificationDocumentType =
   | 'national_id'
   | 'certificate'
@@ -305,7 +268,7 @@ export type VerificationDocumentType =
   | 'training_certificate'
   | 'other';
 
-/** Per-document review outcome (audit §5.C). */
+/** Per-document review outcome. */
 export type VerificationDocumentStatus = 'pending' | 'approved' | 'rejected';
 
 /**
@@ -385,20 +348,11 @@ export interface AdminTechnicianVerificationApi {
   userId: string | null;
   userEmail: string | null;
   documents: TechnicianDocumentApi[];
-  /** Append-only per-document review history, newest first (audit §5.C). */
+  /** Append-only per-document review history, newest first. */
   reviews: VerificationReviewApi[];
   createdAt: string;
   updatedAt: string;
 }
-
-// ---------------------------------------------------------------------------
-// Task 27 — customer ratings & reviews
-//
-// A review belongs to exactly ONE completed service request (unique index),
-// written by the request's owner about the technician who ACCEPTED the job.
-// customer/technician ids are always derived server-side. Public shapes
-// carry only public-safe fields — no emails, no account ids.
-// ---------------------------------------------------------------------------
 
 /** One review as exposed publicly (technician profile) and to the owner. */
 export interface ReviewApi {
@@ -453,10 +407,6 @@ export const CANONICAL_CATEGORIES = [
 ] as const;
 
 
-// ---------------------------------------------------------------------------
-// Task 28 — Notifications & Push Subscriptions types
-// ---------------------------------------------------------------------------
-
 export type NotificationChannel = 'in_app' | 'sms' | 'push' | 'email';
 export type NotificationStatus = 'pending' | 'sent' | 'delivered' | 'failed';
 
@@ -494,7 +444,7 @@ export interface PushSubscriptionInput {
 }
 
 /**
- * Task 28.2B — what GET-your-subscription responses and the
+ * what GET-your-subscription responses and the
  * POST /me/push-subscriptions success body carry. Deliberately minimal:
  * the id (needed for DELETE), the endpoint (so the browser can match it
  * against its PushManager subscription) and metadata. No keys, no user

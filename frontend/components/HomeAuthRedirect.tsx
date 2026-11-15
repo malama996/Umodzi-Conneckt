@@ -6,7 +6,7 @@ import { useAuth } from '@/lib/auth';
 import { homeForRole } from '@/lib/auth/homeForRole';
 
 /**
- * Keeps signed-in visitors off the public landing page (Phase 2, §8).
+ * Keeps signed-in visitors off the public landing page.
  *
  * Behaviour:
  *   - status 'loading'       → render nothing and DO NOT navigate. Session

@@ -5,14 +5,14 @@ import { useAuth } from '@/lib/auth';
 import { getTechnicianOffers } from '@/lib/api/offersApi';
 
 /**
- * Pending-offers count for the signed-in technician (Phase 3 drawer badge).
+ * Pending-offers count for the signed-in technician.
  *
  * Approved approximation of an "unseen offers" badge: the platform tracks
  * no read/seen state, so the badge counts offers whose status is still
  * 'pending' — real data from the existing owner-scoped endpoint, no new
  * backend. It is 0 (and therefore hidden) for every other role, on failure
  * and while loading — never a fabricated number (same rule as the
- * Notifications badge, Task 28.3).
+ * Notifications badge).
  */
 export function usePendingOffersCount(): number {
   const { status, user } = useAuth();

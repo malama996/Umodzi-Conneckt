@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   appleWebApp: { capable: true, title: 'Umodzi Connect', statusBarStyle: 'default' },
 };
 
-/* Mobile/PWA viewport (Phase 2):
+/* Mobile/PWA viewport:
    - viewportFit 'cover' lets the standalone PWA use the full display
      (notches/home bars); globals.css pairs it with env(safe-area-inset-*)
      padding on the header/footer/hero so nothing is ever covered.

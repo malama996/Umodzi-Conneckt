@@ -78,7 +78,7 @@ function scoreTrust(technician: Technician): number {
 /**
  * AVAILABILITY SCORE.
  *
- * Task 11 already guarantees eligible technicians have
+ *  already guarantees eligible technicians have
  * availabilityStatus === 'available'. Therefore for this deterministic
  * prototype: available → 1.0.
  *
@@ -136,7 +136,7 @@ function computeScore(technician: Technician, request: ServiceRequest): Dispatch
  *   2. Service area/city match (normalized comparison)
  *   3. Account status = active
  *   4. Availability status = available
- *   5. Verified (Task 26): verification is a hard eligibility gate, not
+ *   5. Verified: verification is a hard eligibility gate, not
  *      just a trust-score input — an unverified technician is never
  *      offered, no matter how available they are. Scoring, cascading,
  *      and the lifecycle are unchanged.

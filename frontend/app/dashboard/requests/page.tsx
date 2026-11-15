@@ -21,7 +21,7 @@ import {
 } from '@/lib/requestStatus';
 
 /**
- * /dashboard/requests — this account's service-request history (Phase 4).
+ * /dashboard/requests — this account's service-request history.
  *
  * §5 requires customers to see "current and recent service requests" with
  * "status and next steps". That was impossible before: requests could be

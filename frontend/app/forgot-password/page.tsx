@@ -7,7 +7,7 @@ import { ApiError } from '@/lib/api/client';
 import { forgotPassword } from '@/lib/api/authApi';
 
 /**
- * Forgot-password entry point (audit §3). Requests a single-use recovery
+ * Forgot-password entry point. Requests a single-use recovery
  * link for a registered email. The backend response is enumeration-safe and
  * identical whether or not the account exists, so this page always shows the
  * same confirmation and never reveals which emails are registered.

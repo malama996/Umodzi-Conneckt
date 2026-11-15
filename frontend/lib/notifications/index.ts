@@ -1,5 +1,5 @@
 /**
- * In-app notification abstraction (Task 22).
+ * In-app notification abstraction.
  *
  * UI and application code import from this barrel only:
  *

@@ -3,7 +3,7 @@ import type { DispatchOfferStatus, ServiceRequestStatus } from '@/lib/types';
 import { get, patch } from './client';
 
 /**
- * Administrator / platform-management API surface (Task 25).
+ * Administrator / platform-management API surface.
  *
  * Typed mirrors of the backend admin contract (camelCase JSON inside the
  * standard `{ data }` envelope). Every shape is a SAFE projection — the
@@ -163,9 +163,9 @@ export async function updateAdminUserStatus(
 }
 
 /* ---------------------------------------------------------------------------
- * Audit log (Phase 6)
+ * Audit log
  *
- * The backend has recorded audit events since Task 28.3F and exposes them at
+ * The backend has recorded audit events since the audit trail was introduced, exposed at
  * GET /admin/audit-events, but nothing in the UI ever read them — privileged
  * activity was written and then invisible to the administrators who need it.
  *

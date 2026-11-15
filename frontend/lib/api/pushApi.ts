@@ -1,7 +1,7 @@
 import { del, post } from './client';
 
 /**
- * Push subscription API (Task 28.2B/2C) — wire shapes mirror the backend
+ * Push subscription API — wire shapes mirror the backend
  * exactly. The user id is always derived server-side; the client only ever
  * sends the browser subscription fields.
  */

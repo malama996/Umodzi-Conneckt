@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { isValidMapPoint, type MapPoint } from '@/lib/mapData';
 
 /**
- * On-demand browser geolocation for the map (production-fix Task 5).
+ * On-demand browser geolocation for the map.
  *
  * ---------------------------------------------------------------------------
  * Privacy and honesty rules this hook exists to enforce

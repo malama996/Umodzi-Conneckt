@@ -1,5 +1,5 @@
 /**
- * Realtime update abstraction types (Task 22).
+ * Realtime update abstraction types.
  *
  * The UI observes backend state through these events only; the
  * transport (short-interval polling of the existing read-only GET

@@ -21,12 +21,10 @@ import {
 } from '@/lib/api/technicianProfileApi';
 
 /**
- * Technician profile + verification service boundary (Task 26). Pages call
+ * Technician profile and verification service boundary. Pages call
  * these helpers — never the API client directly. Pure display helpers
  * (completeness, labels, tones) live here too so every surface agrees.
  */
-
-/* ------------------------- fetch / mutate ------------------------- */
 
 export const fetchOwnProfile = (): Promise<OwnTechnicianProfile> => getOwnProfile();
 
@@ -65,8 +63,6 @@ export const decideDocument = (
   decision: { decision: 'approved' } | { decision: 'rejected'; reason: string },
 ): Promise<AdminTechnicianVerification> =>
   decideVerificationDocument(technicianId, documentId, decision);
-
-/* ------------------------- display helpers ------------------------- */
 
 /**
  * Upload/review labels for each verification document type.

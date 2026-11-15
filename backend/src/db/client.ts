@@ -41,7 +41,7 @@ export async function transaction<T>(callback: (client: any) => Promise<T>): Pro
   }
 }
 
-// NOTE (Task 23): schema creation moved out of this file. The schema is now
+// NOTE: schema creation moved out of this file. The schema is now
 // owned by the deterministic migration runner in src/db/migrate.ts, which
 // applies the ordered SQL files in src/db/migrations/ (001_initial_schema,
 // 002_authentication, …) and records them in schema_migrations. Do not add

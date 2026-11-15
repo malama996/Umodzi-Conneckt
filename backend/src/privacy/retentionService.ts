@@ -18,7 +18,7 @@ function affectedCount(result: unknown): number {
 }
 
 /**
- * Retention / data-lifecycle operations (Task 28.3E).
+ * Retention and data-lifecycle operations.
  *
  * ---------------------------------------------------------------------------
  * Deliberate design decision: explicit, operator-invoked cleanup, NOT a

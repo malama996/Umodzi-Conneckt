@@ -1,5 +1,5 @@
 /**
- * Task 33.1 chat E2E regression suite: the full consumer↔technician
+ *  chat E2E regression suite: the full consumer↔technician
  * conversation contract against a RUNNING backend (start it first).
  *
  * Run from the backend folder:

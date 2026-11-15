@@ -15,10 +15,10 @@ import {
 } from '@/lib/services/adminService';
 
 /**
- * /admin/audit — the administrator audit log (Phase 6).
+ * /admin/audit — the administrator audit log.
  *
  * The backend has written an audit row for every privileged action since
- * Task 28.3F (account status changes, verification decisions, verification
+ *  (account status changes, verification decisions, verification
  * document access, data exports, account deletions, failed logins) and
  * exposes them at GET /admin/audit-events — but nothing in the UI ever read
  * them. §7 asks for "audit views where required by sensitive operations", and
@@ -28,7 +28,7 @@ import {
  * is `requireRole('administrator')`, so a non-administrator gets 403 from the
  * server regardless of what the client renders. The filter values are
  * forwarded to the server, which validates them (400 outside the vocabulary)
- * — this page never filters results on its own.
+ * this page never filters results on its own.
  *
  * No row is invented: an account with no recorded events gets an honest
  * empty state, and a failure is shown rather than rendered as "no events".

@@ -38,7 +38,7 @@ import {
 } from '@/lib/requestStatus';
 
 /**
- * /dashboard/requests/[id] — ONE request, tracked end to end (Stage 3).
+ * /dashboard/requests/[id] — ONE request, tracked end to end.
  *
  * This route closes the navigation gap: the request list, the dashboard cards
  * and the creation success panel all link here, and a refresh or a deep link

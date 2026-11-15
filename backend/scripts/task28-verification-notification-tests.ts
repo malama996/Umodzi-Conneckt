@@ -1,5 +1,5 @@
 /**
- * Task 28.2D5 tests: verification notifications (submit → administrators;
+ * 5 tests: verification notifications (submit → administrators;
  * admin decision → technician) against a RUNNING backend (start it first)
  * backed by the LOCAL scratch database — never Supabase.
  *

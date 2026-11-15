@@ -5,7 +5,7 @@ import { useAuth } from '@/lib/auth';
 import AccountMenu from './AccountMenu';
 
 /**
- * Header session controls (Task 23, refined by §4) — rendered inside
+ * Header session controls rendered inside
  * PublicHeader, both in the desktop action area and inside the mobile drawer.
  *
  *   loading     → nothing (avoids a login/logout flash during restore)

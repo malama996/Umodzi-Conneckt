@@ -1,5 +1,5 @@
 /**
- * Task 33.2 Part A — administrator conversation-privacy policy, verified
+ *  Part A — administrator conversation-privacy policy, verified
  * against a RUNNING backend (start it first).
  *
  * Run from the backend folder:

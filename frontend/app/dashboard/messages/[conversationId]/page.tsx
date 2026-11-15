@@ -105,7 +105,7 @@ function mergeById(current: DisplayMessage[], incoming: DisplayMessage[]): Displ
 /**
  * Conversation thread route.
  *
- * Phase 2: gated by RequireAuth like every other dashboard route. The
+ * gated by RequireAuth like every other dashboard route. The
  * anonymous branch below used to be this page's only guard, which meant
  * the route rendered its own bespoke "Sign in" panel instead of the
  * application-wide /login?next=… redirect — and, while the session was
@@ -141,7 +141,7 @@ function ConversationThread() {
   const [showJumpToLatest, setShowJumpToLatest] = useState(false);
   /** How many messages arrived while the reader was away from the bottom. */
   const [newCount, setNewCount] = useState(0);
-  // Contact/call (Task 33.4): fetch → tel: link + visible number/copy.
+  // Contact/call: fetch → tel: link + visible number/copy.
   const contact = useContactCall(detail?.conversation.serviceRequestId ?? null);
 
   const scrollRef = useRef<HTMLDivElement | null>(null);
@@ -159,7 +159,6 @@ function ConversationThread() {
   /** Newest id at the previous effect run — used to count late arrivals. */
   const newestIdRef = useRef<string | null>(null);
 
-  /* ---------------- conversation + first page ---------------- */
 
   useEffect(() => {
     if (authStatus === 'anonymous') return;
@@ -201,7 +200,6 @@ function ConversationThread() {
     };
   }, [requestId, authStatus]);
 
-  /* ---------------- scroll helpers ---------------- */
 
   const scrollToBottom = useCallback((smooth: boolean) => {
     bottomRef.current?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'end' });
@@ -250,7 +248,6 @@ function ConversationThread() {
     el.style.height = `${Math.min(el.scrollHeight, 120)}px`;
   }, [draft, state]);
 
-  /* ---------------- read state ---------------- */
 
   const markRead = useCallback(async (conversationId: string) => {
     if (lastMarkedReadRef.current === conversationId) return;
@@ -267,7 +264,6 @@ function ConversationThread() {
     void markRead(detail.conversation.id);
   }, [state, detail, markRead]);
 
-  /* ---------------- realtime ---------------- */
 
   const handleRealtimeMessage = useCallback(
     (messageId: string, conversationId: string) => {
@@ -308,7 +304,7 @@ function ConversationThread() {
   const { status: rtStatus } = useChatRealtime({
     conversationId: detail?.conversation.id ?? null,
     onMessage: handleRealtimeMessage,
-    // Reconnect catch-up (Task 33.3): events are ids only, so anything sent
+    // Reconnect catch-up: events are ids only, so anything sent
     // while the socket was down was never seen. Re-read the newest page over
     // REST and merge by stable id — no lost messages, no duplicates.
     onReconnect: handleReconnect,
@@ -335,7 +331,6 @@ function ConversationThread() {
     return () => window.clearInterval(timer);
   }, [state, rtStatus, detail, handleReconnect]);
 
-  /* ---------------- send ---------------- */
 
   /**
    * Send one text as a new message.
@@ -407,7 +402,6 @@ function ConversationThread() {
     [sendText, sending],
   );
 
-  /* ---------------- older messages ---------------- */
 
   const loadOlder = useCallback(async () => {
     if (!detail || loadingOlder || !hasOlder) return;
@@ -433,7 +427,6 @@ function ConversationThread() {
     }
   }, [detail, hasOlder, loadingOlder, messages]);
 
-  /* ---------------- derived ---------------- */
 
   const other = detail?.otherParticipant;
   const headerTitle = useMemo(() => other?.displayName ?? 'Conversation', [other]);

@@ -1,5 +1,5 @@
 /**
- * Task 33.3 realtime delivery suite: the WebSocket transport contract
+ *  realtime delivery suite: the WebSocket transport contract
  * against a RUNNING backend (start it first — this suite does NOT spawn
  * the server).
  *

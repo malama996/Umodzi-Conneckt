@@ -1,7 +1,7 @@
 import { CANONICAL_CATEGORIES } from "../types/api.js";
 
 /**
- * Task 33 — server-side Gemini fault classification.
+ * Server-side Gemini fault classification.
  *
  * A customer's fault description is sent to Google's Gemini API
  * (`models:generateContent`, JSON mode) and the model must answer with one
@@ -9,7 +9,7 @@ import { CANONICAL_CATEGORIES } from "../types/api.js";
  * CANONICAL_CATEGORIES before it leaves this module: an unsupported,
  * missing, or malformed answer is NEVER treated as a success.
  *
- * Privacy boundaries (hard rules, see task spec §6):
+ * Privacy boundaries (hard rules):
  *   - only the trimmed fault description is sent — no names, emails, phone
  *     numbers, addresses, credentials, database rows, or technician lists;
  *   - the API key and the description are never logged (only error codes and

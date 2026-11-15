@@ -1,5 +1,5 @@
 /**
- * Task 28.2D3 tests: offer-outcome notifications (accept/reject/timeout →
+ * 3 tests: offer-outcome notifications (accept/reject/timeout →
  * the request customer) against a RUNNING backend (start it first) backed
  * by the LOCAL scratch database — never Supabase.
  *

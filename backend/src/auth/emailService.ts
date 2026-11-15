@@ -5,9 +5,9 @@
  * added to the project. Secrets stay server-side:
  *   - RESEND_API_KEY    — bearer token, never exposed to the frontend;
  *   - RESEND_FROM_EMAIL — the verified sender address;
- *   - FRONTEND_ORIGIN (or PUBLIC_APP_URL) — frontend origin used to build
- *     the recovery link. FRONTEND_ORIGIN is the existing canonical value
- *     (CORS allow-list); PUBLIC_APP_URL is accepted as an alias.
+ *   - PUBLIC_APP_URL — the single canonical frontend origin used to build
+ *     recovery links. FRONTEND_ORIGIN is used only as a single-origin
+ *     fallback for local/backward-compatible configurations.
  *
  * Failure policy: sending email must never crash a request or become a
  * side channel. Every failure is logged and reported as `false`; the
@@ -27,8 +27,10 @@ export function isEmailConfigured(): boolean {
 
 function resetLink(rawToken: string): string {
   const origin =
-    process.env.FRONTEND_ORIGIN ??
     process.env.PUBLIC_APP_URL ??
+    // FRONTEND_ORIGIN is a CORS allow-list and may contain commas. In that
+    // legacy case use its first origin rather than generating an invalid URL.
+    process.env.FRONTEND_ORIGIN?.split(',')[0]?.trim() ??
     'http://localhost:3000';
   const base = origin.replace(/\/+$/, '');
   return `${base}/reset-password?token=${encodeURIComponent(rawToken)}`;

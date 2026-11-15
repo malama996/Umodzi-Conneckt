@@ -6,7 +6,7 @@ import { getAccessToken } from '@/lib/auth/tokenHolder';
 import type { ChatRealtimeEvent } from '@/lib/types/communication';
 
 /**
- * Realtime chat transport (Task 28.4B — client side).
+ * Realtime chat transport.
  *
  * Design constraints, in order:
  *   1. Authoritative persistence stays HTTP. This hook carries EVENTS ONLY;
@@ -35,7 +35,7 @@ interface UseChatRealtimeOptions {
    * Called after a RE-connect is authorized (subscribed), never on the first
    * connection. Events are only ids, so anything sent while the socket was
    * down was never seen — the caller should re-read history over REST and
-   * merge by stable message id (Task 33.3 catch-up contract).
+   * merge by stable message id.
    */
   onReconnect?: () => void;
   /** Called for authorization/transport errors so the UI can react. */

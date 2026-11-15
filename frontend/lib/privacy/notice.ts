@@ -1,5 +1,5 @@
 /**
- * Privacy notice content (Task 28.3B).
+ * Privacy notice content.
  *
  * SINGLE SOURCE OF TRUTH. The registration disclosure and the full /privacy
  * page both render from this module, so the summary shown before someone

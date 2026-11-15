@@ -2,7 +2,7 @@ import { isTechnicianCategory, type TechnicianCategory } from '@/lib/categories'
 import { ApiError, post } from './client';
 
 /**
- * AI fault-classification client (Task 33).
+ * AI fault-classification client.
  *
  * Thin wrapper over POST /api/v1/classify-fault. The server owns the Gemini
  * call, the key, and response validation; this layer only enforces the

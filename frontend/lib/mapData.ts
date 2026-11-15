@@ -56,7 +56,7 @@ export interface TechnicianMapMarker {
  * approximate, publicly known city-centre points. These are NOT real GPS
  * locations and NOT real technician positions.
  *
- * Task 28.3A.1 (G-01): technician pins on the map are now derived from the
+ * Technician map pins are derived from the
  * technician's self-declared SERVICE AREA city centre via
  * `getServiceAreaPoint()`. The backend no longer returns a technician's
  * stored precise coordinate, and the frontend must not treat one as display
@@ -81,7 +81,7 @@ const DEFAULT_CITY = 'Kitwe';
 const EARTH_RADIUS_KM = 6371;
 
 /**
- * Coarse service-area point for a technician's declared area (Task 28.3A.1).
+ * Coarse service-area point for a technician's declared area.
  * Falls back to the default pilot city for unknown values.
  * Returns the shared reference so consumers get stable identity across renders.
  */
@@ -145,7 +145,7 @@ export function haversineKm(a: MapPoint, b: MapPoint): number {
  * no re-filtering, no score changes) and every displayed field is
  * copied from the existing technician record.
  *
- * Task 28.3A.1 (G-01): the marker position is the technician's COARSE
+ * The marker position is the technician's coarse
  * service-area centre, never a stored precise coordinate. The backend no
  * longer sends one, and a marker is a UI affordance — it must not become a
  * location disclosure. The displayed `distanceKm` is therefore a distance
@@ -187,7 +187,7 @@ export interface MapMarkerSource {
 }
 
 /**
- * Markers for the LIVE technician listing (production-fix Task 5).
+ * Markers for the live technician listing.
  *
  * This is the single marker-building implementation; `toTechnicianMapMarkers`
  * (ranked dispatch candidates) delegates here so the two entry points can never

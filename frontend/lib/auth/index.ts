@@ -1,5 +1,5 @@
 /**
- * Auth layer barrel (Task 23).
+ * Auth layer barrel.
  *
  * App code imports from '@/lib/auth' — types, the hook, and the store
  * actions. The access token is intentionally NOT exported as readable

@@ -1,5 +1,5 @@
 /**
- * Browser Web Push helper (Task 28.2C) — small, reusable, no dependencies.
+ * Browser Web Push helper — small, reusable, no dependencies.
  *
  * Wraps only native browser APIs (navigator.serviceWorker, Notification,
  * PushManager). Server communication lives in lib/api/pushApi.ts; auth
@@ -165,10 +165,6 @@ export async function unsubscribeBrowserPush(): Promise<boolean> {
     throw new PushError('The browser unsubscribe failed.');
   }
 }
-
-/* ------------------------------------------------------------------ */
-/* Backend-id linkage (per-device, per-endpoint)                       */
-/* ------------------------------------------------------------------ */
 
 // The backend id is only known from the POST response, while the browser
 // subscription carries no id — so this device remembers its own mapping.

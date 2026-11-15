@@ -1,5 +1,5 @@
 /**
- * Technician offer subscription (Task 22).
+ * Technician offer subscription.
  *
  * Reads the raw backend offer rows for one technician through the
  * existing read-only endpoint:

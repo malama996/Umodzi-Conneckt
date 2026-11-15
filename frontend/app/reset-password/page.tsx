@@ -7,7 +7,7 @@ import { ApiError } from '@/lib/api/client';
 import { resetPassword } from '@/lib/api/authApi';
 
 /**
- * Reset-password page (audit §3). Consumes the single-use token from the
+ * Reset-password page. Consumes the single-use token from the
  * emailed link (?token=…) plus a new password. The token is read client-side
  * (same approach as AuthForm's query handling) so the page stays statically
  * rendered. Invalid, expired, or already-used tokens yield the same generic

@@ -49,7 +49,7 @@ interface Flash {
 }
 
 /**
- * Technician profile & verification (Task 26 §11) — /technician/profile.
+ * Technician profile and verification — /technician/profile.
  *
  * The technician maintains the profile fields that drive their public
  * profile and dispatch eligibility (photo, bio, skills, category, service
@@ -165,7 +165,6 @@ function ProfileBody({
   );
 }
 
-/* ------------------------------ photo ------------------------------ */
 
 function PhotoCard({
   profile,
@@ -307,7 +306,6 @@ function PhotoCard({
   );
 }
 
-/* ------------------------------ profile form ------------------------------ */
 
 function ProfileFormCard({
   profile,
@@ -466,7 +464,6 @@ function ProfileFormCard({
   );
 }
 
-/* ------------------------------ verification ------------------------------ */
 
 function VerificationCard({
   profile,

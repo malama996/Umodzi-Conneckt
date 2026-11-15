@@ -1,11 +1,11 @@
 /**
- * Central HTTP boundary for frontend → backend communication (Task 21B).
+ * Central HTTP boundary for frontend → backend communication.
  *
  * All backend calls go through these helpers — React components and
  * application services must not scatter raw fetch() calls.
  * Uses NEXT_PUBLIC_API_BASE_URL; contains no secrets or credentials.
  *
- * Task 23 additions (still the single HTTP boundary):
+ * Authentication requirements:
  *   - every request carries `credentials: 'include'` so the HttpOnly
  *     refresh cookie reaches /api/v1/auth/* (CORS is an explicit origin
  *     allow-list with credentials enabled on the backend);
@@ -46,7 +46,7 @@ export function apiBaseUrl(): string {
 async function request<T>(path: string, init: RequestInit, body?: unknown): Promise<T> {
   // The JSON content type is only sent when a body is present:
   // Fastify rejects empty bodies declared as application/json.
-  // FormData (Task 26 uploads) is passed through untouched — the browser
+  // FormData is passed through untouched — the browser
   // sets the multipart boundary itself.
   const headers: Record<string, string> = { ...init.headers } as Record<string, string>;
   let payload: BodyInit | undefined;
@@ -108,7 +108,7 @@ export function patch<T>(path: string, body?: unknown): Promise<T> {
 }
 
 /**
- * PUT with an optional JSON body (Task 28.4B).
+ * PUT with an optional JSON body.
  *
  * Used by the self-service phone-number form, which replaces the stored
  * number outright. Behaves like patch() with a different verb.
@@ -117,7 +117,7 @@ export function put<T>(path: string, body?: unknown): Promise<T> {
   return request<T>(path, { method: 'PUT' }, body);
 }
 
-/** Multipart upload (Task 26). The boundary header is set by the browser. */
+/** Multipart upload. The browser sets the boundary header. */
 export function postForm<T>(path: string, form: FormData): Promise<T> {
   return request<T>(path, { method: 'POST' }, form);
 }
@@ -146,7 +146,7 @@ async function requestBlob(path: string): Promise<Blob> {
   return response.blob();
 }
 
-/** Binary GET for authorized file downloads (Task 26 documents). */
+/** Binary GET for authorized file downloads. */
 export function getBlob(path: string): Promise<Blob> {
   return requestBlob(path);
 }
@@ -154,7 +154,7 @@ export function getBlob(path: string): Promise<Blob> {
 /**
  * DELETE with an optional JSON body.
  *
- * Task 28.3D needs this for permanent account deletion, which sends a
+ * Permanent account deletion sends a
  * confirmation phrase plus a re-authentication password. Without a body
  * argument this stays byte-identical in behaviour to a bodyless DELETE.
  */

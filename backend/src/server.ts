@@ -143,7 +143,7 @@ app.setErrorHandler((error, _, reply) => {
   });
 });
 
-// Task 28 §14 — CORS uses an EXPLICIT allow-list, never '*'. FRONTEND_ORIGIN
+// CORS uses an EXPLICIT allow-list, never '*'. FRONTEND_ORIGIN
 // accepts a comma-separated list for production (multiple deployed origins);
 // a single value behaves exactly as before. Credentials stay enabled so the
 // HttpOnly refresh cookie rides along from an allowed origin.
@@ -166,8 +166,8 @@ await app.register(cors, {
   credentials: true,
   // Explicit allow-list: the frontend uses GET (reads), POST (creates and
   // explicit prototype outcomes), PATCH (request status transitions), PUT
-  // (Task 28.4B: replacing the account's own contact number at
-  // /api/v1/me/phone), and DELETE (Task 26: withdrawing a verification
+  // (replacing the account's own contact number at
+  // /api/v1/me/phone), and DELETE (withdrawing a verification
   // document before review). Anything else stays blocked by the preflight.
   //
   // PUT must stay in this list: browser preflights rejected the phone-number
@@ -179,14 +179,14 @@ await app.register(cors, {
 // HttpOnly refresh-token cookie support (parse request.cookies + reply.setCookie).
 await app.register(cookie);
 
-// Multipart uploads (Task 26): profile photos + verification documents.
+// Multipart uploads: profile photos + verification documents.
 // One file per request, hard 5 MB ceiling — oversized uploads are rejected
 // by the parser (413) before any byte reaches storage.
 await app.register(multipart, {
   limits: { fileSize: 5 * 1024 * 1024, files: 1 },
 });
 
-// Task 28 §13 — root-scope rate limiting, OPT-IN per route (global:false) so
+// root-scope rate limiting, OPT-IN per route (global:false) so
 // bulk public reads and the automated regression suites are never throttled.
 // The auth endpoints keep their own stricter limiter inside authRoutes.ts.
 // Per-route limits below are env-configurable; defaults are generous enough
@@ -200,7 +200,7 @@ function routeRateLimit(envKey: string, fallbackMax: number) {
   return { max, timeWindow: process.env.RATE_LIMIT_WINDOW ?? "1 minute" };
 }
 
-// Task 28 §15 — production security headers on every API response. This is a
+// production security headers on every API response. This is a
 // JSON-only API (no HTML or inline assets are served), so a locked-down CSP is
 // safe and cannot break the separate Next.js frontend origin. Registered
 // before any route so the hook is snapshotted into every route context.
@@ -227,7 +227,9 @@ await registerJwt(app, loadJwtConfig());
 // traffic is served — startup is atomic: no route ever answers against a
 // half-migrated database.
 try {
-  await runMigrations();
+  // Hosted production startup is the sole remote-migration path. The
+  // standalone migration CLI remains loopback-only as a safety boundary.
+  await runMigrations({ allowRemote: isProduction });
   // Demo identities, ratings and locations must never be created merely
   // because a real production database happens to be empty. Opt in only for
   // local/demo environments.
@@ -305,7 +307,7 @@ const requestSchema = z.object({
   category: z.enum(categories as unknown as [string, ...string[]]),
   city: z.enum(["Kitwe", "Ndola", "Other"]),
   /**
-   * Task 36 (Stage 5, finding #10): browser-generated idempotency key. The
+   * browser-generated idempotency key. The
    * SAME key submitted twice by the SAME customer returns the SAME request
    * instead of creating a duplicate (double-tap / network retry). Absent on
    * legacy calls, which keep working exactly as before.
@@ -315,7 +317,7 @@ const requestSchema = z.object({
 
 /**
  * Helper to return JSON API responses. `meta` carries non-data context
- * (Task 36: dispatch outcomes, idempotent-replay flags) — additive and
+ * additive and
  * optional, so existing callers are unaffected.
  */
 function jsonResponse<T>(
@@ -330,7 +332,7 @@ function jsonResponse<T>(
  * GET /api/v1/technicians
  * Returns all technicians (camelCase keys).
  *
- * Task 28.3A.1 (G-01) — PUBLIC COORDINATES ARE NEVER RETURNED. The stored
+ * .1 (G-01) — PUBLIC COORDINATES ARE NEVER RETURNED. The stored
  * `latitude`/`longitude`/`location` exist only so the dispatch engine can do
  * PostGIS distance work server-side (see assertOfferEligibility and
  * GET /technicians/nearby). Public callers get coarse, self-declared service
@@ -390,7 +392,7 @@ app.get("/api/v1/technicians", async (_, reply) => {
 /**
  * GET /api/v1/technicians/:id
  *
- * Task 28.3A.1 (G-01) — same boundary as the list route: unauthenticated
+ * .1 (G-01) — same boundary as the list route: unauthenticated
  * callers never receive a stored coordinate. Coarse location is conveyed by
  * `serviceArea` alone.
  */
@@ -460,7 +462,7 @@ app.get("/api/v1/technicians/:id", async (request, reply) => {
 /**
  * GET /api/v1/technicians/nearby
  *
- * Task 28.3A.1 (G-01) — PostGIS RADIUS SEARCH IS PRESERVED, PRECISE
+ * .1 (G-01) — PostGIS RADIUS SEARCH IS PRESERVED, PRECISE
  * COORDINATES ARE NOT DISCLOSED.
  *
  *   - The caller supplies their OWN latitude/longitude as a query parameter.
@@ -610,7 +612,7 @@ app.post(
     const now = new Date().toISOString();
 
     try {
-      // Task 36 (Stage 5) — idempotent replay: the same idempotency key from
+      // idempotent replay: the same idempotency key from
       // the same customer returns the original request instead of creating a
       // duplicate. The partial unique index in migration 012 is the backstop
       // if two retries race past this read.
@@ -693,7 +695,7 @@ app.post(
           });
           result.rows[0].status = "matching";
         } else {
-          // Task 36 (Stage 4, finding #6): "no technician anywhere" is a
+          // "no technician anywhere" is a
           // REAL state, not a silent pending limbo. The request persists as
           // no_match with a diagnosable reason, an audit row, and the
           // customer-visible retry path. The three counts distinguish the
@@ -801,7 +803,7 @@ app.post(
 );
 
 /**
- * POST /api/v1/classify-fault — AI-assisted fault classification (Task 33).
+ * POST /api/v1/classify-fault — AI-assisted fault classification.
  *
  * Customer-only. Sends ONLY the trimmed fault description to Gemini (no
  * names, accounts, or technician data) and returns the validated category
@@ -902,7 +904,7 @@ app.get(
     }
     const row = await loadRequestForUser(id, authUser); // throws 400/404 → error handler
 
-    /* Task 36 (Stage 3): the request detail page needs the assigned
+    /* the request detail page needs the assigned
      * technician's name and the conversation id without two extra round
      * trips. Both are additive response fields derived from the same
      * ownership-scoped row; absence stays null, never fabricated. */
@@ -924,8 +926,8 @@ app.get(
 );
 
 /**
- * POST /api/v1/requests/:id/retry — ask dispatch to look again (Task 36,
- * Stage 4). Owner customer only; the backend decides retryability: only a
+ * POST /api/v1/requests/:id/retry — ask dispatch to look again (
+ * ). Owner customer only; the backend decides retryability: only a
  * request that is still unmatched (`no_match` or a legacy stuck `pending`)
  * with no accepted offer is eligible. On success the request is either
  * re-offered (status → matching, new pending offer) or it stays no_match
@@ -1002,8 +1004,8 @@ app.post(
 );
 
 /**
- * PATCH /api/v1/requests/:id/status — server-enforced lifecycle (Task 36,
- * Stage 5; findings #11 and #12).
+ * PATCH /api/v1/requests/:id/status — server-enforced lifecycle (
+ * ; findings #11 and #12).
  *
  * The old handler validated the status vocabulary but not the transition: a
  * customer could mark an unmatched request completed, a technician holding a
@@ -1197,7 +1199,7 @@ app.patch(
           "UPDATE service_requests SET status = $1, updated_at = NOW() WHERE id = $2",
           [status, owned.id],
         );
-        // Phase 7 requirement 10 — every real transition is audited with its
+        //  requirement 10 — every real transition is audited with its
         // actor, role and reason, atomically with the change itself.
         await recordRequestEvent(client, {
           requestId: owned.id,
@@ -1208,7 +1210,7 @@ app.patch(
           reason: statusChangeReason(authUser.role, status),
         });
 
-        // Cancellation cascade (Stage 5): pending offers are dead the moment
+        // Cancellation cascade: pending offers are dead the moment
         // the request is withdrawn — no more dispatch noise for a request the
         // customer has ended. dispatch_offers uses the fixed four-value status
         // vocabulary, so they are closed as 'rejected'; the audit row above is
@@ -1340,7 +1342,7 @@ app.get(
 );
 
 /**
- * Task 28.2D4 — request-status notification copy. Titles are per status;
+ * 4 — request-status notification copy. Titles are per status;
  * messages are audience-specific (the customer owns the request, the
  * technician accepted the job). Labels are grammatical after "is now".
  */
@@ -1365,7 +1367,7 @@ const REQUEST_STATUS_LABELS: Record<ServiceRequestStatus, string> = {
 };
 
 /**
- * Task 28.2D6 — record one event notification, then attempt real Web Push
+ * 6 — record one event notification, then attempt real Web Push
  * delivery for it (post-commit: the D1 transaction has already committed
  * before delivery starts, so no DB transaction is ever held open across
  * the network call). Delivery runs only for freshly created rows —
@@ -1466,7 +1468,7 @@ async function notifyRequestStatusChange(args: {
  * is indistinguishable from one that does not exist.
  */
 /**
- * Task 28.2D3 — offer-outcome notification copy (customer-facing).
+ * 3 — offer-outcome notification copy (customer-facing).
  * Emitted only for genuine pending → terminal transitions; the caller
  * guards on the pre-write status and isolates failures (log + continue).
  */
@@ -1535,7 +1537,7 @@ app.post(
     // owning customer, or an administrator. Strangers get the uniform 404.
     const { request: serviceRequest } = await loadOfferForResponse(offerId, authUser);
 
-    /* Task 36 (Stage 5) — ATOMIC ASSIGNMENT.
+    /* ATOMIC ASSIGNMENT.
      *
      * The old handler ran an unconditional UPDATE with no status predicate,
      * no request lock, no already-assigned guard, no eligibility/workload
@@ -1559,7 +1561,7 @@ app.post(
     if (!result.alreadyAssigned) {
       // Offer-outcome notification to the OTHER party (dedupe keeps the
       // historical key stable). The duplicate second call the old handler
-      // made inside the conversation block is gone (finding #14).
+      // made inside the conversation block is gone.
       try {
         await notifyOfferOutcome(
           offerId,
@@ -1630,7 +1632,7 @@ app.post(
 );
 
 /**
- * Task 36 (Stage 4) — server-side cascade for reject/timeout.
+ * server-side cascade for reject/timeout.
  *
  * The browser used to decide the next candidate after a reject/timeout; a
  * closed tab therefore stranded the request in `matching` forever (finding
@@ -1764,7 +1766,7 @@ app.post(
       });
     }
 
-    /* Task 36 (Stage 5, finding #13): the API creates PENDING offers only.
+    /* the API creates PENDING offers only.
      * A browser can no longer fabricate `accepted`/`rejected`/`timed_out`
      * dispatch decisions by POSTing a terminal status — outcomes are the
      * exclusive business of the outcome endpoints and the sweeper. The
@@ -1794,7 +1796,7 @@ app.post(
       technicianId,
       authUser,
     ); // 400/404
-    // Task 28 §6 — mandatory server-side eligibility gate. Runs OUTSIDE the
+    // mandatory server-side eligibility gate. Runs OUTSIDE the
     // try/catch below so its HttpError (409/422/404) reaches the central error
     // handler with the correct status instead of being masked as a 500.
     await assertOfferEligibility(owned, technicianId);
@@ -1826,7 +1828,7 @@ app.post(
         createdAt: result[0].created_at,
         updatedAt: result[0].updated_at,
       };
-      // Task 28.2D2 — offer-created notification, recorded ONLY after the
+      // 2 — offer-created notification, recorded ONLY after the
       // offer INSERT succeeded. The recipient is the target technician's
       // linked user (NULL for seed/legacy profiles → the helper safely
       // skips). Delivery is attempted for freshly created rows (D6). A
@@ -1986,7 +1988,7 @@ app.get(
 );
 
 /**
- * GET /api/v1/admin/overview — Task 25 platform overview for administrators.
+ * GET /api/v1/admin/overview — platform overview for administrators.
  * Every figure is a direct aggregate over real rows (COUNT/FILTER/GROUP BY);
  * nothing is estimated or fabricated. `requests.open` is the arithmetic sum
  * of pending + matching + matched + in_progress (documented in
@@ -2361,7 +2363,7 @@ interface AdminUserRow {
 
 /**
  * PATCH /api/v1/admin/users/:id/status — server-authorized account
- * activation/deactivation (Task 25). Administrator role only.
+ * activation/deactivation. Administrator role only.
  *
  * Guards: 400 invalid UUID or invalid status vocabulary; 403 when an
  * administrator tries to change their OWN status (prevents locking the
@@ -2442,7 +2444,7 @@ app.patch(
         accountStatus: row.account_status as AdminUserApi["accountStatus"],
         createdAt: row.created_at,
       };
-      // Task 28.3F: a privileged change to someone's access is recorded.
+      // a privileged change to someone's access is recorded.
       // The subject's email/name are NOT copied into the audit row — only the
       // opaque id and the status transition.
       await recordAuditEvent({
@@ -2478,10 +2480,6 @@ app.patch(
     }
   },
 );
-
-/* ----------------------------------------------------------------------- */
-/* Task 27 — customer ratings & reviews                                     */
-/* ----------------------------------------------------------------------- */
 
 interface ReviewRow {
   id: string;
@@ -2522,7 +2520,7 @@ async function loadAcceptedTechnician(
 
 /**
  * Detail-view extras shared by GET /requests/:id and POST /requests/:id/retry
- * (Task 36, Stage 3): the accepted technician's display name and the
+ *: the accepted technician's display name and the
  * conversation id, both nullable — a request may be matched but never have
  * earned a conversation, and unmatched requests have neither.
  */
@@ -2778,10 +2776,6 @@ app.get("/api/v1/technicians/:id/reviews", async (request, reply) => {
   }
 });
 
-/* ----------------------------------------------------------------------- */
-/* Task 28.2B — authenticated Web Push subscription API (/me/...)        */
-/* ----------------------------------------------------------------------- */
-
 /** Row shape for the safe subscription projection (no keys, no user id). */
 interface PushSubscriptionRow {
   id: string;
@@ -2988,10 +2982,6 @@ app.delete(
     }
   },
 );
-
-/* ----------------------------------------------------------------------- */
-/* Task 26 — technician profile, photo, verification documents & lifecycle  */
-/* ----------------------------------------------------------------------- */
 
 /** Accepted upload types. Extension is derived from the DECLARED mime type
  *  (never from the client filename), so a renamed executable stays unsafe. */
@@ -3298,7 +3288,7 @@ const technicianProfilePatchSchema = z
 /**
  * PATCH /api/v1/technician/profile — owner-editable profile fields only
  * (bio, skills, category, serviceArea, availability text + status). The
- * display name stays account-derived (Task 23 identity — never duplicated).
+ * display name stays account-derived.
  * A service-area change re-derives the deterministic city-centre
  * coordinates exactly like registration does.
  */
@@ -3419,7 +3409,7 @@ app.post(
     if (!buffer || buffer.length === 0) {
       return jsonResponse(reply, 400, { error: "The uploaded file is empty." });
     }
-    // Task 28 §7 — magic-byte check: the declared Content-Type/extension is
+    // magic-byte check: the declared Content-Type/extension is
     // not trusted on its own. Rejects executables/scripts and content whose
     // real signature does not match the declared image MIME.
     const magic = validateMagicBytes(buffer, part.mimetype);
@@ -3509,7 +3499,7 @@ app.post(
     if (!buffer || buffer.length === 0) {
       return jsonResponse(reply, 400, { error: "The uploaded file is empty." });
     }
-    // Task 28 §7 — magic-byte check (JPEG/PNG/WebP/PDF); rejects executables,
+    // magic-byte check (JPEG/PNG/WebP/PDF); rejects executables,
     // scripts/markup, and content whose real signature does not match the
     // declared MIME. Verification documents stay private (never public).
     const magic = validateMagicBytes(buffer, part.mimetype);
@@ -3586,7 +3576,7 @@ app.delete(
       id,
     ]);
     await getFileStorage().remove(rows[0].storage_key);
-    // Task 28.3F: record the withdrawal of identity evidence. Only the opaque
+    // record the withdrawal of identity evidence. Only the opaque
     // document id is recorded — not the filename, type, bytes or storage key.
     await recordAuditEvent({
       eventType: "security.verification_document_deleted",
@@ -3659,7 +3649,7 @@ app.post(
         error: "Failed to submit verification",
       });
     }
-    // Task 28.2D5 — verification-submitted fan-out: every active
+    // 5 — verification-submitted fan-out: every active
     // administrator gets their own notification (DB-authoritative set, never
     // hard-coded). Zero admins is a no-op — submission still succeeds.
     // Failures are logged per admin without failing the submission.
@@ -3728,7 +3718,7 @@ app.get(
     if (!buffer) {
       return jsonResponse(reply, 404, { error: "Document not found" });
     }
-    // Task 28.3F: reading identity evidence is a security-relevant access.
+    // reading identity evidence is a security-relevant access.
     // Only opaque ids and the document TYPE are recorded — never the bytes,
     // never the filename, never the storage key.
     await recordAuditEvent({
@@ -3745,7 +3735,7 @@ app.get(
         scope: authUser.role === "administrator" ? "reviewer" : "owner",
       },
     });
-    // Task 28.3G hardening: identity documents must never be written to a
+    //  hardening: identity documents must never be written to a
     // shared or on-disk cache by an intermediary or the browser.
     const safeFileName = doc.file_name.replace(/["\\\r\n/]/g, "").slice(0, 120);
     return reply
@@ -3960,7 +3950,7 @@ app.patch(
       });
     }
     const bundle = await loadAdminVerification(id);
-    // Task 28.3F: record the privileged verification decision. The
+    // record the privileged verification decision. The
     // administrator-authored rejection REASON is deliberately NOT copied into
     // the audit row — it is free text that can quote document content, and
     // the audit log is a security record, not a second copy of that text.
@@ -3978,7 +3968,7 @@ app.patch(
         route: "/api/v1/admin/technicians/:id/verification",
       },
     });
-    // Task 28.2D5 — verification decision notification to the affected
+    // 5 — verification decision notification to the affected
     // technician (linked account only; NULL safely skips). The rejection
     // reason is the admin-authored correction feedback, nothing else.
     // A notification failure is logged but never fails the recorded decision.
@@ -4169,7 +4159,7 @@ app.patch(
 );
 
 /* ================================================================== */
-/* Task 28.3 — data-subject privacy routes (28.3C / 28.3D) and the      */
+/* data-subject privacy routes (28.3C / 28.3D) and the      */
 /* notification inbox (28.3C, closing gap G-02).                      */
 /*                                                                    */
 /* Every route below derives its subject from `request.authUser`, which */
@@ -4380,14 +4370,6 @@ app.delete(
   },
 );
 
-/* ------------------------------------------------------------------ */
-/* Notification inbox (28.3C) — closes gap G-02                      */
-/*                                                                     */
-/* This reuses the EXISTING `notifications` table and NotificationService */
-/* read methods. It adds no second notification store and changes no    */
-/* push/SMS delivery semantics.                                        */
-/* ------------------------------------------------------------------ */
-
 const notificationListSchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).optional().default(25),
   offset: z.coerce.number().int().min(0).optional().default(0),
@@ -4562,7 +4544,7 @@ app.get(
 
 /**
  * GET /health — liveness: confirms the application process is up and serving.
- * Task 28 §17: health does NOT claim infrastructure it has not checked (the
+ * health does NOT claim infrastructure it has not checked (the
  * previous hardcoded `database: 'connected'` was misleading); database
  * connectivity is asserted by GET /ready below.
  */
@@ -4592,7 +4574,7 @@ app.get("/ready", async (_, reply) => {
 });
 
 /* ================================================================== */
-/* Task 28.4B — Communication routes (conversations, messages, phone)  */
+/* Communication routes (conversations, messages, phone)  */
 /* ================================================================== */
 
 /**
@@ -4895,7 +4877,7 @@ app.get(
         [requestId, authUser.id],
       );
       const row = rows[0];
-      // Task 33.1 fix: c.technician_id is a profile-row id, not a user id,
+      //  fix: c.technician_id is a profile-row id, not a user id,
       // so the SQL is_technician flag can never be true for a technician.
       // Resolve the caller's own profile, like canAccessConversation does.
       const callerTech = await query<{ id: string }>(
@@ -5140,7 +5122,7 @@ app.post(
               referenceId: conversationId,
               // Chat is a STREAM of distinct events over one conversation
               // reference: conversation-level natural-key dedupe would let
-              // only the FIRST message ever notify (Task 33.4). One row +
+              // only the FIRST message ever notify. One row +
               // one delivery attempt per persisted message, for the
               // recipient only.
               dedupe: false,
@@ -5395,7 +5377,7 @@ app.get(
 
 /**
  * GET /api/v1/admin/conversations/:id — conversation METADATA for
- * administrators (Task 33.2 conversation-privacy policy).
+ * administrators.
  *
  * Policy: administrators never read, send or manipulate private messages —
  * every participant content route answers 404 for them. This is the single
@@ -5520,7 +5502,7 @@ app.get(
 );
 
 /**
- * GET /api/v1/me/requests — the caller's own service requests (Phase 4).
+ * GET /api/v1/me/requests — the caller's own service requests.
  *
  * §5 requires customers to see "current and recent service requests" and to
  * "view request details and history". That was impossible: a customer could
@@ -5608,8 +5590,22 @@ app.get(
   },
 );
 
-const port = Number(process.env.PORT ?? 3001);
-// Task 28.4B / 33.3 — Realtime WebSocket transport. Mounted on the raw HTTP
+/* Listen port. An ambient PORT of "" or "0" (common in shells that assign a
+ * placeholder) would otherwise bind an ephemeral port while clients keep
+ * calling the documented one, so anything outside 1-65535 falls back to 3001
+ * and the substitution is logged rather than silent. */
+const DEFAULT_PORT = 3001;
+const configuredPort = Number(process.env.PORT);
+const port =
+  Number.isInteger(configuredPort) && configuredPort > 0 && configuredPort < 65536
+    ? configuredPort
+    : DEFAULT_PORT;
+if (process.env.PORT && port !== configuredPort) {
+  console.warn(
+    `PORT="${process.env.PORT}" is not a valid port; listening on ${DEFAULT_PORT} instead.`,
+  );
+}
+//  / 33.3 — Realtime WebSocket transport. Mounted on the raw HTTP
 // server at /api/v1/realtime and attached BEFORE `listen` so no early upgrade
 // request can race the handler. If `ws` cannot be resolved the factory
 // returns null and the REST API continues unchanged, with realtime logged as
@@ -5625,8 +5621,9 @@ if (wsServer) {
 }
 await app.listen({ port, host: "0.0.0.0" });
 console.log(`Server listening on port ${port}`);
+console.log(`Health check: http://localhost:${port}/health`);
 
-/* Task 36 (Stage 4) — in-process dispatch sweeper (Phase 5.4–6).
+/* in-process dispatch sweeper.
  *
  * Mounted AFTER a successful listen so a failed startup never leaves a
  * timer behind. One interval, three bounded jobs, each in its own

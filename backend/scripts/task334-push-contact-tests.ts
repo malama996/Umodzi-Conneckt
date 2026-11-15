@@ -1,5 +1,5 @@
 /**
- * Task 33.4 suite: Web Push integration + contact/call authorization,
+ *  suite: Web Push integration + contact/call authorization,
  * against a RUNNING backend (start it first).
  *
  * Run from the backend folder:
@@ -14,7 +14,7 @@
  * revoked admin session). Audit events are security records and are
  * deliberately NEVER deleted.
  *
- * Covers (Phase 3 of Task 33.4):
+ * Covers:
  *   Push registration/removal — POST /me/push-subscriptions stores against
  *     the AUTHENTICATED user (never the body), re-post rotates keys on the
  *     same row (no duplicate), new endpoint = new row, strict schema 400s,

@@ -4,7 +4,7 @@ import { PublicHeader, PublicFooter } from '@/components/ui';
 import { TERMS_SECTIONS, TERMS_VERSION } from '@/lib/legal/terms';
 
 /**
- * Public Terms and Conditions (Task 32).
+ * Public Terms and Conditions.
  *
  * Same conventions as the /privacy notice page: server-rendered with no
  * client-side data fetching, content from a single-source module

@@ -1,5 +1,5 @@
 /**
- * Dispatch engine (Task 36 — directive Phases 5 / 9 / 10 / 11 / 12).
+ * Dispatch engine.
  *
  * ONE server-authoritative home for the decisions that used to live partly
  * in browser code (`cascadingOfferService`, `smartDispatchPipelineService`):
@@ -41,7 +41,7 @@ export interface CreatedOffer extends CandidateSelection {
 
 export type OfferOutcome = "rejected" | "timed_out";
 
-/** Configurable technician active-assignment cap (Phase 9 requirement 1–2). */
+/** Configurable technician active-assignment cap. */
 export function maxActiveAssignmentsPerTechnician(): number {
   const configured = Number(process.env.MAX_ACTIVE_ASSIGNMENTS_PER_TECHNICIAN);
   return Number.isFinite(configured) && configured >= 1
@@ -103,7 +103,7 @@ async function activeAssignmentCount(
 
 /**
  * Eligibility of ONE technician to take this request's work, checked inside
- * the caller's transaction (Phase 10 requirements 6–8, Phase 12.8).
+ * the caller's transaction.
  *
  * Mirrors `assertOfferEligibility` in authorization.ts (same 409/422 copy) so
  * create-time and accept-time gates can never drift apart. The duplicate-offer
@@ -252,7 +252,7 @@ export async function findNextCandidate(
 /**
  * Persist the next pending offer for a request. candidate_index is assigned
  * as MAX(existing)+1 so a browser can never dictate cascade order again
- * (finding #13).
+ * This prevents a browser from dictating cascade order.
  */
 export async function createOfferForCandidate(
   client: { query: Function },
@@ -289,7 +289,7 @@ export async function createOfferForCandidate(
   };
 }
 
-/** Lifecycle audit row (Phase 7 requirement 10). Never a silent transition. */
+/** Lifecycle audit row. Transitions are never silent. */
 export async function recordRequestEvent(
   client: { query: Function },
   args: {
@@ -508,7 +508,7 @@ export interface AssignmentResult {
 }
 
 /**
- * Atomic assignment (Phase 10 / 12). ONE transaction:
+ * Atomic assignment. One transaction:
  *   lock offer + request → re-validate offer pending, request open,
  *   technician eligible and below the workload cap → conditional offer update
  *   → conditional request update → close competing pending offers → create
@@ -588,7 +588,7 @@ export async function assignOfferAtomically(
       throw new HttpError(409, "This request is no longer open for acceptance");
     }
 
-    // Re-check eligibility AT ACCEPT TIME (finding #3): the technician may
+    // Re-check eligibility at acceptance time: the technician may
     // have been suspended, deactivated, become unavailable, or reached the
     // workload cap since the offer was created.
     await assertTechnicianCanTakeWork(client, request, row.technician_id);
@@ -630,7 +630,7 @@ export async function assignOfferAtomically(
     });
 
     // A request has ONE assignment: every other pending offer is closed so
-    // no technician can still accept it afterwards (Phase 12.4).
+    // no technician can still accept it afterwards.
     const closed = (await client.query(
       `UPDATE dispatch_offers SET status = 'rejected', updated_at = NOW()
         WHERE request_id = $1 AND id <> $2 AND status = 'pending'
@@ -639,7 +639,7 @@ export async function assignOfferAtomically(
     )) as { rows: Array<{ id: string }> };
 
     // Conversation is created inside the same transaction: either both the
-    // assignment AND chat exist, or neither does (Phase 3 requirement 1–2).
+    // assignment and chat exist, or neither does.
     let conversationCreated = false;
     const customerId = request.customerUserId;
     if (customerId) {
@@ -658,7 +658,7 @@ export async function assignOfferAtomically(
       }
     }
 
-    // Availability reflects the workload cap (Phase 9 requirement 7). Only a
+    // Availability reflects the workload cap. Only a
     // technician who just REACHED the cap is flipped to unavailable, and the
     // `availability_auto` flag marks it as system-set so it is restored
     // automatically when capacity frees up. A technician below the cap keeps
@@ -705,7 +705,7 @@ export async function assignOfferAtomically(
 }
 
 /**
- * Customer/admin retry of a `no_match` request (Phase 5 requirement 9).
+ * Customer or administrator retry of a `no_match` request.
  * Returns null when the request cannot currently be retried.
  */
 export async function retryDispatchForRequest(
@@ -786,7 +786,7 @@ export async function retryDispatchForRequest(
 }
 
 /**
- * Sweep pending offers whose response window elapsed (Phase 5.4–6). Each
+ * Sweep pending offers whose response window elapsed. Each
  * offer is processed in its own transaction via processOfferOutcome, so a
  * failure on one never blocks the others and a concurrent manual response
  * wins cleanly by lock order.
@@ -822,7 +822,7 @@ export async function sweepExpiredOffers(): Promise<{
 
 /**
  * Recover requests stuck in `matching` with NO pending offer — the state an
- * interrupted operation leaves behind (Phase 12.10). Each is cascaded or
+ * interrupted operation leaves behind. Each is cascaded or
  * falls back to no_match inside its own transaction.
  */
 export async function sweepStuckMatchingRequests(): Promise<number> {
@@ -878,7 +878,7 @@ export async function sweepStuckMatchingRequests(): Promise<number> {
 
 /**
  * Waiting queue: re-offer `no_match` requests when availability returns
- * (Phase 5 requirement 9, Phase 11 queue behaviour). Bounded, throttled by
+ * Bounded and throttled by
  * `last_dispatch_at`, and never touches cancelled/completed history.
  */
 export async function sweepWaitingRequests(): Promise<{

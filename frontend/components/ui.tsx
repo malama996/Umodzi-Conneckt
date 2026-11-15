@@ -35,7 +35,7 @@ import AuthNav from './AuthNav';
 import LogoutConfirm from './LogoutConfirm';
 
 /**
- * Approved Umodzi Connect brand asset (Task 24).
+ * Approved Umodzi Connect brand asset.
  *
  * The approved SVGs live in `public/branding/` and `public/illustrations/`
  * and are referenced directly as static public assets: this project has no
@@ -82,7 +82,7 @@ export function BrandAsset({
 /* eslint-enable @next/next/no-img-element */
 
 /**
- * Brand lockup — approved SVG logo variants (Task 24).
+ * Brand lockup — approved SVG logo variants.
  *
  * `light`   → white-lettering variant for dark backgrounds (public header,
  *             footer, dashboard sidebar, auth photo panel).
@@ -225,7 +225,7 @@ export function PublicHeader() {
 }
 
 /**
- * Public footer (Task 32) — one shared component rendered once per public
+ * Public footer — one shared component rendered once per public
  * page (landing, matching, technician profile, legal pages). Dashboard
  * layouts never render it, so authenticated navigation is untouched.
  *
@@ -281,7 +281,7 @@ export function Button({
   );
 }
 
-/** Badge colour vocabulary (Task 24 tones + Task 25 coral for failures). */
+/** Badge colour vocabulary. */
 export type BadgeTone = 'success' | 'warning' | 'neutral' | 'teal' | 'coral';
 
 export function Badge({ children, tone = 'neutral' }: { children: ReactNode; tone?: BadgeTone }) {
@@ -353,29 +353,29 @@ export function VerificationTrustIndicators({
  */
 
 /**
- * Sidebar navigation — one item list per role (Phase 3).
+ * Sidebar navigation — one item list per role.
  *
  * The role comes from the authenticated session (backend-authoritative),
  * and every dashboard route that renders this sidebar sits behind
  * RequireAuth — so the auth state is already resolved before the sidebar
- * mounts (no nav flash). Administrators see ONLY the Task 25 functionality
+ * mounts (no nav flash). Administrators see ONLY the administrator functionality
  * that actually exists (no placeholder items).
  *
- * Phase 3 changed the non-admin branch from "administrator ? admin : consumer"
+ *  changed the non-admin branch from "administrator ? admin : consumer"
  * to a genuine three-way switch. Technicians had been handed the CONSUMER list,
  * so their sidebar offered customer-only actions while their offers, profile
  * and verification screens were unreachable from navigation. Every entry below
  * now resolves to a route that exists, and only to one the role may open.
  *
- * Task 28.3 (G-02): the "Notifications" badge previously rendered a HARDCODED
+ *  (G-02): the "Notifications" badge previously rendered a HARDCODED
  * "2", which was fabricated data — the application had no notification
  * history to read and no unread count to report. It is now the REAL unread
  * count from the owner-scoped API, and it is hidden entirely when zero (or
  * while loading/failing) rather than showing a made-up number. The
  * Notifications and Settings items also point at real routes instead of "#".
- * Task 28.4: "Messages" now points at the real conversation list (it was a
+ * "Messages" now points at the real conversation list (it was a
  * "#" placeholder while chat did not exist). Administrators deliberately do
- * NOT get an admin-to-user chat: their item list stays Task 25 only.
+ * NOT get an admin-to-user chat: their item list stays administrator-only.
  */
 export function Sidebar({
   active = 'Dashboard',
@@ -490,7 +490,7 @@ export function Sidebar({
 /**
  * Dashboard chrome: sidebar + topbar + children.
  *
- * Task 25: the topbar identity chip shows the REAL signed-in administrator
+ * the topbar identity chip shows the REAL signed-in administrator
  * (name + role label) on admin pages; every other role keeps the original
  * chip, so customer/technician dashboards are unchanged in appearance.
  *

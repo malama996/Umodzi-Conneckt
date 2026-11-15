@@ -22,13 +22,13 @@ import {
 } from '@/lib/services/adminService';
 
 /**
- * Administrator technician management (Task 25 §4) — /admin/technicians.
+ * Administrator technician management — /admin/technicians.
  *
  * Read-only visibility: name/identity, skills, service area, account,
  * availability, and verification status with search/filters, plus a full
  * profile detail expansion (and a public-profile link where one exists).
  * Verification changes and dispatch-side controls are deliberately NOT
- * here — verification refinement is Task 26 territory, and this screen
+ * here — verification refinement is out of scope here, and this screen
  * never touches dispatch eligibility. Server-side requireRole guards every
  * data call.
  */
