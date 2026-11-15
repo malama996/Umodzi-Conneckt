@@ -3,7 +3,7 @@ import type { AvailabilityStatus } from '@/lib/types';
 import { del, get, patch, post, postForm, getBlob } from './client';
 
 /**
- * Technician profile + verification API (Task 26) — wire shapes mirror the
+ * Technician profile and verification API — wire shapes mirror the
  * backend exactly. Storage keys never appear here; document bytes travel
  * through getBlob (authorized) and photo bytes are served publicly by the
  * backend (components reference the public photo URL directly).
@@ -145,10 +145,6 @@ export async function submitVerification(): Promise<{
 export function downloadVerificationDocument(id: string): Promise<Blob> {
   return getBlob(`/verification-documents/${encodeURIComponent(id)}/file`);
 }
-
-/* ------------------------------------------------------------------ */
-/* Administrator review (Task 26)                                      */
-/* ------------------------------------------------------------------ */
 
 export interface AdminTechnicianVerification {
   id: string;

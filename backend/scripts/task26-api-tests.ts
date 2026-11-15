@@ -1,5 +1,5 @@
 /**
- * Task 26 API integration tests: technician profile, profile photo,
+ *  API integration tests: technician profile, profile photo,
  * verification documents, and the full verification lifecycle
  * (unverified → pending → verified, pending → rejected → pending) against
  * a RUNNING backend (start it first, see STATE.md).
@@ -758,7 +758,7 @@ async function testMissingRecords(admin: Session, techA: Session, techB: Session
 
 async function cleanup(): Promise<void> {
   console.log('\ncleanup — restoring the baseline (seeded admin preserved)');
-  // Task 28.2D: verification submit/decision hooks record in_app
+  // verification submit/decision hooks record in_app
   // notifications — remove them alongside the fixture rows they reference.
   await query(`DELETE FROM notifications`);
   const keys = await query<{ storage_key: string }>(

@@ -3,7 +3,7 @@ import type { ServiceRequest, ServiceRequestCreateInput, ServiceRequestStatus } 
 import * as serviceRequestsApi from '@/lib/api/serviceRequestsApi';
 
 /**
- * Application service-request boundary (Task 21B).
+ * Application service-request boundary.
  *
  * Flow:
  *   UI → requestService → serviceRequestsApi → Fastify → PostgreSQL

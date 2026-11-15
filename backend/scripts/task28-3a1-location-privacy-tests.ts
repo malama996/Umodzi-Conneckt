@@ -1,5 +1,5 @@
 /**
- * Task 28.3A.1 tests: location privacy correction (G-01).
+ * .1 tests: location privacy correction (G-01).
  *
  * Verifies that precise technician coordinates are NOT reachable through any
  * public technician endpoint, that the coarse service-area information and the

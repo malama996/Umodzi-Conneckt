@@ -15,7 +15,7 @@ import {
 import type { UserRole } from '@/lib/auth/authTypes';
 
 /**
- * THE role → menu mapping (Phase 3 / §3 + §4).
+ * THE role → menu mapping.
  *
  * One definition, two consumers: the signed-in drawer (`Sidebar`) renders it
  * as a vertical nav, and the avatar menu (`AccountMenu`) renders the same

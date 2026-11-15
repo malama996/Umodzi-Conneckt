@@ -27,7 +27,7 @@ type PushUiState =
   | 'error';
 
 /**
- * Browser push subscription control (Task 28.2C).
+ * Browser push subscription control.
  *
  * Mounted on the dashboard (all roles, behind RequireAuth). "On" is shown
  * only when a browser subscription exists AND this device holds the backend

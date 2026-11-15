@@ -3,9 +3,10 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Pool } from 'pg';
 import { pool as runtimePool } from './client.js';
+import { assertLocalDatabase } from './assertLocalDatabase.js';
 
 /**
- * Lightweight deterministic migration runner (Task 23).
+ * Lightweight deterministic migration runner.
  *
  * - Files live in `src/db/migrations/` and are named `NNN_description.sql`
  *   (zero-padded, applied in ascending filename order).
@@ -13,11 +14,11 @@ import { pool as runtimePool } from './client.js';
  *   inside the SAME transaction that runs the migration, so a crashed
  *   migration cannot be half-recorded.
  * - Every migration file must be idempotent (IF NOT EXISTS / guarded DO
- *   blocks) so that an existing Task 21B database (created before this
+ *   blocks) so that a database created before this
  *   ledger existed) can be upgraded safely and re-starts are no-ops.
  * - Never drops tables, never truncates, never rewrites existing rows.
  *
- * Task 35.2 (DB-2): migrations perform DDL and therefore must run with the
+ *  (DB-2): migrations perform DDL and therefore must run with the
  * ADMINISTRATIVE connection. Runtime traffic uses the restricted
  * `umodzi_app` role that now lives in DATABASE_URL, so the runner uses the
  * dedicated MIGRATIONS_DATABASE_URL when present and falls back to the
@@ -36,6 +37,11 @@ export interface MigrationResult {
   skipped: string[];
 }
 
+export interface MigrationOptions {
+  /** Only the production API startup path may migrate a managed database. */
+  allowRemote?: boolean;
+}
+
 function migrationsDir(): string {
   const here = path.dirname(fileURLToPath(import.meta.url));
   const candidates = [
@@ -50,7 +56,23 @@ function migrationsDir(): string {
   );
 }
 
-export async function runMigrations(): Promise<MigrationResult> {
+export async function runMigrations(
+  options: MigrationOptions = {},
+): Promise<MigrationResult> {
+  // The API runs this during its own controlled startup sequence. Unlike the
+  // local-only seed commands, it must support the managed production database.
+  // Production DDL is deliberately kept on the separate administrator URL;
+  // normal application traffic continues to use the restricted runtime role.
+  if (process.env.NODE_ENV === 'production' && !process.env.MIGRATIONS_DATABASE_URL) {
+    throw new Error(
+      'MIGRATIONS_DATABASE_URL is required in production so schema changes never use the runtime database role.',
+    );
+  }
+  if (!options.allowRemote) {
+    assertLocalDatabase(process.env.MIGRATIONS_DATABASE_URL, 'MIGRATIONS_DATABASE_URL', 'migrate');
+    assertLocalDatabase(process.env.DATABASE_URL, 'DATABASE_URL', 'migrate');
+  }
+
   const dir = migrationsDir();
   const files = fs
     .readdirSync(dir)
@@ -65,7 +87,7 @@ export async function runMigrations(): Promise<MigrationResult> {
     }
   }
 
-  // Task 35.2: use the administrative connection for DDL when configured;
+  // use the administrative connection for DDL when configured;
   // fall back to the shared pool for pre-Task-35.2 setups.
   const adminPool = process.env.MIGRATIONS_DATABASE_URL
     ? new Pool({ connectionString: process.env.MIGRATIONS_DATABASE_URL })
@@ -73,7 +95,12 @@ export async function runMigrations(): Promise<MigrationResult> {
   const client = await adminPool.connect();
   const applied: string[] = [];
   const skipped: string[] = [];
+  let migrationLockHeld = false;
   try {
+    // Render may briefly run two instances during a deploy. Serialising the
+    // migration ledger prevents both instances from applying the same file.
+    await client.query("SELECT pg_advisory_lock(hashtext('umodzi-connect-migrations'))");
+    migrationLockHeld = true;
     await client.query(
       `CREATE TABLE IF NOT EXISTS schema_migrations (
          name TEXT PRIMARY KEY,
@@ -106,6 +133,15 @@ export async function runMigrations(): Promise<MigrationResult> {
       }
     }
   } finally {
+    if (migrationLockHeld) {
+      try {
+        await client.query("SELECT pg_advisory_unlock(hashtext('umodzi-connect-migrations'))");
+      } catch (error) {
+        // Closing the dedicated connection also releases a session advisory
+        // lock. Do not hide the migration result merely because cleanup logs.
+        console.error('Failed to release migration advisory lock:', error);
+      }
+    }
     client.release();
     if (adminPool !== runtimePool) await adminPool.end();
   }

@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * In-app notification toasts (Task 22).
+ * In-app notification toasts.
  *
  * Mounted once in the root layout so every page renders the same
  * notification surface. Accessibility:
@@ -13,7 +13,7 @@
  * - Dismiss controls are real buttons: keyboard accessible with the
  *   global visible focus style.
  *
- * Delivery-side behaviour (follow-up pass): each toast plays a
+ * Each toast plays a
  * fail-silent Web Audio ping and auto-dismisses after a tone-dependent
  * delay (6 s success/info, 10 s warning/error) — see lib/notifications
  * /store.ts. Manual dismiss always works and cancels the timer.

@@ -1,7 +1,7 @@
 import { query } from '../db/client.js';
 
 /**
- * Privacy/security audit log (Task 28.3F).
+ * Privacy and security audit log.
  *
  * Records are created ONLY from events the running system actually observes.
  * Nothing here seeds, back-dates or fabricates history: a fresh installation
@@ -50,7 +50,7 @@ export const AUDIT_EVENT_TYPES = [
   // Per-document verification decision (Task: §5). The rejection reason is
   // deliberately NOT copied into audit metadata; only the decision is logged.
   'admin.verification_document_decision',
-  // Administrator conversation-METADATA inspection (Task 33.2). Recorded on
+  // Administrator conversation-metadata inspection. Recorded on
   // every admin read of GET /admin/conversations/:id. Message CONTENT is
   // never auditable because it is never exposed to administrators, and no
   // message body is ever written to this log.

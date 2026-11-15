@@ -1,5 +1,5 @@
 /**
- * In-app notification types (Task 22).
+ * In-app notification types.
  *
  * Notifications are presentation-layer feedback only: they never
  * mutate domain state, never trigger persistence, and never leave

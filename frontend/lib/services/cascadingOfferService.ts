@@ -18,7 +18,7 @@ import type {
  *   ...
  *   Exhausted → no candidates remaining
  *
- * The ranked order from Task 12 is authoritative. Candidates are never
+ * The ranked order is authoritative. Candidates are never
  * skipped, reordered, or revisited.
  */
 

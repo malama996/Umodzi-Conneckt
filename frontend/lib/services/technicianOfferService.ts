@@ -9,13 +9,13 @@ import {
 import type { DispatchOffer, DispatchOfferStatus, ServiceRequest } from '@/lib/types';
 
 /**
- * Technician offer service (Task 21B; rewritten in Task 36, Stage 4).
+ * Technician offer service.
  *
  * Application-level boundary for the technician-side offer experience.
  * Persistence is backend-authoritative (PostgreSQL via the offers API) —
  * there is no localStorage ledger.
  *
- * Task 36 (Stage 4): dispatch is SERVER-authoritative. The retired browser
+ * dispatch is SERVER-authoritative. The retired browser
  * cascade (re-running the Smart Dispatch pipeline client-side, creating the
  * next candidate's offer row, PATCHing matched/no_match onto the request) is
  * GONE: a response is now ONE outcome endpoint call, and the backend

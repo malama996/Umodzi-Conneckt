@@ -1,7 +1,7 @@
 import { ApiError, get, post } from './client';
 
 /**
- * Reviews API (Task 27) — wire shapes mirror the backend exactly.
+ * Reviews API — wire shapes mirror the backend exactly.
  * customer/technician ids are always derived server-side; the client only
  * ever sends rating + optional comment.
  */

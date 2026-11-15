@@ -72,7 +72,7 @@ export async function createServiceRequest(
     description: input.description,
     category: input.category,
     city: input.city,
-    // Task 36 (Stage 5): absent on legacy callers; when present, a replay of
+    // When present, a replay of
     // the same submission returns the ORIGINAL request (HTTP 200) instead of
     // creating a duplicate row.
     ...(input.clientRequestId ? { clientRequestId: input.clientRequestId } : {}),
@@ -116,7 +116,7 @@ export async function updateServiceRequestStatus(
 }
 
 /**
- * Ask dispatch to look again for an eligible technician (Task 36, Stage 4).
+ * Ask dispatch to look again for an eligible technician.
  * Only the backend decides whether the request is retryable — a retry on a
  * request that is not waiting fails honestly.
  */
@@ -148,7 +148,7 @@ interface MyServiceRequestDto extends ServiceRequestDto {
 
 /**
  * GET /me/requests — this account's own service requests, newest first
- * (Phase 4). The scope is decided by the backend from the session, so a
+ * The scope is decided by the backend from the session, so a
  * customer only ever receives their own rows and a technician only rows
  * they hold an offer on. Rows are validated through the same contract as a
  * single request, so an unexpected backend value fails loudly instead of

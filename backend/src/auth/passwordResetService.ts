@@ -8,7 +8,7 @@ import { normalizeEmail } from './authService.js';
 import { sendPasswordResetEmail } from './emailService.js';
 
 /**
- * Password recovery (audit §3).
+ * Password recovery.
  *
  * Threat model:
  *   - Only a SHA-256 HASH of the recovery token is stored; the raw token

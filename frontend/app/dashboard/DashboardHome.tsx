@@ -6,7 +6,7 @@ import ConsumerDashboard from './ConsumerDashboard';
 import TechnicianDashboard from './TechnicianDashboard';
 
 /**
- * Role-aware dashboard body (Task 25 + follow-up pass).
+ * Role-aware dashboard body.
  *
  * Reached only through RequireAuth (app/dashboard/page.tsx), so the
  * session is resolved and the role is authoritative before this mounts:

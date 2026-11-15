@@ -1,5 +1,5 @@
 /**
- * Task 23 API integration tests: the full auth + authorization contract
+ *  API integration tests: the full auth + authorization contract
  * against a RUNNING backend (start it first, see STATE.md).
  *
  * Run from the backend folder:
@@ -539,7 +539,7 @@ async function testOwnershipMatrix(sessions: {
     ?.technicianId as string;
   assert(typeof techProfileId === 'string', 'technician profile id known to the session');
 
-  // Task 28: POST /offers now enforces server-side eligibility. Make this
+  // POST /offers now enforces server-side eligibility. Make this
   // registered technician a genuinely eligible candidate for the
   // Electrical/Kitwe request created above (verified + active + available +
   // matching category/service area) — mirroring what the real admin
@@ -556,7 +556,7 @@ async function testOwnershipMatrix(sessions: {
   const ownOffers = await api('GET', `/offers/technician/${techProfileId}`, { token: technician.token });
   assert(ownOffers.status === 200 && Array.isArray(ownOffers.body?.data), 'technician reads own offers → 200');
 
-  // Task 28: deterministically pick a SEEDED technician that is eligible for
+  // deterministically pick a SEEDED technician that is eligible for
   // the Electrical/Kitwe request (verified + active + available + matching
   // category/area) so the second offer exercises the customer-side create +
   // reject flow against a genuinely eligible candidate.
@@ -877,7 +877,7 @@ async function testRateLimitingLast(): Promise<void> {
 
 async function cleanup(): Promise<void> {
   console.log('\ncleanup — restoring the baseline dataset');
-  // Task 28.2D: offer/status hooks record in_app notifications for fixture
+  // offer/status hooks record in_app notifications for fixture
   // flows — remove them alongside the fixture rows they reference.
   await query(`DELETE FROM notifications`);
   await query(

@@ -1,5 +1,5 @@
 /**
- * Task 25 API integration tests: the administrator / platform-management
+ *  API integration tests: the administrator / platform-management
  * contract against a RUNNING backend (start it first, see STATE.md).
  *
  * Run from the backend folder:
@@ -7,14 +7,14 @@
  *   $env:ADMIN_EMAIL='…'  $env:ADMIN_PASSWORD='…'   # the server's seed values
  *   npx tsx scripts/task25-api-tests.ts
  *
- * Covers (Task 25 A–F):
+ * Covers:
  *   A. authorization matrix — every admin endpoint rejects anonymous (401)
  *      and non-administrator roles (403): customer, technician;
  *   B. non-admin denial holds for reads AND the status mutation;
  *   C. user management data — real rows, exact safe field set, no
  *      password/session/token material anywhere in the payload;
  *   D. technician management data — linked accounts vs seed prototype
- *      profiles (LEFT JOIN nulls), Task 11 fields intact;
+ *      profiles (LEFT JOIN nulls) fields intact;
  *   E. request monitoring + no-match — statuses, customer identity,
  *      grouped dispatch offers with technician names, legacy NULL-owner
  *      row, newest-first ordering, and the no_match status exposed as-is
@@ -267,7 +267,7 @@ async function createFixtures(): Promise<{
   assert(created.status === 201, 'customer creates the monitored request → 201');
   requestId = created.body?.data?.id as string;
 
-  // Task 28: POST /offers enforces server-side eligibility, so target a
+  // POST /offers enforces server-side eligibility, so target a
   // SEEDED technician that is genuinely eligible for this Electrical/Kitwe
   // request (verified + active + available + matching category/area).
   const seeded = await query<{ id: string }>(
@@ -642,7 +642,7 @@ async function testStatusMutations(
     'the same token works again once the account is active',
   );
 
-  // Technician accounts keep the profile row in sync (Task 11 vocabulary).
+  // Technician accounts keep the profile row in sync.
   const techSuspend = await api('PATCH', `/admin/users/${technicianUserId}/status`, {
     token: admin.token,
     body: { accountStatus: 'suspended' },
@@ -721,12 +721,12 @@ async function testRegression(sessions: {
     meTechnician.status === 200 &&
       meTechnician.body?.data?.user?.role === 'technician' &&
       typeof meTechnician.body?.data?.user?.technicianName === 'string',
-    'technician /auth/me keeps the linked profile fields (Task 23 contract)',
+    'technician /auth/me keeps the linked profile fields',
   );
 
   assert(
     (await api('GET', `/requests/${requestId}`, { token: admin.token })).status === 200,
-    'administrator still reads any request (Task 23 ownership matrix intact)',
+    'administrator still reads any request',
   );
 
   assert(loginCount === 3, `suite issued exactly 3 logins (rate-budget discipline; saw ${loginCount})`);
@@ -738,7 +738,7 @@ async function testRegression(sessions: {
 
 async function cleanup(): Promise<void> {
   console.log('\ncleanup — restoring the baseline (seeded admin preserved)');
-  // Task 28.2D: offer/status hooks record in_app notifications for fixture
+  // offer/status hooks record in_app notifications for fixture
   // flows — remove them alongside the fixture rows they reference.
   await query(`DELETE FROM notifications`);
   await query(

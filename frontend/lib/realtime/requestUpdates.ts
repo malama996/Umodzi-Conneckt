@@ -1,5 +1,5 @@
 /**
- * Request status subscription (Task 22).
+ * Request status subscription.
  *
  * Reads the customer's service request and its persisted offer ledger
  * through existing read-only endpoints:

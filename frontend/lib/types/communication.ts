@@ -1,5 +1,5 @@
 /**
- * Communication domain types (Task 28.4B).
+ * Communication domain types.
  *
  * Mirrors the backend contract exactly:
  *   - senderId is the server-derived subject, never a client claim

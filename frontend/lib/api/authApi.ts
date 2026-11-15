@@ -2,7 +2,7 @@ import { get, post } from './client';
 import type { AuthPayload, AuthUser, RegisterInput } from '@/lib/auth/authTypes';
 
 /**
- * Auth API boundary (Task 23) — the ONLY place that talks to
+ * Auth API boundary — the only place that talks to
  * /api/v1/auth/*. Requests go through the shared client (lib/api/client.ts)
  * so the Bearer token, credentialed cookie fetches, and the single
  * 401-triggered refresh retry apply automatically. There is no second
@@ -50,7 +50,7 @@ export async function getCurrentUser(): Promise<AuthUser> {
 }
 
 /**
- * Request a password-recovery link (audit §3). The backend response is
+ * Request a password-recovery link. The backend response is
  * enumeration-safe and identical whether or not the email exists, so the
  * caller always shows the same "check your email" message.
  */

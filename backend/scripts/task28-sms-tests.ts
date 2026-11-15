@@ -1,5 +1,5 @@
 /**
- * Task 28.2F tests: Africa's Talking SMS provider boundary + policy —
+ *  tests: Africa's Talking SMS provider boundary + policy —
  * LOCAL scratch database ONLY, never Supabase. No running backend needed.
  *
  * The external provider is NEVER contacted: global fetch is stubbed for
@@ -269,7 +269,7 @@ async function testPersistenceAndReplaceability(): Promise<void> {
     AFRICASTALKING_API_KEY: 'k',
   });
   // The service holds one process-wide provider built from the environment
-  // — rebuild it after changing env (same as a fresh boot would).
+  // rebuild it after changing env (same as a fresh boot would).
   NotificationService.setSmsProvider(new ConfigurableSmsProvider());
   stubFetch(() => ({ status: 201, payload: AT_SUCCESS }));
   const sent = await NotificationService.sendSmsNotification(

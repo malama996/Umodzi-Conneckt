@@ -25,7 +25,7 @@ import {
 } from '@/lib/services/adminService';
 
 /**
- * Administrator platform overview (Task 25 §2) — rendered as /dashboard
+ * Administrator platform overview — rendered as /dashboard
  * for administrators.
  *
  * Every figure comes from GET /api/v1/admin/overview, a server-side
@@ -279,7 +279,7 @@ export default function AdminOverview() {
             </section>
           </>
         )}
-        {/* Task 28.2C: browser push subscription control (additive). */}
+        {/* Browser push subscription control. */}
         <PushSubscriptionControl />
       </main>
     </DashboardLayout>

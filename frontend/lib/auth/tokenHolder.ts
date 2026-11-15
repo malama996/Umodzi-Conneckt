@@ -1,6 +1,6 @@
 /**
  * In-memory access-token holder + single-flight refresh coordination
- * (Task 23; hardened in Task 29).
+ * with single-flight refresh coordination.
  *
  * Rules enforced here:
  *   - the access token exists ONLY as this module-level variable (per

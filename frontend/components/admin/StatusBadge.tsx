@@ -4,18 +4,16 @@ import { Badge } from '@/components/ui';
 import type { DispatchOfferStatus, ServiceRequestStatus } from '@/lib/types';
 
 /**
- * Status badges for the administrator screens (Task 25 §9: clear status
+ * Status badges for the administrator screens (clear status
  * badges everywhere). Tone maps are exhaustive `Record`s over the shared
  * domain unions, so TypeScript rejects a missing case; the colour is
  * never the only signal — the text label always spells the status out.
  *
  * Technician-profile account status keeps its OWN vocabulary
- * (active | inactive | suspended — Task 11) which is distinct from the
+ * (active | inactive | suspended) which is distinct from the
  * users table's (active | suspended | disabled), hence the separate map
  * with a neutral fallback for anything unexpected.
  */
-
-/* ------------------------- tone maps ------------------------- */
 
 const REQUEST_STATUS_TONES: Record<ServiceRequestStatus, BadgeTone> = {
   pending: 'neutral',
@@ -57,16 +55,12 @@ const AVAILABILITY_TONES: Record<string, BadgeTone> = {
   unavailable: 'neutral',
 };
 
-/* ------------------------- helpers ------------------------- */
-
 /** 'no_match' → 'No match', 'in_progress' → 'In progress', else Capitalised. */
 export function requestStatusLabel(status: string): string {
   if (status === 'no_match') return 'No match';
   if (status === 'in_progress') return 'In progress';
   return status.charAt(0).toUpperCase() + status.slice(1);
 }
-
-/* ------------------------- components ------------------------- */
 
 export function RequestStatusBadge({ status }: { status: ServiceRequestStatus }) {
   return <Badge tone={REQUEST_STATUS_TONES[status]}>{requestStatusLabel(status)}</Badge>;
@@ -81,7 +75,7 @@ export function AccountStatusBadge({ status }: { status: AccountStatus }) {
   return <Badge tone={USER_ACCOUNT_TONES[status]}>{requestStatusLabel(status)}</Badge>;
 }
 
-/** Technician-profile status (Task 11 vocabulary, string on the wire). */
+/** Technician-profile status. */
 export function ProfileAccountBadge({ status }: { status: string }) {
   const tone = PROFILE_ACCOUNT_TONES[status] ?? 'neutral';
   const label = status.charAt(0).toUpperCase() + status.slice(1);

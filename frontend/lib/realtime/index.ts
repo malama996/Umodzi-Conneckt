@@ -1,5 +1,5 @@
 /**
- * Realtime update abstraction (Task 22).
+ * Realtime update abstraction.
  *
  * UI components import subscriptions from this barrel only:
  *

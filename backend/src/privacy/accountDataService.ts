@@ -10,9 +10,6 @@ import { listAuditEventsForUser } from './auditService.js';
  * authenticated principal's id, which the route layer obtains from
  * `requireAuth` (and the role/ownership guards re-read from the database).
  *
- * ---------------------------------------------------------------------------
- * What an export NEVER contains
- * ---------------------------------------------------------------------------
  *   * `users.password_hash` and any password material
  *   * `sessions.token_hash` (SHA-256 of the refresh token) or the raw token
  *   * `technician_verification_documents.storage_key` or document BYTES — the
@@ -23,10 +20,6 @@ import { listAuditEventsForUser } from './auditService.js';
  *     URL, which is itself a delivery capability
  *   * any other account's data, and any administrator-only material
  */
-
-/* ------------------------------------------------------------------ */
-/* Shared helpers                                                      */
-/* ------------------------------------------------------------------ */
 
 export interface TechnicianProfileRow {
   id: string;
@@ -96,10 +89,6 @@ function endpointHost(endpoint: string | null): string | null {
     return null;
   }
 }
-
-/* ------------------------------------------------------------------ */
-/* 28.3C — data access / export                                        */
-/* ------------------------------------------------------------------ */
 
 export interface AccountExport {
   format: 'umodzi-account-export-v1';
@@ -453,10 +442,6 @@ export async function buildAccountExport(userId: string): Promise<AccountExport>
 
   return exportPayload;
 }
-
-/* ------------------------------------------------------------------ */
-/* 28.3D — permanent account deletion                                  */
-/* ------------------------------------------------------------------ */
 
 export interface DeletionReport {
   technicianProfileDeleted: boolean;

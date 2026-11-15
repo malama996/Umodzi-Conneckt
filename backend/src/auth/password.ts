@@ -1,7 +1,7 @@
 import { argon2id, hash, verify } from 'argon2';
 
 /**
- * Password hashing (Task 23).
+ * Password hashing.
  *
  * Argon2id — the memory-hard winner of the Password Hashing Competition —
  * is used with the OWASP-recommended minimum parameters

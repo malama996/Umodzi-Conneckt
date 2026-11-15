@@ -44,7 +44,7 @@ export class ConfigurableSmsProvider implements ISmsProvider {
   private config: SmsProviderConfig;
 
   constructor() {
-    // Task 28.2F — Africa's Talking is the first production provider. The
+    // Africa's Talking is the configured production provider. The
     // established environment value is SMS_PROVIDER=africas_talking (see
     // backend .env); the un-underscored alias is accepted so neither
     // spelling silently falls through to the mock provider. Credentials
@@ -159,7 +159,7 @@ export class ConfigurableSmsProvider implements ISmsProvider {
 }
 
 /**
- * SMS policy (Task 28.2F) — conservative by design.
+ * Conservative SMS policy.
  *
  * Web Push + in-app remain the primary notification mechanisms. SMS is
  * reserved for outcomes the recipient must act on or that decide account
@@ -335,7 +335,7 @@ export class NotificationService {
 
   /**
    * Attempt real Web Push delivery for one pending notification
-   * (Task 28.2D6) — the post-commit delivery boundary.
+   * at the post-commit delivery boundary.
    *
    * Reads the row fresh (never trusts a stale copy), sends through the
    * existing PushService to every subscription of the recipient, then
@@ -405,7 +405,7 @@ export class NotificationService {
   }
 
   /**
-   * Record a business-event notification (Task 28.2D1) — the single entry
+   * Record a business-event notification — the single entry
    * point future event hooks (offers, status changes, verification) call.
    *
    * Contract:
@@ -426,8 +426,8 @@ export class NotificationService {
    *     firing produces its own row — see the param docs.
    *   - New rows are `pending` with sent_at/provider_message_id/
    *     failure_reason NULL (the schema defaults status to 'sent', so it
-   *     is overridden explicitly). Marking `sent`/`failed` is Task 28.2D6's
-   *     job, after real delivery is attempted.
+   *     is overridden explicitly). Delivery attempts then mark it `sent` or
+   *     `failed`.
    *   - This method performs NO delivery: no Web Push, no SMS, no second
    *     row. One event + one recipient = exactly one row.
    */
@@ -496,11 +496,7 @@ export class NotificationService {
   }
 }
 
-/* ------------------------------------------------------------------ */
-/* Task 28.2D1 — shared event-notification contract                    */
-/* ------------------------------------------------------------------ */
-
-/** Reference vocabulary for event notifications (audit §reference convention). */
+/** Reference vocabulary for event notifications. */
 export type EventReferenceType = 'service_request' | 'dispatch_offer' | 'technician' | 'conversation';
 
 const EVENT_REFERENCE_TYPES: readonly EventReferenceType[] = [
@@ -521,7 +517,7 @@ export interface RecordEventNotificationParams {
   referenceId: string;
   channel?: NotificationChannel;
   /**
-   * Natural-key dedupe (Task 33.4). Default true: re-firing the SAME
+   * Natural-key deduplication. Default true: re-firing the same
    * logical event returns the existing row instead of inserting a second
    * one. Pass false for event STREAMS that legitimately repeat over one
    * reference — chat messages fire once per message over a single

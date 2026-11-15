@@ -4,7 +4,7 @@ import { PublicHeader, PublicFooter } from '@/components/ui';
 import { PRIVACY_NOTICE_SECTIONS, PRIVACY_NOTICE_VERSION } from '@/lib/privacy/notice';
 
 /**
- * Public privacy notice (Task 28.3B).
+ * Public privacy notice.
  *
  * Rendered on the server with no client-side data fetching, so it stays
  * low-data and is readable with JavaScript unavailable. The text comes from

@@ -1,5 +1,5 @@
 /**
- * Frontend auth domain types (Task 23).
+ * Frontend auth domain types.
  *
  * Strongly typed mirrors of the backend auth contract — no `any`, and no
  * role/status strings are ever written inline anywhere else in the app.

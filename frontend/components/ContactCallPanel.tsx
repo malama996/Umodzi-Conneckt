@@ -5,7 +5,7 @@ import { LuCheck, LuCopy, LuPhone } from 'react-icons/lu';
 import type { ContactCallState } from '@/lib/chat/useContactCall';
 
 /**
- * Contact/call result panel (Task 33.4).
+ * Contact and call result panel.
  *
  * Shared by the conversation list and the chat thread so both surfaces
  * behave identically: the AUTHORIZED number returned by the backend is

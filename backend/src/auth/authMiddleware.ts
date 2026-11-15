@@ -5,7 +5,7 @@ import { verifyAccessToken } from './jwt.js';
 import type { AccountStatus, UserRole } from '../types/api.js';
 
 /**
- * Authentication/authorization guards (Task 23).
+ * Authentication and authorization guards.
  *
  * requireAuth   — extracts `Authorization: Bearer <jwt>`, verifies
  *                 signature/expiry/issuer/audience/claims, then RE-READS

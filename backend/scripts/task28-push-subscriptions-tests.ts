@@ -1,5 +1,5 @@
 /**
- * Task 28.2B API tests: authenticated Web Push subscription management
+ *  API tests: authenticated Web Push subscription management
  * (POST + DELETE /api/v1/me/push-subscriptions) against a RUNNING backend
  * (start it first) backed by the LOCAL scratch database — never Supabase.
  *

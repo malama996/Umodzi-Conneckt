@@ -15,7 +15,7 @@ import {
 import type { AuthPayload, AuthState, RegisterInput } from './authTypes';
 
 /**
- * Auth state store (Task 23) — a tiny external store consumed via
+ * Auth state store — a tiny external store consumed via
  * useSyncExternalStore (same pattern as the notification store).
  *
  * Responsibilities:
@@ -59,7 +59,7 @@ let initPromise: Promise<void> | null = null;
  * success, anonymous otherwise. Idempotent — every caller shares the
  * first in-flight attempt.
  *
- * Task 29: this now goes through tryRefreshOnce() rather than calling the
+ * this now goes through tryRefreshOnce() rather than calling the
  * refresh endpoint directly. Boot previously ran its own refresh OUTSIDE
  * the single flight, so a protected request firing while the boot refresh
  * was still in flight (accessToken is still null, so it 401s) started a

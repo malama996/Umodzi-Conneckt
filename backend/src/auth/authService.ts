@@ -6,7 +6,7 @@ import { createSession, purgeExpiredSessions, type UserRow } from './sessionServ
 import { CANONICAL_CATEGORIES, type AuthUserApi } from '../types/api.js';
 
 /**
- * Authentication service (Task 23) — pure application logic for
+ * Authentication service — pure application logic for
  * registration, login, and identity lookups. HTTP concerns (cookies,
  * replies) stay in routes.ts; token signing stays in jwt.ts.
  *

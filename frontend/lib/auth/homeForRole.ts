@@ -1,7 +1,7 @@
 import type { UserRole } from './authTypes';
 
 /**
- * The workspace each role lands in after signing in (Phase 2).
+ * The workspace each role lands in after signing in.
  *
  * This mapping existed in three disconnected copies — RequireAuth's
  * `HOME_FOR_ROLE`, AuthForm's `homeForRole()`, and the logout redirect —

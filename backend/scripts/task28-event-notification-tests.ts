@@ -1,5 +1,5 @@
 /**
- * Task 28.2D1 tests: the shared event-notification helper
+ * 1 tests: the shared event-notification helper
  * (NotificationService.recordEventNotification) — direct service calls,
  * NO running backend required, LOCAL scratch database ONLY (never Supabase:
  * this suite inserts and deletes rows).

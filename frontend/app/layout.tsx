@@ -4,6 +4,7 @@ import { ServiceWorkerRegistration } from '@/components/ServiceWorkerRegistratio
 import NotificationCenter from '@/components/NotificationCenter';
 import ScrollReveals from '@/components/ScrollReveals';
 import SplashScreen from '@/components/SplashScreen';
+import OfflineBanner from '@/components/OfflineBanner';
 
 /* Theme B typography: the system font stack, applied in globals.css on
    `body` (and inherited by headings and inputs). It matches the visual weight
@@ -24,7 +25,7 @@ export const metadata: Metadata = {
   appleWebApp: { capable: true, title: 'Umodzi Connect', statusBarStyle: 'default' },
 };
 
-/* Mobile/PWA viewport (Phase 2):
+/* Mobile/PWA viewport:
    - viewportFit 'cover' lets the standalone PWA use the full display
      (notches/home bars); globals.css pairs it with env(safe-area-inset-*)
      padding on the header/footer/hero so nothing is ever covered.
@@ -57,6 +58,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       </head>
       <body>
         <SplashScreen />
+        <OfflineBanner />
         {children}
         <ScrollReveals />
         <NotificationCenter />

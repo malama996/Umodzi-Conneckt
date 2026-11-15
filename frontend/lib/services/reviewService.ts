@@ -9,7 +9,7 @@ import {
 } from '@/lib/api/reviewsApi';
 
 /**
- * Review service boundary (Task 27). Pages call these helpers — never the
+ * Review service boundary. Pages call these helpers — never the
  * API client directly. Display helpers (star labels, validation, error
  * copy) live here so every surface agrees.
  */
@@ -24,8 +24,6 @@ export const submitReview = (
   requestId: string,
   input: { rating: number; comment?: string },
 ): Promise<Review> => postReview(requestId, input);
-
-/* ------------------------- display helpers ------------------------- */
 
 /** Whole-star meaning (§5). Index 0 unused so RATING_LABELS[n] reads naturally. */
 export const RATING_LABELS: readonly string[] = [

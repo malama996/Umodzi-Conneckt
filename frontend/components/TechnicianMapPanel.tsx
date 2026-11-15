@@ -25,7 +25,7 @@ import { useGeolocation } from '@/lib/ui/useGeolocation';
 
 /**
  * Technician map panel — the map + list view for a customer's service area
- * (production-fix Task 5).
+ * for a customer's service area.
  *
  * ---------------------------------------------------------------------------
  * What changed, and why the wording matters
@@ -131,7 +131,7 @@ export default function TechnicianMapPanel({
         <span className="result-rule">Service-area locations</span>
       </div>
 
-      {/* Location permission (Task 5). Deliberately opt-in: the button states
+      {/* Location permission is deliberately opt-in: the button states
           exactly what it is for, the state is announced, and the position is
           never requested on page load. */}
       <div className="map-location" role="status">

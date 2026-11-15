@@ -6,7 +6,7 @@ import { getAccessToken } from '@/lib/auth/tokenHolder';
 import type { ChatRealtimeEvent } from '@/lib/types/communication';
 
 /**
- * Realtime chat transport (Task 28.4B — client side).
+ * Realtime chat transport.
  *
  * Design constraints, in order:
  *   1. Authoritative persistence stays HTTP. This hook carries EVENTS ONLY;
@@ -35,7 +35,7 @@ interface UseChatRealtimeOptions {
    * Called after a RE-connect is authorized (subscribed), never on the first
    * connection. Events are only ids, so anything sent while the socket was
    * down was never seen — the caller should re-read history over REST and
-   * merge by stable message id (Task 33.3 catch-up contract).
+   * merge by stable message id.
    */
   onReconnect?: () => void;
   /** Called for authorization/transport errors so the UI can react. */
@@ -63,8 +63,10 @@ export function useChatRealtime({
   onReconnect,
   onError,
   enabled = true,
-}: UseChatRealtimeOptions): { status: RealtimeStatus } {
+}: UseChatRealtimeOptions): { status: RealtimeStatus; subscribed: boolean } {
   const [status, setStatus] = useState<RealtimeStatus>('offline');
+  /** True once the server acknowledged this conversation subscription. */
+  const [subscribed, setSubscribed] = useState(false);
   // Latest callbacks in refs so the socket effect never has to re-run just
   // because a handler identity changed (avoids accidental reconnect loops).
   const onMessageRef = useRef(onMessage);
@@ -81,6 +83,7 @@ export function useChatRealtime({
   useEffect(() => {
     if (!enabled || !stableConversation) {
       setStatus('offline');
+      setSubscribed(false);
       return;
     }
     const token = getAccessToken();
@@ -143,6 +146,11 @@ export function useChatRealtime({
           }
           onErrorRef.current?.(data.error);
         }
+        if (data.type === 'subscribed') {
+          // Diagnostics only: exposed so the connection banner can distinguish
+          // "socket open but subscription refused" from "socket refused".
+          setSubscribed(true);
+        }
       };
 
       socket.onclose = () => {
@@ -167,6 +175,7 @@ export function useChatRealtime({
     connect();
 
     return () => {
+      setSubscribed(false);
       closedByUs = true;
       if (socket && socket.readyState <= WebSocket.OPEN) {
         try {
@@ -178,5 +187,5 @@ export function useChatRealtime({
     };
   }, [enabled, stableConversation]);
 
-  return { status };
+  return { status, subscribed };
 }

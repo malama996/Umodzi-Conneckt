@@ -1,5 +1,5 @@
 /**
- * Task 33 backend tests: Gemini fault classifier with a MOCKED provider.
+ *  backend tests: Gemini fault classifier with a MOCKED provider.
  *
  * Run from the backend folder:
  *   npx --no-install tsx scripts/task33-classify-tests.ts

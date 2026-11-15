@@ -25,7 +25,7 @@ import {
 import type { ServiceRequestStatus } from '@/lib/types';
 
 /**
- * Customer dashboard (Phase 4).
+ * Customer dashboard.
  *
  * It previously rendered four statistic cards whose values were all "—",
  * a "recent" list containing only a note, and a Quick Action labelled
@@ -34,7 +34,7 @@ import type { ServiceRequestStatus } from '@/lib/types';
  *
  * §5 asks for a personalised welcome, current and recent service requests,
  * status and next steps, and clear empty/loading/failure states. All of that
- * now comes from GET /me/requests (the endpoint added in Phase 4). If the
+ * now comes from GET /me/requests (the endpoint that serves the request list). If the
  * request fails, the failure is shown — no placeholder numbers are invented.
  *
  * The status vocabulary/tone maps are exported for the technician dashboard

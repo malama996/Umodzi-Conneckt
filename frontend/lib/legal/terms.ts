@@ -1,5 +1,5 @@
 /**
- * Terms and Conditions content (Task 32).
+ * Terms and Conditions content.
  *
  * SINGLE SOURCE OF TRUTH for the /terms page, following the same pattern as
  * lib/privacy/notice.ts: the page renders from this module so the text cannot
@@ -116,5 +116,12 @@ export const TERMS_SECTIONS: NoticeSection[] = [
   },
 ];
 
-/** Flat document version stamp. Not a compliance claim. */
-export const TERMS_VERSION = '(academic prototype)';
+/**
+ * Flat document version stamp. Not a compliance claim.
+ *
+ * Begins with "Draft" deliberately: the page, the meta description and the
+ *  checks all describe these terms as a draft awaiting legal review,
+ * and a version stamp that omitted that word understated the document's
+ * status.
+ */
+export const TERMS_VERSION = 'Draft — academic prototype';

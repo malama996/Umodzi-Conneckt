@@ -1,5 +1,5 @@
 /**
- * Task 27 API integration tests: customer ratings & reviews tied to
+ *  API integration tests: customer ratings & reviews tied to
  * completed services, against a RUNNING backend (start it first).
  *
  * Run from the backend folder:
@@ -212,7 +212,7 @@ async function createFixtures(): Promise<Sessions> {
   techBProfileId = meB.body?.data?.user?.technicianId as string;
   assert(techAProfileId.length > 0 && techBProfileId.length > 0, 'technician profiles linked');
 
-  // Task 28: POST /offers enforces server-side eligibility. techA is the
+  // POST /offers enforces server-side eligibility. techA is the
   // offer target for the Electrical/Kitwe review fixtures below, so mark it a
   // genuinely eligible candidate (verified + active + available; its
   // registered category/service area already match those requests).
@@ -509,7 +509,7 @@ async function testAggregates(sessions: Sessions): Promise<void> {
 
 async function cleanup(): Promise<void> {
   console.log('\ncleanup — restoring the baseline (seeded admin preserved)');
-  // Task 28.2D: offer/status hooks record in_app notifications for fixture
+  // offer/status hooks record in_app notifications for fixture
   // flows — remove them alongside the fixture rows they reference.
   await query(`DELETE FROM notifications`);
   await query(

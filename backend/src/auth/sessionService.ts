@@ -3,7 +3,7 @@ import { query } from '../db/client.js';
 import type { AccountStatus, UserRole } from '../types/api.js';
 
 /**
- * Server-managed refresh-token sessions (Task 23).
+ * Server-managed refresh-token sessions.
  *
  * Flow: login → opaque 256-bit random token is created, its SHA-256 hash
  * is stored in `sessions`, and only the RAW token leaves the server —

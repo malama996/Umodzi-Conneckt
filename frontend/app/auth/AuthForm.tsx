@@ -20,7 +20,7 @@ import { technicianCategories } from '@/lib/categories';
 import { REGISTRATION_NOTICE_POINTS } from '@/lib/privacy/notice';
 
 /**
- * Login / register form (Task 23) — wired to the real auth API.
+ * Login / register form — wired to the real auth API.
  *
  * Design rules:
  *   - the existing visual design and login-background-technician.jpg are
@@ -78,7 +78,7 @@ export default function AuthForm({ mode }: { mode: 'login' | 'register' }) {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  // Task 32: two separate, explicit acknowledgements (terms + privacy).
+  // two separate, explicit acknowledgements (terms + privacy).
   // Client-side only, like the previous single checkbox: nothing is sent
   // to the backend and nothing is stored as a consent record (see the
   // footnote below) — registration must not invent legal proof.

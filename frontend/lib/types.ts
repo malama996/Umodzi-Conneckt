@@ -1,11 +1,3 @@
-/**
- * Single source of truth for all Umodzi Connect domain types.
- * Mocks today, real Fastify API tomorrow must swap without breaking UI.
- */
-
-// ---------------------------------------------------------------------------
-// Canonical skill categories (FIXED list — 9 items)
-// ---------------------------------------------------------------------------
 export const SKILL_CATEGORIES = [
   'Plumbing',
   'Electrical',
@@ -20,48 +12,33 @@ export const SKILL_CATEGORIES = [
 
 export type SkillCategory = (typeof SKILL_CATEGORIES)[number];
 
-// ---------------------------------------------------------------------------
-// Service areas
-// ---------------------------------------------------------------------------
 export const SERVICE_AREAS = ['Kitwe', 'Ndola', 'Other'] as const;
 export type ServiceArea = (typeof SERVICE_AREAS)[number];
 
-// ---------------------------------------------------------------------------
-// Availability states (display strings)
-// ---------------------------------------------------------------------------
 export const AVAILABILITY_STATES = ['Available now', 'Available today', 'Unavailable'] as const;
 export type AvailabilityState = (typeof AVAILABILITY_STATES)[number];
 
-// ---------------------------------------------------------------------------
-// Availability status (backend enum — used by dispatch/mapper)
-// ---------------------------------------------------------------------------
 export type AvailabilityStatus = 'available' | 'unavailable';
 
-// ---------------------------------------------------------------------------
-// Account status (backend enum — used by dispatch/mapper)
-// ---------------------------------------------------------------------------
 export type AccountStatus = 'active' | 'inactive' | 'suspended';
 
-// ---------------------------------------------------------------------------
-// Technician (read-only view shape — what the UI displays)
-// ---------------------------------------------------------------------------
 export interface Technician {
   id: string;
   name: string;
   category: SkillCategory;
   skills: string[];
   serviceArea: string;
-  city: string; // derived from serviceArea in pilot data
-  rating: number; // 0–5
+  city: string;
+  rating: number;
   jobs: number;
   verified: boolean;
-  availability: string; // display string e.g. "Available now"
+  availability: string;
   availabilityStatus: AvailabilityStatus;
   accountStatus: AccountStatus;
   bio: string | null;
   hasPhoto: boolean;
   /**
-   * Task 28.3A.1 (G-01): precise coordinates are deliberately NOT mapped.
+   * Precise coordinates are deliberately not mapped to the public UI.
    * These fields exist only so tests can assert they are undefined.
    * The mapper intentionally drops any server-provided coordinates.
    */
@@ -69,9 +46,6 @@ export interface Technician {
   longitude?: undefined;
 }
 
-// ---------------------------------------------------------------------------
-// Ranked technician (dispatch scoring result)
-// ---------------------------------------------------------------------------
 export interface DispatchScoreBreakdown {
   proximity: number;
   trust: number;
@@ -86,17 +60,11 @@ export interface RankedTechnician {
   score: DispatchScoreBreakdown;
 }
 
-// ---------------------------------------------------------------------------
-// Eligible technician result (pre-ranking filter output)
-// ---------------------------------------------------------------------------
 export interface EligibleTechnicianResult {
   technician: Technician;
   matchedCategory: SkillCategory;
 }
 
-// ---------------------------------------------------------------------------
-// Smart dispatch result
-// ---------------------------------------------------------------------------
 export type SmartDispatchStatus = 'matched' | 'no_match';
 
 export interface SmartDispatchResult {
@@ -105,9 +73,6 @@ export interface SmartDispatchResult {
   candidates: RankedTechnician[];
 }
 
-// ---------------------------------------------------------------------------
-// Dispatch offer (cascading offer state)
-// ---------------------------------------------------------------------------
 export type DispatchOfferStatus = 'pending' | 'accepted' | 'rejected' | 'timed_out';
 
 export interface DispatchOffer {
@@ -117,9 +82,6 @@ export interface DispatchOffer {
   status: DispatchOfferStatus;
 }
 
-// ---------------------------------------------------------------------------
-// Cascading offer result
-// ---------------------------------------------------------------------------
 export type CascadingOfferStatus = 'offering' | 'accepted' | 'exhausted';
 
 export interface CascadingOfferResult {
@@ -127,15 +89,9 @@ export interface CascadingOfferResult {
   offer: DispatchOffer | null;
 }
 
-// ---------------------------------------------------------------------------
-// Service request lifecycle statuses
-// ---------------------------------------------------------------------------
 export type ServiceRequestStatus =
   'pending' | 'matching' | 'matched' | 'no_match' | 'in_progress' | 'completed' | 'cancelled';
 
-// ---------------------------------------------------------------------------
-// Service request (core entity)
-// ---------------------------------------------------------------------------
 export interface ServiceRequest {
   id: string;
   description: string;
@@ -146,15 +102,12 @@ export interface ServiceRequest {
   updatedAt: string;
 }
 
-// ---------------------------------------------------------------------------
-// Service request create input (client → API)
-// ---------------------------------------------------------------------------
 export interface ServiceRequestCreateInput {
   description: string;
   category: SkillCategory;
   city: string;
   /**
-   * Task 36 (Stage 5, finding #10): browser-generated idempotency key. The
+   * Browser-generated idempotency key. The
    * SAME key submitted twice by the SAME customer returns the SAME request
    * (idempotent replay) instead of creating a duplicate — the backstop for
    * double taps and network retries. Optional; legacy calls omit it.
@@ -162,26 +115,20 @@ export interface ServiceRequestCreateInput {
   clientRequestId?: string;
 }
 
-// ---------------------------------------------------------------------------
-// Technician profile draft (editable fields — R-PROF-02)
-// ---------------------------------------------------------------------------
 export interface TechnicianProfileDraft {
   name: string;
   bio?: string;
   experienceYears?: number;
   serviceArea: ServiceArea;
-  serviceRadiusKm: number; // 1–25
+  serviceRadiusKm: number;
   availability: AvailabilityState;
   skills: SkillCategory[];
-  photoDataUrl?: string; // compressed client-side, ≤150 KB
+  photoDataUrl?: string;
   verified: boolean;
   rating: number;
   jobs: number;
 }
 
-// ---------------------------------------------------------------------------
-// Fault classification (R-CLASS-01 / R-CLASS-02)
-// ---------------------------------------------------------------------------
 export interface ClassificationRequest {
   description: string;
 }
@@ -213,9 +160,6 @@ export interface ClassificationResult {
   rationale?: string;
 }
 
-// ---------------------------------------------------------------------------
-// Technician profile edit (used by ProfileEditor + mock persistence)
-// ---------------------------------------------------------------------------
 export interface TechnicianProfileEdit {
   name?: string;
   category?: SkillCategory;
@@ -224,9 +168,6 @@ export interface TechnicianProfileEdit {
   notes?: string;
 }
 
-// ---------------------------------------------------------------------------
-// Dispatch scoring weights (V0.3 placeholder — typed now, unused this sprint)
-// ---------------------------------------------------------------------------
 export interface DispatchScoreWeights {
   proximity: number;
   trust: number;
@@ -234,9 +175,6 @@ export interface DispatchScoreWeights {
   fairness: number;
 }
 
-// ---------------------------------------------------------------------------
-// Landing page config (preserved from existing lib/data.ts shape)
-// ---------------------------------------------------------------------------
 export interface LandingPageConfig {
   hero: {
     title: string;

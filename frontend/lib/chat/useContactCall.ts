@@ -4,7 +4,7 @@ import { ApiError, get } from '@/lib/api/client';
 import { toTelLink } from '@/lib/api/communicationApi';
 
 /**
- * Contact/call state machine (Task 33.4).
+ * Contact/call state machine.
  *
  * One shared implementation for both contact surfaces (conversation list
  * and chat thread): fetch the OTHER participant's authorized number from

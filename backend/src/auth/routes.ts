@@ -18,7 +18,7 @@ import {
 import { recordAuditEvent } from '../privacy/auditService.js';
 
 /**
- * Auth API routes (Task 23): POST /register, /login, /refresh, /logout
+ * Auth API routes: POST /register, /login, /refresh, /logout
  * and GET /me — mounted under /api/v1/auth by server.ts.
  *
  * Cookie policy for the refresh token:
@@ -90,10 +90,6 @@ export default async function authRoutes(app: FastifyInstance): Promise<void> {
     DEFAULT_REFRESH_TTL,
   );
 
-  // -------------------------------------------------------------------------
-  // POST /api/v1/auth/register — customer or technician only.
-  // Administrator is rejected with an explicit 403 inside registerAccount().
-  // -------------------------------------------------------------------------
   app.post(
     '/register',
     { config: { rateLimit: { max: 15, timeWindow: '1 minute' } } },
@@ -104,16 +100,11 @@ export default async function authRoutes(app: FastifyInstance): Promise<void> {
     },
   );
 
-  // -------------------------------------------------------------------------
-  // POST /api/v1/auth/login — generic 401 for unknown email AND wrong
-  // password (identical body, equalised timing); 403 only once the password
-  // has been proven for a suspended/disabled account.
-  //
-  // Task 28.3F: both outcomes are audited. The failure record deliberately
+  // Login failures are audited without email or user identifiers so audit
+  // records cannot be used to enumerate accounts. The failure record deliberately
   // stores NO email address and NO user id — an attacker probing this endpoint
   // would otherwise be able to mine the log to enumerate which accounts exist.
   // A failed attempt is recorded with a null actor and a reason code only.
-  // -------------------------------------------------------------------------
   app.post(
     '/login',
     { config: { rateLimit: { max: 20, timeWindow: '1 minute' } } },
@@ -165,13 +156,10 @@ export default async function authRoutes(app: FastifyInstance): Promise<void> {
     },
   );
 
-  // -------------------------------------------------------------------------
-  // POST /api/v1/auth/refresh — cookie → hash → session lookup → rotate.
-  // Outcomes: unknown/expired → 401; revoked-as-logout → 401; reuse beyond
+  // Unknown, expired, revoked, or replayed refresh tokens yield 401. Reuse beyond
   // the rotation grace window → revoke EVERY session for that user → 401;
   // suspended/disabled user → revoke sessions → 401; otherwise a new
   // session (fresh cookie) + a new access token.
-  // -------------------------------------------------------------------------
   app.post('/refresh', async (request, reply) => {
     const raw = request.cookies[REFRESH_COOKIE_NAME];
     if (!raw) {
@@ -207,11 +195,9 @@ export default async function authRoutes(app: FastifyInstance): Promise<void> {
     return reply.send({ data: { user, accessToken } });
   });
 
-  // -------------------------------------------------------------------------
-  // POST /api/v1/auth/logout — revoke the presented session ('logout'
-  // reason, no grace window) and clear the cookie. Idempotent: answering
+  // Logout revokes the presented session without a grace window and clears the
+  // cookie. It is idempotent: answering
   // 200 without a cookie keeps clients simple and leaks nothing.
-  // -------------------------------------------------------------------------
   app.post('/logout', async (request, reply) => {
     const raw = request.cookies[REFRESH_COOKIE_NAME];
     if (raw) {
@@ -221,10 +207,6 @@ export default async function authRoutes(app: FastifyInstance): Promise<void> {
     return reply.send({ data: { ok: true } });
   });
 
-  // -------------------------------------------------------------------------
-  // GET /api/v1/auth/me — identity re-read from the database (requireAuth
-  // has already verified token + active account status).
-  // -------------------------------------------------------------------------
   app.get('/me', { preHandler: requireAuth }, async (request, reply) => {
     const authUser = request.authUser;
     if (!authUser) {
@@ -237,14 +219,10 @@ export default async function authRoutes(app: FastifyInstance): Promise<void> {
     return reply.send({ data: { user } });
   });
 
-  // -------------------------------------------------------------------------
-  // POST /api/v1/auth/forgot-password — begin recovery (audit §3).
-  //
-  // ENUMERATION-SAFE: the response is byte-identical whether or not the
+  // The response is byte-identical whether or not the
   // email maps to an active account, and delivery failures are swallowed.
   // Strictly rate limited (5/min) to bound abuse. The audit record stores no
   // email and no user id, so the log itself cannot be mined for accounts.
-  // -------------------------------------------------------------------------
   app.post(
     '/forgot-password',
     { config: { rateLimit: { max: 5, timeWindow: '1 minute' } } },
@@ -274,12 +252,9 @@ export default async function authRoutes(app: FastifyInstance): Promise<void> {
     },
   );
 
-  // -------------------------------------------------------------------------
-  // POST /api/v1/auth/reset-password — complete recovery (audit §3).
   // Validates the single-use, time-limited token, rotates the password, and
   // revokes every existing session. Invalid/expired/used tokens all yield the
   // same generic 400 (thrown inside resetPassword). Rate limited.
-  // -------------------------------------------------------------------------
   app.post(
     '/reset-password',
     { config: { rateLimit: { max: 10, timeWindow: '1 minute' } } },

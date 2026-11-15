@@ -1,5 +1,5 @@
 /**
- * Task 23 migration tests: deterministic ordered runner, idempotency,
+ *  migration tests: deterministic ordered runner, idempotency,
  * legacy-data preservation, and the safety contract of the SQL files.
  *
  * Run from the backend folder (requires the scratch PostgreSQL cluster):
@@ -29,12 +29,12 @@ import { fileURLToPath } from 'node:url';
 import { Client } from 'pg';
 
 /* ------------------------------------------------------------------ */
-/* Task 35.2 wiring note                                               */
+/*  wiring note                                               */
 /* ------------------------------------------------------------------ */
 /* This suite is a database-ADMINISTRATION harness: it runs the migration */
 /* runner, creates and drops a scratch database, and inspects the        */
 /* schema_migrations ledger. Under the two-role topology introduced by   */
-/* Task 35.2 the runtime role (`umodzi_app`) is deliberately unable to   */
+/*  the runtime role (`umodzi_app`) is deliberately unable to   */
 /* do any of that, so the harness must use the ADMINISTRATIVE connection */
 /* (MIGRATIONS_DATABASE_URL) — exactly the privilege level it had before */
 /* the split, when DATABASE_URL *was* the admin connection.             */
@@ -71,7 +71,7 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 const MIGRATIONS_DIR = path.join(HERE, '..', 'src', 'db', 'migrations');
 const TEST_DATABASE = 'umodzi_migrate_test';
 
-// Task 35.2 maintenance: the expected migration set is derived from the
+//  maintenance: the expected migration set is derived from the
 // migrations directory instead of being hardcoded (the suite originally
 // hardcoded the first four files, which became stale as Tasks 28–35.2
 // appended 005–010). Comparing the ledger against the full derived list is
@@ -273,7 +273,7 @@ async function freshPhase(): Promise<void> {
     'users.account_status CHECK enforces active/suspended/disabled',
   );
 
-  // Task 26 (003): verification columns, lifecycle CHECK, documents table.
+  //  (003): verification columns, lifecycle CHECK, documents table.
   const techColumns = await query<{ column_name: string }>(
     `SELECT column_name FROM information_schema.columns
      WHERE table_schema = 'public' AND table_name = 'technicians'
@@ -310,7 +310,7 @@ async function freshPhase(): Promise<void> {
     'document storage-key uniqueness + technician index exist',
   );
 
-  // Task 27 (004): reviews table — rating bounds, one review per service,
+  //  (004): reviews table — rating bounds, one review per service,
   // and the three relationship foreign keys.
   const reviewChecks = await query<{ conname: string }>(
     `SELECT conname FROM pg_constraint

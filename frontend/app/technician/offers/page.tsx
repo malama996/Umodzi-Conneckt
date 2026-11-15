@@ -39,21 +39,21 @@ type Notice = { tone: 'success' | 'info' | 'warning'; text: string } | null;
  * to the technician, and lets the technician
  * explicitly accept, reject, or (prototype-only) simulate
  * a response timeout. Offers and responses are persisted
- * through the backend API (PostgreSQL); Task 36 moved ALL cascade and
+ * through the backend API (PostgreSQL); the server owns ALL cascade and
  * lifecycle decisions to the backend — a response here is one outcome
  * call, and the server advances dispatch.
  *
  * Signed-in technicians see THEIR offers — the profile is bound to the
  * account (one account ↔ one technician profile), so there is no
  * prototype selector anymore. Backend offer changes are
- * observed through the lib/realtime subscription (Task 22): one
+ * observed through the lib/realtime subscription: one
  * shared polling loop per technician reads the existing offer
  * endpoint, so new or changed offers appear without a reload, and
  * observed transitions are surfaced once via the in-app
  * notification abstraction (entity+state deduplicated).
  */
 function TechnicianOffersContent() {
-  // Identity comes exclusively from the authenticated session (Task 23):
+  // Identity comes exclusively from the authenticated session:
   // the backend links each technician account to exactly ONE profile row,
   // and the API authorizes reads by the JWT subject — nothing here is
   // chosen by the client.
@@ -78,7 +78,7 @@ function TechnicianOffersContent() {
    * Hydrate the pending-offer views from the technician offer service.
    * Default behaviour (initial load / post-mutation refresh) shows the
    * loading state and clears the list on failure — matching the
-   * existing Task 21B semantics. With `preserveOnFailure` (used by
+   * existing dispatch semantics. With `preserveOnFailure` (used by
    * realtime refreshes) the last known valid list is kept and only the
    * connection indicator reports the problem.
    */
@@ -179,7 +179,7 @@ function TechnicianOffersContent() {
     offerEventRef.current = handleOfferEvent;
   });
 
-  // Realtime observation (Task 22): one shared polling loop per
+  // Realtime observation: one shared polling loop per
   // technician reads the existing GET /offers/technician/:id endpoint.
   // The first read (baseline) hydrates the visible list; later reads
   // surface added/changed offers without a page reload. The loop stops
@@ -417,7 +417,7 @@ function TechnicianOffersContent() {
 }
 
 /**
- * /technician/offers route (Task 23): technician-only. Anonymous visitors
+ * /technician/offers route: technician-only. Anonymous visitors
  * are redirected to /login?next=/technician/offers; a signed-in customer
  * or administrator sees the access-denied panel. Nothing on this page
  * renders until the session state is known.

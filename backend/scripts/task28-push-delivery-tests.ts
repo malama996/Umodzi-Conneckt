@@ -1,5 +1,5 @@
 /**
- * Task 28.2D6 tests: real Web Push delivery wiring
+ * 6 tests: real Web Push delivery wiring
  * (NotificationService.deliverPendingNotification over the existing
  * PushService + web-push) — LOCAL scratch database ONLY, never Supabase.
  *

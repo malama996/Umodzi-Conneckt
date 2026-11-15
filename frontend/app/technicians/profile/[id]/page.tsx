@@ -19,8 +19,8 @@ import TechnicianReviewsSection from '@/components/TechnicianReviewsSection';
 import Reveal from '@/components/Reveal';
 
 /**
- * Public technician profile for backend-registered technicians (Task 26
- * §18) — /technicians/profile/<id>.
+ * Public technician profile for backend-registered technicians —
+ * /technicians/profile/<id>.
  *
  * Renders REAL backend data only: photo (public photo endpoint), name,
  * bio, skills, category, service area, availability, verification badge

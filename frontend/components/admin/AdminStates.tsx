@@ -4,7 +4,7 @@ import { LuCircleAlert, LuInbox } from 'react-icons/lu';
 import { Button } from '@/components/ui';
 
 /**
- * Shared loading / error / empty states for the Task 25 administrator
+ * Shared loading / error / empty states for the administrator
  * screens. Every admin data view renders exactly one of these while its
  * fetch is pending, failed, or returning zero rows — no screen ever shows
  * fabricated placeholder content, and errors always offer a retry.

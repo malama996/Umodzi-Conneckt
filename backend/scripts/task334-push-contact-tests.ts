@@ -1,5 +1,5 @@
 /**
- * Task 33.4 suite: Web Push integration + contact/call authorization,
+ *  suite: Web Push integration + contact/call authorization,
  * against a RUNNING backend (start it first).
  *
  * Run from the backend folder:
@@ -14,7 +14,7 @@
  * revoked admin session). Audit events are security records and are
  * deliberately NEVER deleted.
  *
- * Covers (Phase 3 of Task 33.4):
+ * Covers:
  *   Push registration/removal — POST /me/push-subscriptions stores against
  *     the AUTHENTICATED user (never the body), re-post rotates keys on the
  *     same row (no duplicate), new endpoint = new row, strict schema 400s,
@@ -64,9 +64,12 @@ if (!process.env.DATABASE_URL || !adminEmail || !adminPassword) {
   console.error('Need DATABASE_URL + ADMIN_EMAIL/ADMIN_PASSWORD in backend/.env');
   process.exit(1);
 }
+// Local PostgreSQL serves no TLS, so requesting it makes the pool fail before
+// the first assertion. Only a non-local (hosted) database needs SSL.
+const isLocalDb = /^(localhost|127\.0\.0\.1|::1|\[::1\])$/i.test(new URL(process.env.DATABASE_URL).hostname);
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false },
+  ssl: isLocalDb ? false : { rejectUnauthorized: false },
 });
 
 let passed = 0;

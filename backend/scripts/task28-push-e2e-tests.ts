@@ -1,5 +1,5 @@
 /**
- * Task 28.2E tests: end-to-end push chain over REAL infrastructure —
+ *  tests: end-to-end push chain over REAL infrastructure —
  * running backend (real VAPID from its environment), real web-push
  * encryption, and a LOCAL stub push service answering with real HTTP
  * statuses. Google/Mozilla are never contacted; only the far-end push

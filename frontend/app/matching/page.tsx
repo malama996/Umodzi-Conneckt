@@ -36,7 +36,7 @@ function MatchingContent() {
   const showShortHint = trimmedLength > 0 && trimmedLength < DESCRIPTION_MIN;
 
   /**
-   * AI category suggestion (Task 33) — strictly opt-in and never
+   * AI category suggestion — strictly opt-in and never
    * destructive. The description is never modified; a manual selection is
    * never silently replaced (the suggestion waits for an explicit accept).
    * A sequence guard drops stale responses so a slow reply cannot
@@ -119,7 +119,7 @@ function MatchingContent() {
   );
 
   /**
-   * Honest fallback centre for the map (Task 5): the service area the customer
+   * Honest fallback centre for the map: the service area the customer
    * chose for this request, or the pilot default before a request exists. It is
    * used ONLY until the customer shares their device location, and the panel
    * labels it "Approx." so a fallback is never mistaken for a GPS fix.
@@ -251,7 +251,7 @@ function MatchingContent() {
             )}
           </section>
 
-          {/* Live listing + location map (Task 5). The map panel owns the
+          {/* Live listing and location map. The map panel owns the
               technician list as well, so the same technicians are never
               rendered twice. Every row and pin is real platform data; only
               the customer marker becomes a GPS fix, and only on request. */}

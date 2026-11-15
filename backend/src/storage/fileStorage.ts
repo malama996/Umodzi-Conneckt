@@ -2,14 +2,14 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 /**
- * File storage abstraction (Task 26).
+ * File storage abstraction.
  *
  * The domain model and database records only ever carry an OPAQUE
  * `storage_key` (e.g. `verification/<technicianId>/<docId>.pdf`). How a
  * key maps to bytes is entirely a deployment concern behind this
  * interface — the default implementation stores under a server-local
  * directory configured by `STORAGE_DIR`, and a future object store
- * (Task 28) implements the same interface without touching routes,
+ * implements the same interface without touching routes,
  * services, or records.
  *
  * Rules enforced here:

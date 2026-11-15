@@ -19,7 +19,7 @@ import type {
 import type { ServiceRequestStatus } from '@/lib/types';
 
 /**
- * Administrator application service (Task 25).
+ * Administrator application service.
  *
  * Follows the established layering (UI → services → lib/api → HTTP): pages
  * never call the API client directly. Besides the thin fetch/mutate
@@ -91,10 +91,6 @@ export function adminErrorMessage(error: unknown): string {
   if (error instanceof Error && error.message) return error.message;
   return 'Something went wrong while contacting the server.';
 }
-
-/* ------------------------------------------------------------------ */
-/* View helpers (pure — no I/O)                                        */
-/* ------------------------------------------------------------------ */
 
 /** ISO timestamp → localised string; falls back to the raw value. */
 export function formatTimestamp(value: string): string {

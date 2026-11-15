@@ -4,10 +4,10 @@ import Link from 'next/link';
 import { LuArrowRight, LuCircleAlert, LuCircleCheck, LuLoader } from 'react-icons/lu';
 import { isTechnicianCategory } from '@/lib/categories';
 import { createServiceRequest } from '@/lib/services/requestService';
-import type { ServiceRequest } from '@/lib/types';
+import { SERVICE_AREAS, type ServiceArea, type ServiceRequest } from '@/lib/types';
 
 /**
- * Task 36 (Stage 5, finding #10): browser idempotency key for a submission.
+ * Browser idempotency key for a submission.
  * Prefers crypto.randomUUID (secure contexts); falls back to a v4-shaped
  * UUID from getRandomValues (available in every browser and Node ≥ 19,
  * including non-secure contexts). No Web Crypto at all → an honest error:
@@ -75,13 +75,13 @@ export default function ServiceRequestForm({
   onRequestCreated,
   onRequestReset,
 }: ServiceRequestFormProps) {
-  const [city, setCity] = useState('');
+  const [city, setCity] = useState<ServiceArea | ''>('');
   const [mode, setMode] = useState<FormMode>('editing');
   const [createState, setCreateState] = useState<CreateState>('idle');
   const [createdRequest, setCreatedRequest] = useState<ServiceRequest | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
   /**
-   * Task 36 (Stage 5): idempotency key for the CURRENT submission attempt.
+   * Idempotency key for the current submission attempt.
    * Kept across a failed confirm→confirm-again cycle (a network retry of the
    * same logical submission replays to the same request); cleared when the
    * user goes back to edit or resets, so edited content is a NEW submission.
@@ -272,19 +272,24 @@ export default function ServiceRequestForm({
       </div>
       <label>
         <span>Service city</span>
-        <input
-          type="text"
+        <select
           value={city}
           onChange={(e) => {
-            setCity(e.target.value);
+            setCity(e.target.value as ServiceArea | '');
             if (createState === 'error') {
               setCreateState('idle');
               setErrorMessage('');
             }
           }}
-          placeholder="e.g. Kitwe"
           disabled={isCreating}
-        />
+        >
+          <option value="">Select a service city</option>
+          {SERVICE_AREAS.map((area) => (
+            <option key={area} value={area}>
+              {area}
+            </option>
+          ))}
+        </select>
       </label>
       {createState === 'error' && errorMessage && (
         <p className="request-form-error" role="alert">

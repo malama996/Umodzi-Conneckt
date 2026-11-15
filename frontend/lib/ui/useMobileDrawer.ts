@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 
 /**
- * Shared behaviour for the mobile navigation drawers (Phase 3).
+ * Shared behaviour for the mobile navigation drawers.
  *
  * One implementation drives both the public-header drawer and the
  * dashboard sidebar drawer so they can never drift apart:

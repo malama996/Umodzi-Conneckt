@@ -4,7 +4,7 @@ import { assertUuid } from './authService.js';
 import { HttpError } from './httpError.js';
 
 /**
- * Data-ownership authorization (Task 23).
+ * Data-ownership authorization.
  *
  * The backend derives ownership exclusively from the authenticated
  * identity — request.customer_user_id and the offer → technician → user
@@ -16,7 +16,7 @@ import { HttpError } from './httpError.js';
  *   - an authenticated caller hitting an endpoint they may never use
  *     (wrong role / another technician's id in the path) → 403.
  *
- * Legacy note: rows created before Task 23 have customer_user_id NULL.
+ * Legacy rows may have a null customer_user_id.
  * They are never claimed: only administrators (and technicians already
  * holding an offer on them) can touch them.
  */
@@ -209,7 +209,7 @@ export async function assertOfferCreateAccess(
 }
 
 /**
- * POST /offers — Task 28 server-side eligibility gate (handoff §6).
+ * Server-side eligibility gate for creating offers.
  *
  * The backend NEVER trusts the frontend dispatch/candidate pipeline: before
  * an offer row is persisted it independently re-verifies, from the database,
@@ -330,7 +330,7 @@ export async function assertOfferEligibility(
 }
 
 /**
- * Statuses a technician may ever write. Task 36 (Stage 5): dispatch outcomes
+ * Statuses a technician may ever write. Dispatch outcomes
  * ('matched'/'no_match') are produced by the OFFER endpoints and the sweeper,
  * never by a browser status write, so the scope narrows to the progress and
  * completion records of the job the technician actually holds —

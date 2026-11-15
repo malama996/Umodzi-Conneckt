@@ -18,7 +18,7 @@ import type { ConversationSummary } from '@/lib/types/communication';
  * count all come from the backend's owner-scoped query. An account with no
  * conversations gets an honest empty state rather than placeholder rows.
  *
- * Phase 2: wrapped in RequireAuth like every other dashboard route, so an
+ * wrapped in RequireAuth like every other dashboard route, so an
  * anonymous visitor is redirected to /login?next=… instead of receiving a
  * raw 401 from the conversation list.
  */
@@ -57,16 +57,21 @@ function ConversationsList() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  /**
+   * `silent` refreshes the list in place: no skeleton, and a transient network
+   * failure does not replace a list that is already on screen with an error.
+   * It is used by the background refresh below, never by the first load.
+   */
+  const load = useCallback(async (options: { silent?: boolean } = {}) => {
+    if (!options.silent) setLoading(true);
     try {
       const list = await listMyConversations();
       setConversations(list);
       setError(null);
     } catch (err) {
-      setError(communicationErrorMessage(err));
+      if (!options.silent) setError(communicationErrorMessage(err));
     } finally {
-      setLoading(false);
+      if (!options.silent) setLoading(false);
     }
   }, []);
 
@@ -74,7 +79,33 @@ function ConversationsList() {
     void load();
   }, [load]);
 
-  // Contact/call (Task 33.4): shared state machine — the number comes
+  /**
+   * Keep the unread badges, last-message previews and timestamps current while
+   * the list is open. A chat socket is subscribed only inside an individual
+   * conversation, so without this the list is frozen from the moment it loads
+   * and a message arriving in another conversation stays invisible until the
+   * user presses Refresh.
+   *
+   * Deliberately conservative: one request every 20 seconds, only while the tab
+   * is visible, plus an immediate refresh when the tab regains focus. Nothing
+   * runs in the background or when the tab is hidden.
+   */
+  useEffect(() => {
+    const refresh = () => {
+      if (document.visibilityState !== 'visible') return;
+      void load({ silent: true });
+    };
+    const timer = window.setInterval(refresh, 20000);
+    document.addEventListener('visibilitychange', refresh);
+    window.addEventListener('focus', refresh);
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener('visibilitychange', refresh);
+      window.removeEventListener('focus', refresh);
+    };
+  }, [load]);
+
+  // Contact/call: shared state machine — the number comes
   // from the backend and is shown with a tel: link + copy action, so the
   // desktop fallback is never a silent no-op.
   const contact = useContactCall();

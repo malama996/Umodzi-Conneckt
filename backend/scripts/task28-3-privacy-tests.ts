@@ -1,5 +1,5 @@
 /**
- * Task 28.3 focused tests: data access/export (28.3C), permanent account
+ *  focused tests: data access/export (28.3C), permanent account
  * deletion (28.3D), audit logging (28.3F) and verification-document privacy
  * (28.3G).
  *
@@ -7,7 +7,7 @@
  *   1. GET /me/data            — real, owner-scoped export; no secret leakage
  *   2. GET /me/account/deletion-preview — honest counts, removes nothing
  *   3. DELETE /me/account      — real deletion, password+phrase gated
- *   4. GET /me/notifications*  — owner-scoped inbox, pagination, read state
+ *   4. GET /me/notifications* owner-scoped inbox, pagination, read state
  *   5. audit_events            — recorded, owner-isolated, no secrets stored
  *   6. Verification documents  — remain private; access is audited; no-store
  *

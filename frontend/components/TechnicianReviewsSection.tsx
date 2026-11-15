@@ -9,7 +9,7 @@ import { formatTimestamp } from '@/lib/services/adminService';
 import { fetchTechnicianReviews, ratingLabel } from '@/lib/services/reviewService';
 
 /**
- * Shared "Ratings & Reviews" section (Task 27 §12–§14) used by the public
+ * Shared "Ratings & Reviews" section used by the public
  * technician profile, the technician's own profile, and the admin review
  * page. Everything is computed server-side: average (1 decimal), review
  * count, star distribution, and the real review list — nothing is

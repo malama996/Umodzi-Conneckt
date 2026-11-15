@@ -1,5 +1,5 @@
 /**
- * Communication authorization (Task 28.4A — Step 6 / 7 / 14).
+ * Communication authorization.
  *
  * The authorization boundary is the **accepted service relationship**,
  * not the user's profile visibility or the request UUID alone.
@@ -27,7 +27,7 @@ export interface ConversationAccessResult {
   isTechnician: boolean;
   /**
    * Role flag of the caller — informational only; it never contributes to
-   * `allowed` (Task 33.2 policy: no private message content for
+   * `allowed` (private message content is not available to
    * administrators by default; metadata goes through the audited admin
    * endpoint instead).
    */
@@ -47,7 +47,7 @@ export interface ConversationAccessResult {
  *     (accepted offer exists with that technician).
  *   - Conversation status must be `active` (not `closed`).
  *   - The administrator role never grants access: private message content is
- *     participant-only by policy (Task 33.2). Their metadata route is
+ *     participant-only by policy. Their metadata route is
  *     `GET /api/v1/admin/conversations/:id`, which never returns content.
  *
  * If any check fails: returns `{ allowed: false, exists, ... }` — callers
@@ -118,7 +118,7 @@ export async function canAccessConversation(
 
   // The conversation exists — derive authorization from the DB.
   //
-  // Task 33.1 fix: conversations.technician_id is a TECHNICIANS-row id, not
+  // conversations.technician_id is a technicians-row id, not
   // a users-row id, so comparing it directly to the session user id denied
   // every technician (and, via the isParticipant gate below, every
   // administrator — the isAdministrator branch was dead code). Resolve the
@@ -153,7 +153,7 @@ export async function canAccessConversation(
   // for a correctly-formed conversation; this verifies the session matches.)
   // For the technician: they must have been assigned through the accepted offer.
   //
-  // Administrator privacy policy (Task 33.2): the administrator ROLE is never
+  // The administrator role is never
   // an access grant here — this function only ever authorizes the two
   // participants, so message-history reads, sends and read-state changes all
   // answer 404 for an administrator who is not a participant. (The
@@ -203,7 +203,7 @@ export async function canAccessConversation(
  * An administrator never satisfies these conditions through the role itself
  * (they own no request and the check derives nothing from `role`), so
  * request-scoped conversation access is participant-only by construction —
- * Task 33.2 privacy policy.
+ * The privacy policy keeps request-scoped conversations participant-only.
  */
 export interface CommunicationWindowOptions {
   /**
@@ -270,11 +270,8 @@ export async function canCommunicateOnRequest(
   const isTechnician = technicianId !== null;
 
   // The authorization boundary: an accepted offer must back the relationship.
-  // Task 33.1 fix: the old check required the CALLER to hold the accepted
-  // offer through their own profile, which is always false for a customer
-  // (no profile row) — so customers could never unlock the request-scoped
-  // route. Scope correctly: the customer needs ANY accepted offer on this
-  // request; a technician needs the accepted offer on their own profile.
+  // needs the accepted offer on their own profile. A customer needs any
+  // accepted offer on the request because customers do not have profiles.
   const acceptedOffers = await query<{ id: string; technician_id: string }>(
     `SELECT id, technician_id FROM dispatch_offers
      WHERE request_id = $1 AND status = 'accepted'
@@ -297,10 +294,8 @@ export async function canCommunicateOnRequest(
   // exists, whether or not a conversation row has yet been created (the route
   // creates it when needed).
   //
-  // Task 36 fix: the old gate required status === 'matched', which 404'd the
-  // conversation and contact routes the moment the technician started work
-  // (in_progress) or finished it (completed). Communication now follows the
-  // accepted relationship for the whole active service window. Closed history
+  // Communication follows the accepted relationship throughout the active
+  // service window, including when work is in progress. Closed history
   // (completed/cancelled) is readable only where the caller opts in; the
   // contact-number route does not, so a phone number is not exposed after the
   // job is closed.

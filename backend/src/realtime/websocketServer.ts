@@ -1,14 +1,14 @@
 /**
- * Task 28.4B — Realtime transport: the actual WebSocket server.
+ * Realtime transport: the actual WebSocket server.
  *
- * DEPENDENCY POSITION (updated by Task 33.3):
+ * DEPENDENCY POSITION:
  *   `ws` is now a REAL dependency of `backend` (installed via the workspace,
  *   root lockfile updated). The loader below still resolves it at RUNTIME
  *   through `createRequire`, so a deployment that somehow lacks the package
  *   still gets an honest no-op transport instead of a crashed process — and
  *   the REST API remains fully functional either way.
  *
- *   Task 33.3 root causes fixed (realtime was dormant even though all the
+ *    root causes fixed (realtime was dormant even though all the
  *   code existed):
  *     1. The old loader probed `require` through `eval`, which is undefined
  *        in a Node ESM process ("type": "module" / NodeNext output), so the
@@ -32,8 +32,8 @@
  *      deleted account is rejected even with a live token; the role used for
  *      authorization comes from that row, never from client claims.
  *   4. Conversation authorization is ALWAYS the DB-derived `canAccessConversation()`
- *      — never anything the client asserts in a `subscribe` message. The
- *      administrator role is never an access grant (Task 33.2 policy).
+ * never anything the client asserts in a `subscribe` message. The
+ *      administrator role is never an access grant.
  *   5. Only conversations the user is a participant of are ever added to
  *      their subscription set, and broadcasts go only to those subscribers.
  *
@@ -83,7 +83,12 @@ interface WsServerLike {
   emit(event: string, ...args: any[]): boolean;
 }
 type WsModuleLike = {
-  WebSocketServer: new (opts: { noServer: boolean; maxPayload?: number }) => WsServerLike;
+  WebSocketServer: new (opts: {
+    noServer: boolean;
+    maxPayload?: number;
+    /** Selects the subprotocol echoed in the 101 response (RFC 6455 §4.1). */
+    handleProtocols?: (protocols: Set<string>, request: IncomingMessage) => string | false;
+  }) => WsServerLike;
   WebSocket?: { OPEN: number };
 };
 
@@ -95,7 +100,7 @@ function resolveWsModule(): WsModuleLike | null {
   if (moduleResolved) return wsModule;
   moduleResolved = true;
   try {
-    // ESM-correct resolution (Task 33.3): this backend runs as a Node ES
+    // ESM-correct resolution: this backend runs as a Node ES
     // module, where a bare `require` does not exist — the previous eval-based
     // probe always returned null, which is why realtime stayed dormant even
     // in deployments that had `ws` available. `createRequire` works in ESM
@@ -136,6 +141,31 @@ export function createWebSocketServer(app: FastifyInstance): { close: () => void
     // Client frames are tiny JSON commands (`subscribe`/`unsubscribe`); a
     // small cap keeps a malformed or hostile peer from forcing large parses.
     maxPayload: 4096,
+    /**
+     * browser handshake fix.
+     *
+     * The browser offers the session token as a subprotocol
+     * (`bearer-<jwt>`), because an upgrade request cannot carry a custom
+     * Authorization header. RFC 6455 §4.1 requires the server's 101 response
+     * to name one of the offered subprotocols; if the client offered any and
+     * the response names none, the browser MUST fail the connection.
+     *
+     * `ws` only emits that header when `handleProtocols` is supplied — with
+     * no hook it sends nothing. Node's `ws` client tolerates the omission,
+     * which is exactly why the realtime suite passed while no browser could
+     * ever connect: chat looked "implemented" and simply never went live.
+     * Echoing the offered `bearer-` entry back satisfies the browser without
+     * weakening anything — the same token already travelled in the request
+     * header, and authorization still happens in `authenticateHandshake`
+     * plus the database-backed conversation check.
+     */
+    handleProtocols: (protocols: Set<string>) => {
+      for (const protocol of protocols) {
+        if (protocol.startsWith('bearer-')) return protocol;
+      }
+      // A client offering no token gets no echo; it is closed with 4001 below.
+      return false;
+    },
   });
 
   httpServer.on('upgrade', (req: IncomingMessage, socket: any, head: any) => {
@@ -183,7 +213,7 @@ export function createWebSocketServer(app: FastifyInstance): { close: () => void
     //    routinely subscribe from their `open` handler, so frames can arrive
     //    while the asynchronous authentication below is still running — and
     //    `ws` emits 'message' into the void when no listener is attached yet
-    //    (observed live in Task 33.3: both early frames were silently lost).
+    //    (observed live: both early frames were silently lost).
     //    Buffer them and process after the state exists; on auth failure the
     //    socket is closed and the buffer is discarded with it.
     const preReadyFrames: unknown[] = [];
@@ -198,8 +228,10 @@ export function createWebSocketServer(app: FastifyInstance): { close: () => void
       void handleClientMessage(ws, pendingState, req, raw);
     });
 
-    // 1. Authenticate at the handshake. Failures are closed immediately with
-    //    a protocol-level code rather than being allowed to idle.
+    // 1. Authenticate at the handshake (and echo the offered subprotocol,
+    //    which `handleProtocols` above already selected in the 101 response).
+    //    Failures are closed immediately with a protocol-level code rather
+    //    than being allowed to idle.
     const auth = authenticateHandshake(req);
     if (!auth) {
       safeClose(ws, 4001, 'Authentication failed');
@@ -294,8 +326,8 @@ export function createWebSocketServer(app: FastifyInstance): { close: () => void
         // against PostgreSQL, using the session's own user id. The shim
         // mirrors the `{ id, role }` shape `requireAuth` builds for HTTP —
         // the previous `{ userId }` shape was read as `id: undefined`, which
-        // denied every subscription (Task 33.3 fix). The administrator role
-        // never grants content access here (Task 33.2 policy).
+        // denied every subscription. The administrator role
+        // never grants content access here.
         const access = await canAccessConversation(
           {
             authUser: { id: state.userId, role: state.role },

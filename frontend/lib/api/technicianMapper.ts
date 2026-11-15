@@ -6,7 +6,7 @@ const AVAILABILITY_STATUSES: readonly string[] = ['available', 'unavailable'];
 const ACCOUNT_STATUSES: readonly string[] = ['active', 'inactive', 'suspended'];
 
 /**
- * Single explicit API → frontend transformation boundary (Task 21B).
+ * Single explicit API → frontend transformation boundary.
  *
  * Maps a backend technician record to the frontend Technician shape.
  * Category and status strings are validated against the domain
@@ -17,7 +17,7 @@ const ACCOUNT_STATUSES: readonly string[] = ['active', 'inactive', 'suspended'];
  * area IS the city (Kitwe/Ndola). Documented derivation — revisit if
  * service areas ever diverge from city names.
  *
- * Task 28.3A.1 (G-01): precise coordinates are deliberately NOT mapped.
+ * Precise coordinates are deliberately not mapped.
  * The backend stopped returning them on public technician routes, and the
  * frontend must not reintroduce the exposure by treating a server-provided
  * coordinate as display data. The prototype map instead derives a COARSE

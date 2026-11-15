@@ -1,0 +1,308 @@
+{
+  "ranAt": "2026-11-13T11:30:32.132Z",
+  "runs": 22,
+  "acceptRuns": 12,
+  "cascadeRuns": 6,
+  "noMatchRuns": 4,
+  "matched": 0,
+  "noMatch": 4,
+  "matchRatePercent": 0,
+  "medianSecondsToFirstOffer": 0.003,
+  "medianSecondsToAcceptance": 0.069,
+  "meanSecondsToAcceptance": 0.075,
+  "meanCascadeDepth": 1.333,
+  "maxCascadeDepth": 2,
+  "cancellations": 0,
+  "distance": null,
+  "distanceNote": "Requests carry no coordinates in the create payload, so travel distance is not measured.",
+  "perRun": [
+    {
+      "id": "7e15fc92-1192-4bfa-b4ac-562ecfd25e14",
+      "status": "completed",
+      "depth": 1,
+      "secondsToFirstOffer": 0.002,
+      "secondsToAcceptance": 0.055
+    },
+    {
+      "id": "8281c0fe-62f7-44fe-aee0-ced864861c62",
+      "status": "completed",
+      "depth": 1,
+      "secondsToFirstOffer": 0.004,
+      "secondsToAcceptance": 0.069
+    },
+    {
+      "id": "e54511b2-7771-4f08-977e-fa2745254dfb",
+      "status": "completed",
+      "depth": 1,
+      "secondsToFirstOffer": 0.004,
+      "secondsToAcceptance": 0.09
+    },
+    {
+      "id": "60c2dbe0-e986-4b9e-84e1-dc98d1914f39",
+      "status": "completed",
+      "depth": 1,
+      "secondsToFirstOffer": 0.002,
+      "secondsToAcceptance": 0.024
+    },
+    {
+      "id": "474c972f-875b-4df2-b966-72944258c0b3",
+      "status": "completed",
+      "depth": 1,
+      "secondsToFirstOffer": 0.005,
+      "secondsToAcceptance": 0.068
+    },
+    {
+      "id": "eb921609-3f80-4266-b89a-9cdb49a9f73b",
+      "status": "completed",
+      "depth": 1,
+      "secondsToFirstOffer": 0.003,
+      "secondsToAcceptance": 0.041
+    },
+    {
+      "id": "ebe24f29-1e9e-43f3-91ff-65a4c7a6f555",
+      "status": "completed",
+      "depth": 1,
+      "secondsToFirstOffer": 0.004,
+      "secondsToAcceptance": 0.059
+    },
+    {
+      "id": "02a95f04-7672-4136-a6ee-53dbd021eece",
+      "status": "completed",
+      "depth": 1,
+      "secondsToFirstOffer": 0.003,
+      "secondsToAcceptance": 0.061
+    },
+    {
+      "id": "4e8e0c60-ddc5-4b7e-aee2-edac69c84bb3",
+      "status": "completed",
+      "depth": 1,
+      "secondsToFirstOffer": 0.004,
+      "secondsToAcceptance": 0.073
+    },
+    {
+      "id": "cbd2e404-6f79-4d80-a1bc-ccf129de90c2",
+      "status": "completed",
+      "depth": 1,
+      "secondsToFirstOffer": 0.004,
+      "secondsToAcceptance": 0.066
+    },
+    {
+      "id": "7d113b8f-c7fa-41c7-97bd-6ef6e1ee7666",
+      "status": "completed",
+      "depth": 1,
+      "secondsToFirstOffer": 0.002,
+      "secondsToAcceptance": 0.029
+    },
+    {
+      "id": "e1a060de-aaa6-4f7d-9477-0bdd958ac73e",
+      "status": "completed",
+      "depth": 1,
+      "secondsToFirstOffer": 0.004,
+      "secondsToAcceptance": 0.065
+    },
+    {
+      "id": "14f5eaa7-97c0-4ad8-89fa-fededc2e23f2",
+      "status": "completed",
+      "depth": 2,
+      "secondsToFirstOffer": 0.004,
+      "secondsToAcceptance": 0.113
+    },
+    {
+      "id": "3385f21c-7e50-412d-bf51-00e50c6e5aba",
+      "status": "completed",
+      "depth": 2,
+      "secondsToFirstOffer": 0.003,
+      "secondsToAcceptance": 0.139
+    },
+    {
+      "id": "4cc052e8-595d-4f3f-a9c4-a79ffefc9c18",
+      "status": "completed",
+      "depth": 2,
+      "secondsToFirstOffer": 0.003,
+      "secondsToAcceptance": 0.069
+    },
+    {
+      "id": "4ffdbe7e-70b3-41c2-8b39-86e16f19b5ed",
+      "status": "completed",
+      "depth": 2,
+      "secondsToFirstOffer": 0.003,
+      "secondsToAcceptance": 0.118
+    },
+    {
+      "id": "0c644ac7-f192-4222-b0e0-9eb2a4aa0b57",
+      "status": "completed",
+      "depth": 2,
+      "secondsToFirstOffer": 0.003,
+      "secondsToAcceptance": 0.126
+    },
+    {
+      "id": "a4e37e78-6ab6-4e25-90e3-0d7e6b92e914",
+      "status": "completed",
+      "depth": 2,
+      "secondsToFirstOffer": 0.003,
+      "secondsToAcceptance": 0.085
+    },
+    {
+      "id": "5bf01eff-59af-4094-a9c3-e1490a651252",
+      "status": "no_match",
+      "depth": 0,
+      "secondsToFirstOffer": null,
+      "secondsToAcceptance": null
+    },
+    {
+      "id": "692b8d36-9711-4c90-863b-b8f2aafdc2bb",
+      "status": "no_match",
+      "depth": 0,
+      "secondsToFirstOffer": null,
+      "secondsToAcceptance": null
+    },
+    {
+      "id": "af385164-5cad-4426-b1a8-98a8ef6376dd",
+      "status": "no_match",
+      "depth": 0,
+      "secondsToFirstOffer": null,
+      "secondsToAcceptance": null
+    },
+    {
+      "id": "c6336bf1-4523-4875-addb-9a6c333037cd",
+      "status": "no_match",
+      "depth": 0,
+      "secondsToFirstOffer": null,
+      "secondsToAcceptance": null
+    }
+  ],
+  "results": [
+    {
+      "requestId": "7e15fc92-1192-4bfa-b4ac-562ecfd25e14",
+      "kind": "accept",
+      "offerId": "2d4865eb-3325-4e5d-8282-cf3979f1454e",
+      "ok": true
+    },
+    {
+      "requestId": "8281c0fe-62f7-44fe-aee0-ced864861c62",
+      "kind": "accept",
+      "offerId": "29bfe1b0-be57-44b0-ab76-027d01365818",
+      "ok": true
+    },
+    {
+      "requestId": "e54511b2-7771-4f08-977e-fa2745254dfb",
+      "kind": "accept",
+      "offerId": "a1f99f0f-43e9-41c4-bd1f-a29db80e86b4",
+      "ok": true
+    },
+    {
+      "requestId": "60c2dbe0-e986-4b9e-84e1-dc98d1914f39",
+      "kind": "accept",
+      "offerId": "fa66bab5-39e9-444d-bcd5-fe6bebc9768b",
+      "ok": true
+    },
+    {
+      "requestId": "474c972f-875b-4df2-b966-72944258c0b3",
+      "kind": "accept",
+      "offerId": "4243d89e-e7c7-44ce-9b24-12622d8d9865",
+      "ok": true
+    },
+    {
+      "requestId": "eb921609-3f80-4266-b89a-9cdb49a9f73b",
+      "kind": "accept",
+      "offerId": "fa1fe395-c842-46b3-ac51-e563f2196503",
+      "ok": true
+    },
+    {
+      "requestId": "ebe24f29-1e9e-43f3-91ff-65a4c7a6f555",
+      "kind": "accept",
+      "offerId": "b429471c-0d04-4ff9-bac2-9876eab3ae31",
+      "ok": true
+    },
+    {
+      "requestId": "02a95f04-7672-4136-a6ee-53dbd021eece",
+      "kind": "accept",
+      "offerId": "e39edd76-9d13-4a4c-b3dd-f3e52772c042",
+      "ok": true
+    },
+    {
+      "requestId": "4e8e0c60-ddc5-4b7e-aee2-edac69c84bb3",
+      "kind": "accept",
+      "offerId": "49892a0e-dbcf-4e82-80f8-bb4786b431b0",
+      "ok": true
+    },
+    {
+      "requestId": "cbd2e404-6f79-4d80-a1bc-ccf129de90c2",
+      "kind": "accept",
+      "offerId": "5883c183-f585-42f8-9239-1596d6b7c114",
+      "ok": true
+    },
+    {
+      "requestId": "7d113b8f-c7fa-41c7-97bd-6ef6e1ee7666",
+      "kind": "accept",
+      "offerId": "5c21112d-1777-4153-b91d-9849f7285e18",
+      "ok": true
+    },
+    {
+      "requestId": "e1a060de-aaa6-4f7d-9477-0bdd958ac73e",
+      "kind": "accept",
+      "offerId": "46151aa5-1742-4806-9f46-fe884604b7f0",
+      "ok": true
+    },
+    {
+      "requestId": "14f5eaa7-97c0-4ad8-89fa-fededc2e23f2",
+      "kind": "cascade",
+      "offerId": "86c0a6ed-5777-4930-b041-a8037bac8439",
+      "ok": true
+    },
+    {
+      "requestId": "3385f21c-7e50-412d-bf51-00e50c6e5aba",
+      "kind": "cascade",
+      "offerId": "a7f426f5-7308-47d4-935a-391e30542fb6",
+      "ok": true
+    },
+    {
+      "requestId": "4cc052e8-595d-4f3f-a9c4-a79ffefc9c18",
+      "kind": "cascade",
+      "offerId": "4939345e-9a60-41bb-96ca-94dbd3cadbcf",
+      "ok": true
+    },
+    {
+      "requestId": "4ffdbe7e-70b3-41c2-8b39-86e16f19b5ed",
+      "kind": "cascade",
+      "offerId": "4f5de105-6bd0-41c2-bcda-fc3b761fc477",
+      "ok": true
+    },
+    {
+      "requestId": "0c644ac7-f192-4222-b0e0-9eb2a4aa0b57",
+      "kind": "cascade",
+      "offerId": "cb6073a3-bcd3-4d83-bce9-7ec8ae5c435a",
+      "ok": true
+    },
+    {
+      "requestId": "a4e37e78-6ab6-4e25-90e3-0d7e6b92e914",
+      "kind": "cascade",
+      "offerId": "ea8baecd-ab28-447c-b9ee-9e63b172d6aa",
+      "ok": true
+    },
+    {
+      "requestId": "5bf01eff-59af-4094-a9c3-e1490a651252",
+      "kind": "no_match",
+      "status": "no_match",
+      "ok": true
+    },
+    {
+      "requestId": "692b8d36-9711-4c90-863b-b8f2aafdc2bb",
+      "kind": "no_match",
+      "status": "no_match",
+      "ok": true
+    },
+    {
+      "requestId": "af385164-5cad-4426-b1a8-98a8ef6376dd",
+      "kind": "no_match",
+      "status": "no_match",
+      "ok": true
+    },
+    {
+      "requestId": "c6336bf1-4523-4875-addb-9a6c333037cd",
+      "kind": "no_match",
+      "status": "no_match",
+      "ok": true
+    }
+  ]
+}

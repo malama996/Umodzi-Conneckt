@@ -18,7 +18,7 @@ import {
 
 /**
  * Status filter chips — every request status gets its own chip with its
- * live count, so "No match" monitoring is a first-class view (Task 25 §6)
+ * live count, so "No match" monitoring is a first-class view
  * rather than a separate system: no-match IS a request status, and the
  * backend has no separate event log to redesign.
  */
@@ -34,7 +34,7 @@ const CHIPS: { key: AdminRequestStatusFilter; label: string }[] = [
 ];
 
 /**
- * Administrator request/platform monitoring (Task 25 §5 + §6) —
+ * Administrator request/platform monitoring —
  * /admin/requests.
  *
  * Read-only: status, category/classification, city, customer identity,

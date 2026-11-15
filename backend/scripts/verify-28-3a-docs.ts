@@ -1,5 +1,5 @@
 /**
- * Task 28.3A documentation verification (read-only).
+ *  documentation verification (read-only).
  *
  * Checks that the factual claims made in docs/*.md actually match the
  * codebase and the applied schema. Fails loudly on any mismatch so a
@@ -243,7 +243,7 @@ function verifyRoutes(): void {
     );
   }
 
-  /* --- G-01 CORRECTION (Task 28.3A.1) ------------------------------- *
+  /* --- G-01 CORRECTION ------------------------------- *
    * Before 28.3A.1 this asserted the presence of `latitude: rows[0].latitude`,
    * i.e. it verified the FINDING. The finding has since been corrected, so the
    * assertion is inverted: the public projections must no longer carry a
@@ -489,7 +489,7 @@ function verifyDocs(): void {
     'no local credentials in the docs',
   );
 
-  /* --- G-01 doc consistency (Task 28.3A.1) ---------------------------- *
+  /* --- G-01 doc consistency ---------------------------- *
    * The code no longer publishes coordinates, so no document may assert, in
    * the present tense, that a public route returns one. Struck-through
    * historical statements and explicitly labelled findings are allowed.
