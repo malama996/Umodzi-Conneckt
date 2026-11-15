@@ -6102,3 +6102,37 @@ h2 {
     animation: splash-spin 2.4s linear infinite;
   }
 }
+
+/* Application-wide offline notice (components/OfflineBanner.tsx).
+   Fixed at the top so it is visible on every route without entering the
+   normal document flow, and padded for the notch so it is never clipped in a
+   standalone PWA. The banner carries its own background, so it stays readable
+   in both themes without changing the theme tokens. */
+.offline-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 120;
+  padding: calc(8px + env(safe-area-inset-top, 0px)) 16px 8px;
+  background: var(--navy);
+  color: #ffffff;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .offline-banner {
+    animation: offline-slide-in 220ms ease-out;
+  }
+}
+
+@keyframes offline-slide-in {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}

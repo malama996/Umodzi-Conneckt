@@ -315,6 +315,26 @@ function ConversationThread() {
     enabled: state === 'ready',
   });
 
+  /**
+   * Fallback when the live socket is not available (blocked network, missing
+   * realtime transport, repeated reconnect failure). The transport reports
+   * `offline` and stops retrying, so without this the thread would silently
+   * stop updating and a message would only appear on reopen — the one failure
+   * mode that looks like a broken chat during a demonstration.
+   *
+   * Costs one request per 20 seconds, only while the tab is visible, and it
+   * stops the moment the socket reconnects. History is merged by message id,
+   * so a poll can never duplicate a row.
+   */
+  useEffect(() => {
+    if (state !== 'ready' || rtStatus !== 'offline' || !detail) return;
+    const timer = window.setInterval(() => {
+      if (document.visibilityState !== 'visible') return;
+      void handleReconnect();
+    }, 20000);
+    return () => window.clearInterval(timer);
+  }, [state, rtStatus, detail, handleReconnect]);
+
   /* ---------------- send ---------------- */
 
   /**
@@ -482,8 +502,7 @@ function ConversationThread() {
           )}
           {rtStatus === 'offline' && (
             <p className="chat-connection notice-ish" role="status">
-              Live updates are paused — messages still appear when you send or reopen this
-              conversation.
+              Live updates are paused — this conversation refreshes every 20 seconds instead.
             </p>
           )}
 

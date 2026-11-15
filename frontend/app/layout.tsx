@@ -4,6 +4,7 @@ import { ServiceWorkerRegistration } from '@/components/ServiceWorkerRegistratio
 import NotificationCenter from '@/components/NotificationCenter';
 import ScrollReveals from '@/components/ScrollReveals';
 import SplashScreen from '@/components/SplashScreen';
+import OfflineBanner from '@/components/OfflineBanner';
 
 /* Theme B typography: the system font stack, applied in globals.css on
    `body` (and inherited by headings and inputs). It matches the visual weight
@@ -57,6 +58,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       </head>
       <body>
         <SplashScreen />
+        <OfflineBanner />
         {children}
         <ScrollReveals />
         <NotificationCenter />
