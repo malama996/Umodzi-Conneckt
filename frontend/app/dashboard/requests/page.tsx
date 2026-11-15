@@ -14,11 +14,7 @@ import {
   requestErrorMessage,
   type MyServiceRequest,
 } from '@/lib/api/serviceRequestsApi';
-import {
-  REQUEST_STATUS_LABEL,
-  REQUEST_STATUS_TONE,
-  requestStatusHint,
-} from '@/lib/requestStatus';
+import { REQUEST_STATUS_LABEL, REQUEST_STATUS_TONE, requestStatusHint } from '@/lib/requestStatus';
 
 /**
  * /dashboard/requests — this account's service-request history.

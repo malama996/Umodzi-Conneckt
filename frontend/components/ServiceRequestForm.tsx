@@ -213,8 +213,7 @@ export default function ServiceRequestForm({
   if (mode === 'reviewing') {
     return (
       <section className="request-review" aria-label="Review your request">
-        <div className="request-form-header">
-        </div>
+        <div className="request-form-header"></div>
         <dl className="request-review-details">
           <div>
             <dt>Problem</dt>

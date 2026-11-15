@@ -40,8 +40,8 @@ export default function TermsPage() {
               today — including what the platform does not promise.
             </p>
             <p className="legal-draft" role="note">
-              this document has not been reviewed by a lawyer and must receive legal review
-              before production use.
+              this document has not been reviewed by a lawyer and must receive legal review before
+              production use.
             </p>
             <p className="privacy-version">{TERMS_VERSION}</p>
           </header>

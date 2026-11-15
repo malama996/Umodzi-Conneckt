@@ -37,7 +37,8 @@ export function useMobileDrawer(open: boolean, close: () => void) {
   useEffect(() => {
     if (!open) return undefined;
 
-    openerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    openerRef.current =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
 
     const wrapper = panelRef.current;
     const panel =

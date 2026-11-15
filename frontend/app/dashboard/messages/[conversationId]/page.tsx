@@ -159,7 +159,6 @@ function ConversationThread() {
   /** Newest id at the previous effect run — used to count late arrivals. */
   const newestIdRef = useRef<string | null>(null);
 
-
   useEffect(() => {
     if (authStatus === 'anonymous') return;
     let cancelled = false;
@@ -199,7 +198,6 @@ function ConversationThread() {
       cancelled = true;
     };
   }, [requestId, authStatus]);
-
 
   const scrollToBottom = useCallback((smooth: boolean) => {
     bottomRef.current?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'end' });
@@ -248,7 +246,6 @@ function ConversationThread() {
     el.style.height = `${Math.min(el.scrollHeight, 120)}px`;
   }, [draft, state]);
 
-
   const markRead = useCallback(async (conversationId: string) => {
     if (lastMarkedReadRef.current === conversationId) return;
     lastMarkedReadRef.current = conversationId;
@@ -263,7 +260,6 @@ function ConversationThread() {
     if (state !== 'ready' || !detail) return;
     void markRead(detail.conversation.id);
   }, [state, detail, markRead]);
-
 
   const handleRealtimeMessage = useCallback(
     (messageId: string, conversationId: string) => {
@@ -330,7 +326,6 @@ function ConversationThread() {
     }, 20000);
     return () => window.clearInterval(timer);
   }, [state, rtStatus, detail, handleReconnect]);
-
 
   /**
    * Send one text as a new message.
@@ -402,7 +397,6 @@ function ConversationThread() {
     [sendText, sending],
   );
 
-
   const loadOlder = useCallback(async () => {
     if (!detail || loadingOlder || !hasOlder) return;
     setLoadingOlder(true);
@@ -426,7 +420,6 @@ function ConversationThread() {
       setLoadingOlder(false);
     }
   }, [detail, hasOlder, loadingOlder, messages]);
-
 
   const other = detail?.otherParticipant;
   const headerTitle = useMemo(() => other?.displayName ?? 'Conversation', [other]);

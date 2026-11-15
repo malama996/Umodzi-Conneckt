@@ -55,10 +55,9 @@ export async function getCurrentUser(): Promise<AuthUser> {
  * caller always shows the same "check your email" message.
  */
 export async function forgotPassword(email: string): Promise<string> {
-  const response = await post<{ data: { ok: boolean; message: string } }>(
-    '/auth/forgot-password',
-    { email },
-  );
+  const response = await post<{ data: { ok: boolean; message: string } }>('/auth/forgot-password', {
+    email,
+  });
   return response.data.message;
 }
 
@@ -67,9 +66,9 @@ export async function forgotPassword(email: string): Promise<string> {
  * new password. Throws ApiError(400) for an invalid/expired/used token.
  */
 export async function resetPassword(token: string, password: string): Promise<string> {
-  const response = await post<{ data: { ok: boolean; message: string } }>(
-    '/auth/reset-password',
-    { token, password },
-  );
+  const response = await post<{ data: { ok: boolean; message: string } }>('/auth/reset-password', {
+    token,
+    password,
+  });
   return response.data.message;
 }
