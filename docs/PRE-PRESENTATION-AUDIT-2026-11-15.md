@@ -38,6 +38,15 @@ New `components/OfflineBanner.tsx`, mounted once in `app/layout.tsx`, with a sma
 block appended to `globals.css`. It reports the browser's connectivity only, announces politely,
 pads for the notch, respects reduced-motion and never retries or replays a request.
 
+**B2a — Banner cannot cover the header (measured, then fixed).**
+The first version was `position: fixed`. It was replaced with `position: sticky; top: 0`, then
+measured in the browser at 431 px wide by forcing the offline branch: banner occupied **0–71 px**
+and the site header **0–88 px**, i.e. they overlapped, because the header is itself sticky and both
+claimed the viewport's top edge. The banner is now a normal **in-flow** block (`position: relative`),
+so it occupies its own band and the header starts below it — true at any width and any scroll
+position, since it never leaves the flow. The entrance animation is a fade rather than a slide,
+because a transform paints outside the box while animating and would reintroduce the overlap.
+
 **B3 — Chat REST fallback when the socket is unavailable.**
 `app/dashboard/messages/[conversationId]/page.tsx`. When the transport reports `offline` (blocked
 network, no realtime server, repeated reconnect failure) the thread now re-reads the newest page
@@ -49,14 +58,55 @@ No database, schema, API-contract or dependency changes were made. No existing t
 
 ## C. Chat verification
 
-Verified by reading the implemented code paths, **not** by running the two-session browser test the
-brief specifies. All sixteen steps of that test (customer sends → technician receives → reply →
-refresh → disconnect → send → reconnect → unread → foreign-user access) remain **unexecuted**, and
-should be run on the presentation machine before the audience arrives.
+Two-session run executed on 15 November 2026 against the running API with the local database, one
+customer session and one technician session on the same accepted service request:
 
-What the code does establish: persistence is server-side and authoritative, sender identity and
-timestamps are server-derived, foreign conversation ids resolve to 404, and no path marks a message
-delivered before the backend confirms it.
+| Step | Result |
+|---|---|
+| Customer session authenticates | PASS |
+| Technician session authenticates | PASS |
+| Sessions are distinct | PASS |
+| Both participants resolve the same conversation | PASS (`cf01bc1c…`) |
+| Customer message persists | PASS, 201 |
+| Technician reads that message | PASS |
+| Sender identity is server-derived | PASS |
+| Technician reply persists | PASS, 201 |
+| Customer reads the reply | PASS |
+| History intact after re-reading | PASS (2 messages) |
+| Chronological ordering | PASS |
+| Empty message rejected | PASS, 400 |
+| Oversized (2 001 chars) rejected | PASS, 400 |
+| Conversation appears in the customer's list | PASS |
+| Mark-read returns a real count | PASS, `updated: 1` |
+| Unread count drops after reading | PASS, 1 → 0 |
+| Outsider cannot read the conversation | PASS, 404 |
+| Outsider cannot post to it | PASS, 404 |
+| Unauthenticated read refused | PASS, 401 |
+| Administrator is not a silent participant | PASS, 404 |
+
+**20 of 20 checks passed.** Both messages also render in the thread UI — the customer view showed
+the exchange with the technician labelled as the other participant.
+
+Still unexecuted: the same exchange driven through two browser windows, and the mid-conversation
+network drop (steps 11–14 of the brief). The transport's reconnect path was reviewed but not
+observed under a real disconnect.
+
+### Can a technician chat with more than one customer?
+
+Yes, and the schema is built for it. `conversations` is unique per **service request**
+(`uq_conversations_service_request`), not per technician, so every accepted job opens its own
+conversation. One technician holds **13 conversations** in the current test database.
+
+- `/dashboard/messages` lists every conversation the caller participates in, each with its own
+  unread count, last message and timestamp.
+- Authorisation is decided per conversation from the database (`canAccessConversation` matches
+  `customer_id` or `technician_id`), so access to one says nothing about access to another.
+- The live socket subscribes to the **one** open conversation at a time; that is a bandwidth
+  choice, not a limit on how many a technician can have. The list refreshes itself every 20
+  seconds (B1), so new conversations and unread badges appear without being on that thread.
+- Dispatch enforces a ceiling on *concurrent accepted jobs* per technician
+  (`MAX_ACTIVE_ASSIGNMENTS_PER_TECHNICIAN`, default 3), which bounds how many can be live at once,
+  not how many may exist over time.
 
 ## D. PWA verification
 
@@ -85,6 +135,19 @@ instruction: the 45-script test suite and browser-driven checks.
    the user; an update prompt is the correct long-term fix.
 4. The `<OfflineBanner>` reports browser connectivity only. A captive portal can report "online"
    while requests fail; per-request error handling remains the authoritative signal.
+5. **Service worker vs. a different build on the same origin.** A worker left registered from an
+   earlier *production* run (`next start`) broke the *development* pages in this session with
+   `Cannot read properties of undefined (reading 'call')` at the first new component in
+   `app/layout.tsx`: the worker's cache-first rule served production chunk files for development
+   chunk URLs, which are not content-hashed. Clearing the registration and its two caches fixed it
+   immediately, and an incognito window (no worker) was never affected.
+
+   This does **not** affect a normal deploy: production chunk URLs are content-hashed and change
+   with every build, and navigations are network-first, so a new deployment cannot be served old
+   HTML or mismatched chunks. It does matter operationally: if a preview and the live site ever
+   share an origin, or if you test `next start` and `next dev` on the same `localhost` port, clear
+   the worker (DevTools → Application → Service Workers → Unregister, and clear storage). Anyone
+   reviewing a deploy in a browser that ran an older build should hard-reload once.
 
 ## G. Presentation readiness
 

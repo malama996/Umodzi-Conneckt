@@ -6104,15 +6104,20 @@ h2 {
 }
 
 /* Application-wide offline notice (components/OfflineBanner.tsx).
-   Fixed at the top so it is visible on every route without entering the
-   normal document flow, and padded for the notch so it is never clipped in a
-   standalone PWA. The banner carries its own background, so it stays readable
-   in both themes without changing the theme tokens. */
+
+   In flow, NOT fixed and NOT sticky.
+
+   Both were measured and both overlap the site header: a fixed banner paints
+   over the header outright, and a sticky banner anchored to `top: 0` collides
+   with the header, which is itself sticky — at 431px wide the banner sat at
+   0-71 and the header at 0-88. A normal in-flow block takes its own band at the
+   top of the document, so the header and every route below it simply start
+   after it. That holds at any width and any scroll position, because the
+   banner never leaves the flow and never claims the viewport's top edge.
+   Safe-area padding keeps it clear of the notch in a standalone PWA; the
+   banner carries its own background so it stays readable in both themes. */
 .offline-banner {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
+  position: relative;
   z-index: 120;
   padding: calc(8px + env(safe-area-inset-top, 0px)) 16px 8px;
   background: var(--navy);
@@ -6120,19 +6125,22 @@ h2 {
   font-size: 0.82rem;
   line-height: 1.4;
   text-align: center;
+  overflow-wrap: anywhere;
 }
 
+/* Fade, never a slide: a transform would paint the banner outside its own box
+   while it animates, which is exactly the overlap this component must avoid. */
 @media (prefers-reduced-motion: no-preference) {
   .offline-banner {
-    animation: offline-slide-in 220ms ease-out;
+    animation: offline-fade-in 200ms ease-out;
   }
 }
 
-@keyframes offline-slide-in {
+@keyframes offline-fade-in {
   from {
-    transform: translateY(-100%);
+    opacity: 0;
   }
   to {
-    transform: translateY(0);
+    opacity: 1;
   }
 }

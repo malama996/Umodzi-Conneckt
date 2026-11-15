@@ -27,3 +27,4 @@ Thumbs.db
 # Microsoft Office lock files created while a document is open (~$name.ext)
 ~$*
 !backend/scripts/eval-dispatch.mjs
+!backend/scripts/chat-two-session-check.mjs
