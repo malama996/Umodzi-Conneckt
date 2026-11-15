@@ -165,7 +165,6 @@ function ProfileBody({
   );
 }
 
-
 function PhotoCard({
   profile,
   onChanged,
@@ -305,7 +304,6 @@ function PhotoCard({
     </section>
   );
 }
-
 
 function ProfileFormCard({
   profile,
@@ -463,7 +461,6 @@ function ProfileFormCard({
     </section>
   );
 }
-
 
 function VerificationCard({
   profile,

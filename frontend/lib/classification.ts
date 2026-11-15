@@ -332,9 +332,7 @@ export function classifyFault(description: string): TechnicianCategory | '' {
  * The winner is the category with the greatest summed keyword weight;
  * confidence is reported alongside it but does not itself pick the winner.
  */
-export function classifyFaultWithEvidence(
-  description: string,
-): ClassificationEvidence {
+export function classifyFaultWithEvidence(description: string): ClassificationEvidence {
   const text = description.toLowerCase();
   const matches = matchCategories(text);
 

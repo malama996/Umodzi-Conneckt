@@ -20,10 +20,7 @@ import RequireAuth from '@/components/RequireAuth';
 import Reveal from '@/components/Reveal';
 import { Badge, Button, DashboardLayout } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
-import {
-  communicationErrorMessage,
-  getRequestConversation,
-} from '@/lib/api/communicationApi';
+import { communicationErrorMessage, getRequestConversation } from '@/lib/api/communicationApi';
 import {
   getServiceRequest,
   requestErrorMessage,
@@ -31,11 +28,7 @@ import {
   type ServiceRequestDetail,
 } from '@/lib/api/serviceRequestsApi';
 import { useContactCall } from '@/lib/chat/useContactCall';
-import {
-  REQUEST_STATUS_LABEL,
-  REQUEST_STATUS_TONE,
-  requestStatusHint,
-} from '@/lib/requestStatus';
+import { REQUEST_STATUS_LABEL, REQUEST_STATUS_TONE, requestStatusHint } from '@/lib/requestStatus';
 
 /**
  * /dashboard/requests/[id] — ONE request, tracked end to end.
@@ -132,8 +125,7 @@ function RequestDetailContent() {
     }
   };
 
-  const canRetry =
-    !isTechnician && request !== null && request.status === 'no_match';
+  const canRetry = !isTechnician && request !== null && request.status === 'no_match';
 
   return (
     <DashboardLayout active={isTechnician ? 'My Assignments' : 'My Requests'}>
@@ -179,9 +171,8 @@ function RequestDetailContent() {
               <LuClipboardList size={22} aria-hidden="true" />
               <h3>Request not available</h3>
               <p>
-                This request does not exist or belongs to another account. That is
-                deliberate — a request you do not own is indistinguishable from one
-                that is missing.
+                This request does not exist or belongs to another account. That is deliberate — a
+                request you do not own is indistinguishable from one that is missing.
               </p>
               <Link className="button button-teal" href="/dashboard/requests">
                 Back to requests
@@ -205,10 +196,7 @@ function RequestDetailContent() {
 
               <div className="request-workflow-actions">
                 {hasConversation && (
-                  <Link
-                    className="button button-teal"
-                    href={`/dashboard/messages/${request.id}`}
-                  >
+                  <Link className="button button-teal" href={`/dashboard/messages/${request.id}`}>
                     <LuMessageCircle size={13} aria-hidden="true" /> Open conversation
                   </Link>
                 )}

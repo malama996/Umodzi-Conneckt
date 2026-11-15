@@ -2,14 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
-import {
-  LuBell,
-  LuCheck,
-  LuClipboardList,
-  LuInbox,
-  LuMessageSquare,
-  LuUser,
-} from 'react-icons/lu';
+import { LuBell, LuCheck, LuClipboardList, LuInbox, LuMessageSquare, LuUser } from 'react-icons/lu';
 import { useAuth } from '@/lib/auth';
 
 import {

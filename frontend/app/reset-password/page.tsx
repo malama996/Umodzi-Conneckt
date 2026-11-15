@@ -139,7 +139,8 @@ export default function ResetPasswordPage() {
                 />
               </label>
               <button className="button button-coral auth-submit" type="submit" disabled={busy}>
-                {busy ? 'Resetting…' : 'Reset password'} <LuArrowRight size={14} aria-hidden="true" />
+                {busy ? 'Resetting…' : 'Reset password'}{' '}
+                <LuArrowRight size={14} aria-hidden="true" />
               </button>
               {error && (
                 <div className="inline-error" role="alert">

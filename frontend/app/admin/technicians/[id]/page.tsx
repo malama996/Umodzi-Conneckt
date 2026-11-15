@@ -260,12 +260,7 @@ function DocumentsList({
         <>
           <ul className="t26-doc-list">
             {bundle.documents.map((doc) => (
-              <DocumentRow
-                key={doc.id}
-                technicianId={bundle.id}
-                doc={doc}
-                onChanged={onChanged}
-              />
+              <DocumentRow key={doc.id} technicianId={bundle.id} doc={doc} onChanged={onChanged} />
             ))}
           </ul>
           <p className="admin-note t26-decision-note">

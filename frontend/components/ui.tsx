@@ -173,7 +173,11 @@ export function PublicHeader() {
             aria-label={navOpen ? 'Close menu' : 'Open menu'}
             onClick={() => setNavOpen((open) => !open)}
           >
-            {navOpen ? <LuX size={22} aria-hidden="true" /> : <LuMenu size={22} aria-hidden="true" />}
+            {navOpen ? (
+              <LuX size={22} aria-hidden="true" />
+            ) : (
+              <LuMenu size={22} aria-hidden="true" />
+            )}
           </button>
           <nav
             ref={panelRef}

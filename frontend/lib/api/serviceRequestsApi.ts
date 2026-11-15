@@ -120,12 +120,8 @@ export async function updateServiceRequestStatus(
  * Only the backend decides whether the request is retryable — a retry on a
  * request that is not waiting fails honestly.
  */
-export async function retryServiceRequestDispatch(
-  id: string,
-): Promise<ServiceRequestDetail> {
-  const body = await post<{ data: ServiceRequestDto }>(
-    `/requests/${encodeURIComponent(id)}/retry`,
-  );
+export async function retryServiceRequestDispatch(id: string): Promise<ServiceRequestDetail> {
+  const body = await post<{ data: ServiceRequestDto }>(`/requests/${encodeURIComponent(id)}/retry`);
   return {
     ...toServiceRequest(body.data),
     assignedTechnicianName: body.data.assignedTechnicianName ?? null,

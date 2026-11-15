@@ -2303,21 +2303,24 @@ h2 {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding: 18px max(20px, env(safe-area-inset-left))
-    calc(18px + env(safe-area-inset-bottom)) 20px;
+  padding: 18px max(20px, env(safe-area-inset-left)) calc(18px + env(safe-area-inset-bottom)) 20px;
   background: linear-gradient(180deg, var(--deep), var(--navy));
   color: #fff;
   box-shadow: var(--shadow-lg);
   transform: translateX(-100%);
   visibility: hidden;
-  transition: transform 0.25s ease, visibility 0s linear 0.25s;
+  transition:
+    transform 0.25s ease,
+    visibility 0s linear 0.25s;
   overscroll-behavior: contain;
   -webkit-tap-highlight-color: transparent;
 }
 .mobile-nav-open {
   transform: translateX(0);
   visibility: visible;
-  transition: transform 0.25s ease, visibility 0s linear 0s;
+  transition:
+    transform 0.25s ease,
+    visibility 0s linear 0s;
 }
 .mobile-nav-head {
   display: flex;
@@ -3141,14 +3144,18 @@ h2 {
     z-index: 1050;
     transform: translateX(-100%);
     visibility: hidden;
-    transition: transform 0.25s ease, visibility 0s linear 0.25s;
+    transition:
+      transform 0.25s ease,
+      visibility 0s linear 0.25s;
     box-shadow: var(--shadow-lg);
     overscroll-behavior: contain;
   }
   .sidebar-open .sidebar {
     transform: translateX(0);
     visibility: visible;
-    transition: transform 0.25s ease, visibility 0s linear 0s;
+    transition:
+      transform 0.25s ease,
+      visibility 0s linear 0s;
   }
   .sidebar-backdrop {
     display: block;
@@ -3198,8 +3205,7 @@ h2 {
   }
   .hero {
     min-height: 735px;
-    padding: calc(115px + env(safe-area-inset-top)) 20px
-      calc(90px + env(safe-area-inset-bottom));
+    padding: calc(115px + env(safe-area-inset-top)) 20px calc(90px + env(safe-area-inset-bottom));
     background-position: 64% center;
   }
   .hero:before {
@@ -3672,7 +3678,9 @@ h2 {
   animation: auth-spin 0.6s linear infinite;
 }
 @keyframes auth-spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 .auth-gate h1 {
   font-size: clamp(22px, 3vw, 32px);

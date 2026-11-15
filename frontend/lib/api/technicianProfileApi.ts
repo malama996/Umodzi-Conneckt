@@ -10,11 +10,7 @@ import { del, get, patch, post, postForm, getBlob } from './client';
  */
 
 export type TechnicianVerificationStatus =
-  | 'unverified'
-  | 'pending'
-  | 'partially_verified'
-  | 'verified'
-  | 'rejected';
+  'unverified' | 'pending' | 'partially_verified' | 'verified' | 'rejected';
 
 export type VerificationDocumentType =
   | 'national_id'
