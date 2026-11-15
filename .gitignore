@@ -28,3 +28,4 @@ Thumbs.db
 ~$*
 !backend/scripts/eval-dispatch.mjs
 !backend/scripts/chat-two-session-check.mjs
+!frontend/.env.deployed.example

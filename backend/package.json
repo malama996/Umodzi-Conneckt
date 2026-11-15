@@ -9,7 +9,8 @@
     "start": "node dist/server.js",
     "typecheck": "tsc --noEmit",
     "migrate": "tsx src/db/migrate-cli.ts",
-    "seed": "tsx src/db/seed.ts"
+    "seed": "tsx src/db/seed.ts",
+    "seed:demo": "tsx scripts/seed-demo-accounts.ts"
   },
   "dependencies": {
     "@fastify/cookie": "^11.1.2",
