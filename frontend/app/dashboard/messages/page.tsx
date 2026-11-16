@@ -196,7 +196,7 @@ function ConversationsList() {
                       </span>
                       <span className="inbox-item-meta">
                         <span className="inbox-channel">
-                          {conversation.otherParticipant.isTechnician ? 'Technician' : 'Customer'}
+                          {conversation.otherParticipant.isTechnician ? 'Technician' : 'Consumer'}
                         </span>
                         {unread && <span className="inbox-dot">{conversation.unreadCount}</span>}
                         <span className="sr-only">

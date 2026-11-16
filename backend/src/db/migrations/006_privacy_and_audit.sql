@@ -1,7 +1,4 @@
 -- 006_privacy_and_audit.sql
--- Task 28.3 — privacy/security foundations: the audit log, plus the
--- read-state support the data-subject notification inbox (28.3C/G-02) needs.
---
 -- Migration rules (same contract as 001-005):
 --   * Additive only. No DROP, no truncation, no rewrite of existing rows.
 --   * Idempotent: IF NOT EXISTS / guarded DO blocks, so re-running against an
@@ -12,8 +9,6 @@
 --     and that is the honest state.
 
 -- ---------------------------------------------------------------------------
--- audit_events — privacy/security event log (Task 28.3F)
---
 -- DESIGN DECISIONS (each one deliberate and load-bearing):
 --
 -- 1. NO FOREIGN KEY to users, ON PURPOSE.
@@ -85,8 +80,6 @@ CREATE INDEX IF NOT EXISTS idx_audit_events_target
   ON audit_events (target_user_id, created_at DESC);
 
 -- ---------------------------------------------------------------------------
--- notification read state (Task 28.3C / G-02)
---
 -- `notifications.read` and `notifications.read_at` already exist (migration
 -- 005) and are maintained by NotificationService.markAsRead(). No schema
 -- change is required for the subject-facing inbox: the data-subject read

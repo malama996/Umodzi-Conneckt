@@ -1,6 +1,4 @@
 -- 004_reviews.sql
--- Task 27 — customer ratings & reviews tied to completed services.
---
 -- A review is the customer's verdict on ONE completed service request:
 -- exactly one review per service request (unique index), written by the
 -- request's owning customer about the technician who accepted the job.

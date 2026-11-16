@@ -1,5 +1,5 @@
 -- 010_enable_rls_and_app_policies.sql
--- Task 35.2 (DB-1/DB-2 continuation) — enable Row Level Security on every
+-- enable Row Level Security on every
 -- application table and add the ONE legitimate policy: full access for the
 -- dedicated runtime role `umodzi_app` (created by
 -- scripts/task352-create-runtime-role.ts; when absent in CI/plain Postgres,

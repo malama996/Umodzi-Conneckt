@@ -184,7 +184,7 @@ export default function Home() {
                 'Describe the job',
                 'Tell us what is wrong, select the service area and confirm the suggested category.',
                 '/illustrations/service-request.svg',
-                'Illustration: a customer completes a service request on a phone',
+                'Illustration: a consumer completes a service request on a phone',
               ],
               [
                 '02',
@@ -262,7 +262,7 @@ export default function Home() {
               <BrandAsset
                 className="split-art"
                 src="/illustrations/trust-reviews.svg"
-                alt="Illustration: a verified technician profile with ratings and customer reviews"
+                alt="Illustration: a verified technician profile with ratings and consumer reviews"
                 width={640}
                 height={480}
                 loading="lazy"

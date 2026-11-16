@@ -11,14 +11,14 @@ import type { UserRole } from './authTypes';
  * contract, authorization checks). It is deliberately left exactly as it is:
  * renaming it would invalidate existing sessions, break every API consumer and
  * require a data migration, for no user-visible benefit. Only the PRESENTATION
- * changes — a signed-in customer reads "Customer", never "Consumer".
+ * changes — a signed-in customer reads "Consumer".
  *
  * Every user-facing surface (dashboard topbar chip, mobile drawer identity
  * header, role badges) reads its wording from here, so the two drawer
  * implementations and the profile chip can never drift apart.
  */
 const ROLE_DISPLAY_LABELS: Record<UserRole, string> = {
-  customer: 'Customer',
+  customer: 'Consumer',
   technician: 'Technician',
   administrator: 'Administrator',
 };

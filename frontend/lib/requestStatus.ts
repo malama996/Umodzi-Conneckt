@@ -47,7 +47,7 @@ export const TECHNICIAN_REQUEST_STATUS_HINT: Record<ServiceRequestStatus, string
   no_match: 'Dispatch could not place this request with you.',
   in_progress: 'You are working on this request. Mark it completed when the job is done.',
   completed: 'You completed this request.',
-  cancelled: 'This request was cancelled by the customer or an administrator.',
+  cancelled: 'This request was cancelled by the consumer or an administrator.',
 };
 
 export function requestStatusHint(

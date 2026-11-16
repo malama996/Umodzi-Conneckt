@@ -35,6 +35,10 @@ services:
         sync: false  # Generate with: openssl rand -hex 32
       - key: FRONTEND_ORIGIN
         sync: false  # Your Netlify domain, e.g. https://umodzi.netlify.app
+      # One canonical URL for password-reset links. Kept separate from the
+      # CORS allow-list, which may include more than one frontend origin.
+      - key: PUBLIC_APP_URL
+        sync: false
       - key: ADMIN_EMAIL
         sync: false
       - key: ADMIN_PASSWORD
@@ -52,15 +56,18 @@ services:
       - key: COOKIE_SAME_SITE
         value: "none"
       # --- File uploads ---
-      # local   = server disk (EPHEMERAL on Render: photos/docs are lost on
-      #           every redeploy/restart — fine only for throwaway demos)
-      # supabase = durable object storage; also set SUPABASE_URL,
-      #           SUPABASE_STORAGE_KEY, SUPABASE_PUBLIC_BUCKET,
-      #           SUPABASE_PRIVATE_BUCKET (see render.env.example)
-      - key: STORAGE_DIR
-        value: var/uploads
+      # Render disks are ephemeral, so production uploads MUST use durable
+      # Supabase Storage. The app fails fast if any required value is absent.
       - key: STORAGE_PROVIDER
-        value: local
+        value: supabase
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_STORAGE_KEY
+        sync: false
+      - key: SUPABASE_PUBLIC_BUCKET
+        value: profile-photos
+      - key: SUPABASE_PRIVATE_BUCKET
+        value: verification-docs
       # Optional: Uncomment and configure for production SMS
       # - key: SMS_PROVIDER
       #   sync: false

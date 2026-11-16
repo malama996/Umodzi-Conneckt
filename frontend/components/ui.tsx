@@ -82,11 +82,11 @@ export function BrandAsset({
 /* eslint-enable @next/next/no-img-element */
 
 /**
- * Brand lockup — approved SVG logo variants.
+ * Brand lockup approved SVG logo variants.
  *
- * `light`   → white-lettering variant for dark backgrounds (public header,
+ * `light`    white-lettering variant for dark backgrounds (public header,
  *             footer, dashboard sidebar, auth photo panel).
- * `compact` → mark only, no tagline.
+ * `compact` mark only, no tagline.
  * The full logo ↔ compact mark swap on narrow viewports is driven by CSS
  * (`.logo-full` / `.logo-mark-img`), so the same markup serves the 650px
  * header breakpoint and the 950px collapsed-sidebar breakpoint.
@@ -135,7 +135,7 @@ export function PublicHeader() {
   const [navOpen, setNavOpen] = useState(false);
   const close = useCallback(() => setNavOpen(false), []);
   const { panelRef, onTouchStart, onTouchEnd } = useMobileDrawer(navOpen, close);
-  // §10: the marketing anchors (Home / Services / How It Works / About) exist
+  // the marketing anchors (Home / Services / How It Works / About) exist
   // for visitors who are still deciding whether to use the platform. A
   // signed-in customer is already past that point — usually mid-request on
   // /matching — so offering links back to the landing sections only pulls them
@@ -372,7 +372,7 @@ export function VerificationTrustIndicators({
  * now resolves to a route that exists, and only to one the role may open.
  *
  *  (G-02): the "Notifications" badge previously rendered a HARDCODED
- * "2", which was fabricated data — the application had no notification
+ * "2", which was fabricated data the application had no notification
  * history to read and no unread count to report. It is now the REAL unread
  * count from the owner-scoped API, and it is hidden entirely when zero (or
  * while loading/failing) rather than showing a made-up number. The
@@ -469,7 +469,7 @@ export function Sidebar({
         <LuLogOut size={13} className="ic" aria-hidden="true" />{' '}
         <span>{busy ? 'Signing out…' : 'Log Out'}</span>
       </button>
-      {/* Log-out confirmation (§3) — the shared dialog, portaled to <body>
+      {/* Log-out confirmation — the shared dialog, portaled to <body>
           (see the comment above), so the drawer, the avatar menu and the
           public header can never word it differently — and the dialog is
           always on top of the page, never trapped behind the sidebar. */}
@@ -499,7 +499,7 @@ export function Sidebar({
  * chip, so customer/technician dashboards are unchanged in appearance.
  *
  * §4: that chip is now the interactive avatar menu (`AccountMenu`) for every
- * role — same size, same position, same identity data, but tapping it opens
+ * role same size, same position, same identity data, but tapping it opens
  * the account menu instead of doing nothing. It replaces the hardcoded
  * "Arnold Malama / AM / Consumer" values that used to appear in every
  * customer's and technician's own header.

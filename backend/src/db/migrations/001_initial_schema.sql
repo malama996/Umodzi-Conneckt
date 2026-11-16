@@ -1,11 +1,4 @@
 -- 001_initial_schema.sql
--- Original Task 21B schema (technicians, service_requests, dispatch_offers).
---
--- Written as CREATE ... IF NOT EXISTS so it can be applied safely to an
--- existing Task 21B database (the migration runner had no ledger back
--- then) as well as to a brand new database. Never drops or rewrites
--- existing tables or data.
---
 -- Applied first, in filename order, by src/db/migrate.ts.
 
 CREATE EXTENSION IF NOT EXISTS postgis;
