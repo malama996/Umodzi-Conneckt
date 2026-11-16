@@ -58,7 +58,7 @@ export default function TechnicianOfferCard({
               <dd>{request.id}</dd>
             </div>
             <div>
-              <dt>Customer location</dt>
+              <dt>Consumer location</dt>
               <dd>{request.city}</dd>
             </div>
             <div>

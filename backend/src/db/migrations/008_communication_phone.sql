@@ -1,4 +1,4 @@
--- 008_communication_phone -- Task 28.4B (Step 11) phone contact foundation
+-- 008_communication_phone sql
 -- Additive only; idempotent. Stores an authoritative phone number for
 -- a technician's account, with basic E.164-style normalization and a
 -- unique index so duplicate accounts don't have duplicate numbers.

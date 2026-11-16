@@ -1,6 +1,4 @@
 -- 002_authentication.sql
--- Task 23 — identity: users, refresh-token sessions, and ownership links.
---
 -- Migration rules:
 --   * Additive only. Existing technicians/service_requests/dispatch_offers
 --     rows are preserved untouched.
@@ -83,8 +81,7 @@ BEGIN
   END IF;
 END $$;
 
--- One account <-> at most one technician profile (NULLs allowed for the
--- seeded prototype technicians that have no account yet).
+
 CREATE UNIQUE INDEX IF NOT EXISTS uq_technicians_user_id ON technicians(user_id);
 
 CREATE INDEX IF NOT EXISTS idx_service_requests_customer_user_id

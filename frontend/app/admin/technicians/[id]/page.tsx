@@ -236,8 +236,8 @@ function VerificationBundle({
           <DecisionPanel bundle={bundle} onChanged={onChanged} />
         </section>
 
-        <section className="t26-card" aria-label="Customer reviews">
-          <TechnicianReviewsSection technicianId={bundle.id} heading="Customer reviews" />
+        <section className="t26-card" aria-label="Consumer reviews">
+          <TechnicianReviewsSection technicianId={bundle.id} heading="Consumer reviews" />
         </section>
       </div>
     </>

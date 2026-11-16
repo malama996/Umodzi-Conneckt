@@ -152,7 +152,7 @@ function AdminUsersView() {
                 onChange={(event) => setRole(event.target.value as UserRole | 'all')}
               >
                 <option value="all">All roles</option>
-                <option value="customer">Customer</option>
+                <option value="customer">Consumer</option>
                 <option value="technician">Technician</option>
                 <option value="administrator">Administrator</option>
               </select>
@@ -186,7 +186,7 @@ function AdminUsersView() {
               {users.length === 0 ? (
                 <AdminEmpty
                   title="No accounts yet."
-                  hint="Registered customers and technicians will appear here."
+                  hint="Registered consumers and technicians will appear here."
                 />
               ) : (
                 <AdminEmpty

@@ -1,7 +1,4 @@
 -- 003_technician_verification.sql
--- Task 26 — technician profile enrichment (bio, profile photo) and the
--- verification lifecycle (unverified → pending → verified | rejected →
--- pending …) with evidence documents.
 --
 -- Migration rules (same contract as 001/002):
 --   * Additive only. No DROP, no rewrites of existing rows.
@@ -57,7 +54,7 @@ UPDATE technicians
    AND verification_status = 'unverified';
 
 -- ---------------------------------------------------------------------------
--- technician_verification_documents — evidence submitted for review
+-- technician_verification_documents evidence submitted for review
 --   document_type : national_id | certificate | other
 --   storage_key   : opaque key resolved by the backend storage layer
 --   file_name     : original client filename (display only, sanitized)

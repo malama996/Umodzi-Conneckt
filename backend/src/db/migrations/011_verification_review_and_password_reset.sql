@@ -1,6 +1,5 @@
 -- 011_verification_review_and_password_reset.sql
--- Production-readiness audit (§5 technician verification trust model +
--- §3 password recovery). Two additive, independent changes:
+-- Two additive, independent changes:
 --
 --   A. Per-document verification review. The prior model (003) stored a
 --      SINGLE whole-profile decision on `technicians` and treated documents

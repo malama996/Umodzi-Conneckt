@@ -1,5 +1,4 @@
 -- 007_communication.sql
--- Task 28.4A — high-end messaging foundation.
 -- Additive only; idempotent; no drops/rebuilds; no seed/fake rows.
 
 -- ---------------------------------------------------------------------------

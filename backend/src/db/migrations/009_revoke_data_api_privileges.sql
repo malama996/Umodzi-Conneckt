@@ -1,6 +1,4 @@
 -- 009_revoke_data_api_privileges.sql
--- Task 35.2 (DB-1) — close the Data API privilege exposure found in the
--- Task 35.1 audit: the Supabase roles `anon`, `authenticated` and
 -- `service_role` held full CRUD+TRUNCATE+TRIGGER grants on every public
 -- table while RLS was disabled everywhere. Umodzi Connect never uses the
 -- Supabase Data API (its frontend holds no publishable key; the backend
@@ -17,7 +15,6 @@
 --     of this project's tables are).
 --
 -- Rollback (privilege-only, examined, data-safe): see the companion note
--- in STATE.md §29 — re-grant ALL to the three roles restores the exact
 -- prior grant state; no data operation is involved.
 
 -- 1+2. Revoke Data API privileges only when those roles exist in this

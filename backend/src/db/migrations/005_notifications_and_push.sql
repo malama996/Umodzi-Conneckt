@@ -1,6 +1,4 @@
 -- 005_notifications_and_push.sql
--- Task 28 — Real database-backed notification center & Web Push subscriptions.
-
 -- 1. Create notifications table
 CREATE TABLE IF NOT EXISTS notifications (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

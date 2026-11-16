@@ -453,7 +453,7 @@ function ConversationThread() {
               <div>
                 <h1>{headerTitle}</h1>
                 <p className="chat-header-meta">
-                  {other?.isTechnician ? 'Technician' : 'Customer'}
+                  {other?.isTechnician ? 'Technician' : 'Consumer'}
                   {detail?.request?.category ? ` · ${detail.request.category}` : ''}
                   {detail?.request?.city ? ` · ${detail.request.city}` : ''}
                 </p>

@@ -59,7 +59,7 @@ export const PRIVACY_NOTICE_SECTIONS: NoticeSection[] = [
       'Service request data — the description you write when you ask for a service, the category, and the city.',
       'Location information — the service area you choose. Precise coordinates are stored for the internal matching engine only and are never published through the public API (see "Your location" below).',
       'Dispatch and offer data — which technicians were matched to which request, in what order, and whether an offer was accepted, declined or timed out.',
-      'Reviews and ratings — the star rating and comment a customer leaves for a completed service.',
+      'Reviews and ratings — the star rating and comment a consumer leaves for a completed service.',
       'Notifications — messages the system generates for you about your requests, offers and verification status.',
       'Push subscription data — if you allow browser notifications, the subscription details your browser provides so a message can reach your device.',
       'Security information — the security events recorded about your own account, such as a successful sign-in or a sign-in attempt that failed.',
@@ -91,7 +91,7 @@ export const PRIVACY_NOTICE_SECTIONS: NoticeSection[] = [
     heading: 'Who can see your information',
     items: [
       'Publicly visible — the display name, service category, skills, service area, rating, number of completed jobs, verification badge, availability text and biography of a technician.',
-      'Visible to the other party in a service — a customer and a technician can see the details of the request and offers connected to it, so the job can be arranged.',
+      'Visible to the other party in a service — a consumer and a technician can see the details of the request and offers connected to it, so the job can be arranged.',
       'Visible to you only — your sessions, your notification history, your verification documents, and your security event history.',
       'Visible to administrators — administrators can see account records (name, email, role, account status) and service requests, and can review technician verification. This privileged access is logged so it is accountable.',
       'Never disclosed — your password, the stored hash of your password, your session tokens, and the contents of your verification documents to anyone other than you and the administrators reviewing them.',

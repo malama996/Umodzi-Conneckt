@@ -89,7 +89,7 @@ export default function AdminOverview() {
                   <div>
                     <b>{overview.users.total}</b>
                     <small>
-                      {overview.users.byRole.customer} customers ·{' '}
+                      {overview.users.byRole.customer} consumers ·{' '}
                       {overview.users.byRole.technician} technicians ·{' '}
                       {overview.users.byRole.administrator} administrators
                     </small>

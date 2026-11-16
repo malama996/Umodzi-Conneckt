@@ -138,7 +138,7 @@ function AdminRequestsView() {
               {requests.length === 0 ? (
                 <AdminEmpty
                   title="No service requests yet."
-                  hint="Requests appear here the moment a customer creates one."
+                  hint="Requests appear here the moment a consumer creates one."
                 />
               ) : (
                 <AdminEmpty
@@ -159,7 +159,7 @@ function AdminRequestsView() {
                     <th scope="col">Status</th>
                     <th scope="col">Request</th>
                     <th scope="col">City</th>
-                    <th scope="col">Customer</th>
+                    <th scope="col">Consumer</th>
                     <th scope="col">Offers</th>
                     <th scope="col">Created</th>
                     <th scope="col">Actions</th>
@@ -190,7 +190,7 @@ function AdminRequestsView() {
                           <td data-label="City">
                             <span className="admin-cell-body">{request.city}</span>
                           </td>
-                          <td data-label="Customer">
+                          <td data-label="Consumer">
                             <span className="admin-cell-body">
                               {request.customerEmail ? (
                                 <>
@@ -264,7 +264,7 @@ function AdminRequestsView() {
                                     </dd>
                                   </div>
                                   <div>
-                                    <dt>Customer</dt>
+                                    <dt>Consumer</dt>
                                     <dd>
                                       {request.customerEmail
                                         ? `${request.customerName} · ${request.customerEmail}`

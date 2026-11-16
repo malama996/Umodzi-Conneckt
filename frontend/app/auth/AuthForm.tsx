@@ -25,7 +25,7 @@ import { REGISTRATION_NOTICE_POINTS } from '@/lib/privacy/notice';
  * Design rules:
  *   - the existing visual design and login-background-technician.jpg are
  *     untouched (styling lives in globals.css / .auth-* classes);
- *   - the account-type control reads "Customer"/"Technician" in the UI while
+ *   - the account-type control reads "Consumer"/"Technician" in the UI while
  *     mapping to the `customer` / `technician` role VALUES (see the mapping
  *     below) — the stored role is never renamed, so existing accounts, JWTs
  *     and API contracts are unaffected by the wording change;
@@ -71,10 +71,10 @@ function messageFromError(error: unknown): string {
 
 export default function AuthForm({ mode }: { mode: 'login' | 'register' }) {
   const [show, setShow] = useState(false);
-  // UI-facing choice only: 'Technician' vs anything-else (Customer). The
+  // UI-facing choice only: 'Technician' vs anything-else (Consumer). The
   // role VALUE sent to the API is derived below and stays `customer`, so no
   // internal identifier, route or record changes with this wording.
-  const [accountType, setAccountType] = useState('Customer');
+  const [accountType, setAccountType] = useState('Consumer');
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -192,7 +192,7 @@ export default function AuthForm({ mode }: { mode: 'login' | 'register' }) {
           <p>
             {mode === 'login'
               ? 'Continue to your community services.'
-              : 'Get started as a customer or technician.'}
+              : 'Get started as a consumer or technician.'}
           </p>
           {mode === 'register' && (
             <>
@@ -213,7 +213,7 @@ export default function AuthForm({ mode }: { mode: 'login' | 'register' }) {
                   <LuUsers size={11} className="ic" aria-hidden="true" /> Account type
                 </span>
                 <select value={accountType} onChange={(e) => setAccountType(e.target.value)}>
-                  <option>Customer</option>
+                  <option>Consumer</option>
                   <option>Technician</option>
                 </select>
               </label>

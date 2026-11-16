@@ -27,8 +27,8 @@ export const TERMS_SECTIONS: NoticeSection[] = [
     id: 'purpose',
     heading: 'Purpose and scope',
     paragraphs: [
-      'Umodzi Connect is an academic prototype that connects customers with local technicians in Kitwe and Ndola, Zambia. A customer describes a problem, and the platform dispatches the request to eligible technicians who may accept the work.',
-      'These terms describe the service as it is built today. They cover customer accounts, technician accounts, service requests, technician matching, profiles, reviews, and account suspension. Anything not described here is not part of the service.',
+      'Umodzi Connect is an academic prototype that connects consumers with local technicians in Kitwe and Ndola, Zambia. A consumer describes a problem, and the platform dispatches the request to eligible technicians who may accept the work.',
+      'These terms describe the service as it is built today. They cover consumer accounts, technician accounts, service requests, technician matching, profiles, reviews, and account suspension. Anything not described here is not part of the service.',
     ],
   },
   {
@@ -37,7 +37,7 @@ export const TERMS_SECTIONS: NoticeSection[] = [
     items: [
       'To use the service you must register with your name, email address, and a password. You are responsible for keeping your password secret and for all activity under your account.',
       'You must provide accurate registration information. A technician must additionally choose a genuine service category and service area.',
-      'Public registration creates customer or technician accounts only. Administrator accounts are provisioned separately and cannot be created through registration.',
+      'Public registration creates consumer or technician accounts only. Administrator accounts are provisioned separately and cannot be created through registration.',
       'You must not share your account, impersonate another person, or create an account for someone else without their knowledge.',
     ],
   },
@@ -47,7 +47,7 @@ export const TERMS_SECTIONS: NoticeSection[] = [
     paragraphs: [
       'A service request consists of a written fault description of at least 8 characters, a service category, and a city. The platform checks that the request is valid and then dispatches it to technicians using the server-side matching engine.',
       'Matching is best-effort: the engine selects from technicians who are active, available, verified, and serve the request category and area. If no technician is eligible, the request is recorded as unmatched.',
-      'Umodzi Connect does not guarantee that any technician will be available, that a request will be matched, that matched work will be completed, or any particular quality of workmanship. Arrangements for carrying out the work are made between the customer and the technician.',
+      'Umodzi Connect does not guarantee that any technician will be available, that a request will be matched, that matched work will be completed, or any particular quality of workmanship. Arrangements for carrying out the work are made between the consumer and the technician.',
     ],
   },
   {
@@ -63,7 +63,7 @@ export const TERMS_SECTIONS: NoticeSection[] = [
     id: 'reviews-conduct',
     heading: 'Ratings, reviews, and conduct',
     items: [
-      'Customers may leave a star rating and a written comment about a completed service. Reviews must describe your genuine experience.',
+      'Consumers may leave a star rating and a written comment about a completed service. Reviews must describe your genuine experience.',
       'You must not post false, misleading, or abusive reviews, and you must not attempt to manipulate ratings — your own or anyone else\u2019s.',
       'Treat other users with respect in all communication on the platform. Harassment, hate speech, threats, and spam are not acceptable.',
     ],
@@ -92,7 +92,7 @@ export const TERMS_SECTIONS: NoticeSection[] = [
     heading: 'Limitations, third parties, and availability',
     items: [
       'The service is a prototype provided as-is. No uptime, response-time, or availability commitment is made, and the service may be changed or taken down for maintenance at any time.',
-      'No payments are processed through the platform. There is no escrow, no payment protection, and no dispute-resolution process. Any payment for work is a private matter between the customer and the technician.',
+      'No payments are processed through the platform. There is no escrow, no payment protection, and no dispute-resolution process. Any payment for work is a private matter between the consumer and the technician.',
       'An SMS integration exists in the code but is inactive: no SMS is sent and no phone number is held for that purpose.',
       'Data is stored in a PostgreSQL database; where that database is physically hosted has not been established for this deployment. Browser push notifications, where enabled, are delivered through the push service operated by your browser vendor.',
       'To the extent permitted, the platform is not liable for work arranged between users, for unavailable or unmatched requests, or for loss arising from reliance on profiles, ratings, or matching results.',

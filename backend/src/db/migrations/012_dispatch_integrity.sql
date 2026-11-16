@@ -1,6 +1,4 @@
 -- 012_dispatch_integrity.sql
--- Task 36 (Stages 4–5) — dispatch integrity and lifecycle audit.
---
 -- Adds the database structures the new server-authoritative dispatch engine
 -- (backend/src/dispatch/dispatchService.ts) depends on:
 --   A. service_requests: browser idempotency key + dispatch bookkeeping
