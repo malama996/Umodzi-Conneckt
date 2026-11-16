@@ -249,9 +249,7 @@ export default function TechnicianMap({
               <div className="map-popup-head">
                 <h4>{customerLabel}</h4>
               </div>
-              <p className="map-popup-sub">
-                Mock location for this request (not real GPS).
-              </p>
+              <p className="map-popup-sub">Mock location for this request (not real GPS).</p>
             </div>
           </Popup>
         </Marker>

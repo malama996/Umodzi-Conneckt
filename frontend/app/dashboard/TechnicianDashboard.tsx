@@ -44,10 +44,7 @@ import type { ServiceRequestStatus } from '@/lib/types';
  */
 
 /** Statuses that are an active job from the technician's side. */
-const ACTIVE_STATUSES: ReadonlySet<ServiceRequestStatus> = new Set([
-  'matched',
-  'in_progress',
-]);
+const ACTIVE_STATUSES: ReadonlySet<ServiceRequestStatus> = new Set(['matched', 'in_progress']);
 
 const RECENT_LIMIT = 5;
 
@@ -87,8 +84,7 @@ export default function TechnicianDashboard() {
           <div className="dashboard-heading">
             <div>
               <h1>
-                {firstName ? `Welcome back, ${firstName}` : 'Your workbench'}{' '}
-                <span>👋</span>
+                {firstName ? `Welcome back, ${firstName}` : 'Your workbench'} <span>👋</span>
               </h1>
               <p>Here’s where your assignments and offers stand.</p>
             </div>
@@ -181,8 +177,8 @@ export default function TechnicianDashboard() {
                 <div>
                   <h2>Offer waiting on you?</h2>
                   <p>
-                    Dispatched offers appear in your offers list. Accept to lock in
-                    the job — or decline so it moves on.
+                    Dispatched offers appear in your offers list. Accept to lock in the job — or
+                    decline so it moves on.
                   </p>
                   <Link href="/technician/offers" className="button button-coral">
                     Review offers <LuArrowRight size={14} aria-hidden="true" />
@@ -197,9 +193,7 @@ export default function TechnicianDashboard() {
                 <div className="panel-head">
                   <div>
                     <h2>Recent assignments</h2>
-                    <p className="panel-sub">
-                      Your latest jobs and where each one stands.
-                    </p>
+                    <p className="panel-sub">Your latest jobs and where each one stands.</p>
                   </div>
                   {total > RECENT_LIMIT && (
                     <Link className="outline-button" href="/dashboard/requests">
@@ -219,10 +213,7 @@ export default function TechnicianDashboard() {
                 <div className="empty-state">
                   <LuBriefcaseBusiness size={22} aria-hidden="true" />
                   <h3>No assignments yet</h3>
-                  <p>
-                    When dispatch sends you an offer and you accept it, the job
-                    appears here.
-                  </p>
+                  <p>When dispatch sends you an offer and you accept it, the job appears here.</p>
                   <Link className="button button-teal" href="/technician/offers">
                     Review offers
                   </Link>

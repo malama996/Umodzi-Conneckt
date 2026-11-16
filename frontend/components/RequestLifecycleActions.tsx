@@ -11,10 +11,7 @@ import {
   type MyServiceRequest,
 } from '@/lib/api/serviceRequestsApi';
 
-type LifecycleRequest = Pick<
-  MyServiceRequest,
-  'id' | 'status' | 'assignedTechnicianName'
->;
+type LifecycleRequest = Pick<MyServiceRequest, 'id' | 'status' | 'assignedTechnicianName'>;
 
 /**
  * The ONE set of lifecycle controls rendered by both the request list and the
@@ -69,7 +66,11 @@ export default function RequestLifecycleActions({
   };
 
   const hasActions =
-    canStartWork || canCompleteWork || canConfirmCompletion || canCancel || request.status === 'completed';
+    canStartWork ||
+    canCompleteWork ||
+    canConfirmCompletion ||
+    canCancel ||
+    request.status === 'completed';
 
   if (!hasActions) return null;
 

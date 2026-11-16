@@ -18,12 +18,14 @@ jobs:
   validate:
     name: Build & Test
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
 
     services:
-      # Isolated PostgreSQL for integration tests (if needed)
+      # Isolated PostGIS for the migration and privacy steps.
+      # Pinned to PostgreSQL 18 / PostGIS 3.7 — the versions the schema and the
+      # PostGIS dispatch queries are developed and verified against locally.
       postgres:
-        image: postgis/postgis:16-3.4
+        image: postgis/postgis:18-3.7
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: test-password
@@ -31,10 +33,25 @@ jobs:
         ports:
           - 5432:5432
         options: >-
-          --health-cmd pg_isready
+          --health-cmd "pg_isready -U postgres -d umodzi_test"
           --health-interval 10s
           --health-timeout 5s
-          --health-retries 5
+          --health-retries 10
+          --health-start-period 15s
+
+    # Shared by every step so the app and the scripts never disagree about
+    # which database, secret or public URL they are pointing at.
+    env:
+      DATABASE_URL: postgresql://postgres:test-password@localhost:5432/umodzi_test
+      # Throwaway CI-only values. JWT_SECRET must be >= 32 chars or the server
+      # fails fast at boot; neither value is a real secret.
+      JWT_SECRET: ci-only-jwt-secret-for-github-actions-000000
+      ADMIN_EMAIL: admin@umodzi.test
+      ADMIN_PASSWORD: ci-only-admin-password
+      SEED_DEMO_DATA: 'true'
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:3001/api/v1
+      NEXT_PUBLIC_VAPID_PUBLIC_KEY: test-vapid-key
+      CI: 'true'
 
     steps:
       - name: Checkout repository
@@ -47,7 +64,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --no-audit --no-fund
 
       - name: Backend typecheck
         run: npm run typecheck -w backend
@@ -66,60 +83,71 @@ jobs:
 
       - name: Frontend build
         run: npm run build -w frontend
-        env:
-          NEXT_PUBLIC_API_BASE_URL: http://localhost:3001/api/v1
-          NEXT_PUBLIC_VAPID_PUBLIC_KEY: test-vapid-key
+
+      - name: Wait for Postgres
+        working-directory: backend
+        run: |
+          node --input-type=module -e '
+            import pg from "pg";
+            for (let i = 0; i < 30; i += 1) {
+              const client = new pg.Client({ connectionString: process.env.DATABASE_URL });
+              try {
+                await client.connect();
+                await client.end();
+                console.log("Postgres is accepting connections.");
+                process.exit(0);
+              } catch {
+                await new Promise((resolve) => setTimeout(resolve, 2000));
+              }
+            }
+            console.error("Postgres did not become ready in time.");
+            process.exit(1);
+          '
 
       - name: Run database migrations
         run: npm run migrate -w backend
-        env:
-          DATABASE_URL: postgresql://postgres:test-password@localhost:5432/umodzi_test
 
-      - name: Run backend unit tests
+      - name: Backend unit tests (auth, JWT, sessions)
+        working-directory: backend
         run: npx tsx scripts/task23-tests.ts
+
+      - name: Classification tests (mocked provider)
         working-directory: backend
-        env:
-          DATABASE_URL: postgresql://postgres:test-password@localhost:5432/umodzi_test
-
-      - name: Run frontend integration tests
-        run: npx --no-install tsx scripts/task22-tests.ts
-        working-directory: frontend
-
-      - name: Run classification tests
         run: npx tsx scripts/task33-classify-tests.ts
+
+      - name: File storage tests (local + stubbed Supabase)
         working-directory: backend
-        env:
-          DATABASE_URL: postgresql://postgres:test-password@localhost:5432/umodzi_test
+        run: npx tsx scripts/storage-tests.ts
 
-      - name: Run privacy tests
+      - name: Frontend integration tests
+        working-directory: frontend
+        run: npx tsx scripts/task22-tests.ts
+
+      - name: Location privacy tests (live server)
+        working-directory: backend
         run: |
-          npx tsx src/server.ts &
+          set -euo pipefail
+          npx tsx src/server.ts > /tmp/server.log 2>&1 &
           SERVER_PID=$!
-          trap "kill $SERVER_PID" EXIT
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
 
-          for i in {1..30}; do
+          ready=no
+          for _ in $(seq 1 60); do
             if curl --fail --silent http://localhost:3001/health > /dev/null; then
+              ready=yes
               break
             fi
             sleep 1
           done
 
-          curl --fail --silent http://localhost:3001/health > /dev/null
-          npx tsx scripts/task28-3a1-location-privacy-tests.ts
-        working-directory: backend
-        env:
-          DATABASE_URL: postgresql://postgres:test-password@localhost:5432/umodzi_test
-          ADMIN_EMAIL: admin@umodzi.test
-          # The server fails fast at boot without JWT_SECRET (loadJwtConfig()
-          # runs before any route serves), so the health check below never
-          # passes. Throwaway CI-only value, >= 32 chars; not a real secret.
-          JWT_SECRET: ci-only-jwt-secret-for-github-actions-000000
-          # The privacy tests assert against real technician rows, including
-          # the Kitwe pilot coordinate (seedInitialTechnicians). A fresh CI
-          # database is otherwise empty and every field assertion fails.
-          SEED_DEMO_DATA: "true"
+          if [ "$ready" != "yes" ]; then
+            echo "Server never became healthy. Log:"
+            tail -40 /tmp/server.log
+            exit 1
+          fi
 
-      - name: Run file storage tests
-        # Local + Supabase providers against a stubbed fetch — no DB, no network.
-        run: npx tsx scripts/storage-tests.ts
-        working-directory: backend
+          npx tsx scripts/task28-3a1-location-privacy-tests.ts
+
+      - name: Server log on failure
+        if: failure()
+        run: tail -60 /tmp/server.log 2>/dev/null || true

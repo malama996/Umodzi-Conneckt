@@ -50,9 +50,6 @@ export const TECHNICIAN_REQUEST_STATUS_HINT: Record<ServiceRequestStatus, string
   cancelled: 'This request was cancelled by the consumer or an administrator.',
 };
 
-export function requestStatusHint(
-  status: ServiceRequestStatus,
-  isTechnician: boolean,
-): string {
+export function requestStatusHint(status: ServiceRequestStatus, isTechnician: boolean): string {
   return (isTechnician ? TECHNICIAN_REQUEST_STATUS_HINT : REQUEST_STATUS_HINT)[status];
 }

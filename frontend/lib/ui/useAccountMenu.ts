@@ -22,8 +22,7 @@ import { usePathname } from 'next/navigation';
  * effect dependency.
  */
 
-const FOCUSABLE_ITEM =
-  'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+const FOCUSABLE_ITEM = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 export function useAccountMenu(open: boolean, close: () => void) {
   const triggerRef = useRef<HTMLButtonElement | null>(null);
@@ -34,9 +33,7 @@ export function useAccountMenu(open: boolean, close: () => void) {
 
     const panel = panelRef.current;
     const trigger = triggerRef.current;
-    const items = panel
-      ? Array.from(panel.querySelectorAll<HTMLElement>(FOCUSABLE_ITEM))
-      : [];
+    const items = panel ? Array.from(panel.querySelectorAll<HTMLElement>(FOCUSABLE_ITEM)) : [];
 
     const onPointerDown = (event: MouseEvent | TouchEvent) => {
       const target = event.target as Node | null;
