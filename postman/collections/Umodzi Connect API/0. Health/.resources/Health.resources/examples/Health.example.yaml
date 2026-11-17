@@ -1,0 +1,31 @@
+$kind: http-example
+request:
+  url: http://localhost:3001/health
+  method: GET
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    access-control-allow-origin: http://localhost:3000
+    access-control-allow-credentials: "true"
+    content-type: application/json; charset=utf-8
+    x-content-type-options: nosniff
+    referrer-policy: no-referrer
+    x-frame-options: DENY
+    permissions-policy: geolocation=(), microphone=(), camera=(), payment=()
+    content-security-policy: default-src 'none'; frame-ancestors 'none'; base-uri 'none'
+    content-length: "73"
+    Date: Mon, 16 Nov 2026 15:55:08 GMT
+    Connection: keep-alive
+    Keep-Alive: timeout=72
+  body:
+    type: json
+    content: |-
+      {
+        "data": {
+          "status": "ok",
+          "service": "umodzi-connect-api",
+          "version": "0.2.0"
+        }
+      }
+order: 1000

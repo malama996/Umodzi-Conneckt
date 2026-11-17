@@ -1,0 +1,11 @@
+$kind: http-request
+method: GET
+url: http://localhost:3001/health
+examples: .resources/Health.resources/examples
+order: 2000
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('200 OK', () => pm.response.to.have.status(200));
+      pm.test('service is the API', () => pm.expect(pm.response.json().service).to.eql('umodzi-connect-api'));
+    language: text/javascript

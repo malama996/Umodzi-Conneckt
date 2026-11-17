@@ -1,0 +1,13 @@
+$kind: http-request
+name: 'Non-admin is refused'
+method: GET
+url: '{{baseUrl}}/admin/overview'
+order: 33000
+headers:
+  - key: 'Authorization'
+    value: 'Bearer {{customerToken}}'
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('403 for a customer', () => pm.response.to.have.status(403));
+    language: text/javascript

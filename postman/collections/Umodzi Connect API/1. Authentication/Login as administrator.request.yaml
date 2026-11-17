@@ -1,0 +1,24 @@
+$kind: http-request
+name: 'Login as administrator'
+method: POST
+url: '{{baseUrl}}/auth/login'
+order: 4000
+headers:
+  - key: 'Content-Type'
+    value: 'application/json'
+body:
+  type: text
+  content: |-
+    {
+      "email": "{{adminEmail}}",
+      "password": "{{adminPassword}}"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('200 OK', () => pm.response.to.have.status(200));
+      const b = pm.response.json();
+      pm.test('access token returned', () => pm.expect(b.data.accessToken).to.be.a('string').and.not.empty);
+      pm.environment.set('adminToken', b.data.accessToken);
+      pm.environment.set('adminId', b.data.user.id);
+    language: text/javascript

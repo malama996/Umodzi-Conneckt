@@ -1,0 +1,20 @@
+$kind: http-request
+name: 'Classify a fault description'
+method: POST
+url: '{{baseUrl}}/classify'
+order: 16000
+headers:
+  - key: 'Content-Type'
+    value: 'application/json'
+body:
+  type: text
+  content: |-
+    {
+      "description": "The kitchen tap is leaking badly and the pipe under the sink is wet"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('200 OK', () => pm.response.to.have.status(200));
+      pm.test('classified as plumbing', () => pm.expect(JSON.stringify(pm.response.json()).toLowerCase()).to.include('plumbing'));
+    language: text/javascript

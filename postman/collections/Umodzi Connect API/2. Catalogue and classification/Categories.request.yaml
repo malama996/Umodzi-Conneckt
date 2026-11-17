@@ -1,0 +1,11 @@
+$kind: http-request
+name: 'Categories'
+method: GET
+url: '{{baseUrl}}/categories'
+order: 13000
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('200 OK', () => pm.response.to.have.status(200));
+      pm.test('nine canonical categories', () => pm.expect(pm.response.json().data.categories.length).to.eql(9));
+    language: text/javascript

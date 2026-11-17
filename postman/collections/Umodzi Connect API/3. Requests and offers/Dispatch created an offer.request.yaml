@@ -1,0 +1,16 @@
+$kind: http-request
+name: 'Dispatch created an offer'
+method: GET
+url: '{{baseUrl}}/requests/{{requestId}}/offers'
+order: 21000
+headers:
+  - key: 'Authorization'
+    value: 'Bearer {{customerToken}}'
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('200 OK', () => pm.response.to.have.status(200));
+      const offers = pm.response.json().data;
+      pm.test('dispatch produced at least one offer', () => pm.expect(offers.length).to.be.above(0));
+      if (offers.length) { pm.environment.set('offerId', offers[0].id); }
+    language: text/javascript

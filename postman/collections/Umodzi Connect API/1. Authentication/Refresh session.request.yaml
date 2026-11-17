@@ -1,0 +1,11 @@
+$kind: http-request
+name: 'Refresh session'
+method: POST
+url: '{{baseUrl}}/auth/refresh'
+order: 10000
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('200 OK', () => pm.response.to.have.status(200));
+      pm.test('new access token', () => pm.expect(pm.response.json().data.accessToken).to.be.a('string'));
+    language: text/javascript

@@ -1,0 +1,13 @@
+$kind: http-request
+name: 'Other customer cannot read it'
+method: GET
+url: '{{baseUrl}}/requests/{{requestId}}'
+order: 20000
+headers:
+  - key: 'Authorization'
+    value: 'Bearer {{technicianToken}}'
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('404 for a non-participant', () => pm.response.to.have.status(404));
+    language: text/javascript

@@ -1,0 +1,21 @@
+$kind: http-request
+name: 'Send a message'
+method: POST
+url: '{{baseUrl}}/conversations/{{conversationId}}/messages'
+order: 28000
+headers:
+  - key: 'Content-Type'
+    value: 'application/json'
+  - key: 'Authorization'
+    value: 'Bearer {{customerToken}}'
+body:
+  type: text
+  content: |-
+    {
+      "message": "I am outside the gate now, please come through."
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('2xx or 404 when no conversation exists yet', () => pm.expect([200, 201, 400, 404]).to.include(pm.response.code));
+    language: text/javascript

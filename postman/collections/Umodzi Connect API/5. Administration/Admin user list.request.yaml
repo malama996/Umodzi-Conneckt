@@ -1,0 +1,14 @@
+$kind: http-request
+name: 'Admin user list'
+method: GET
+url: '{{baseUrl}}/admin/users'
+order: 31000
+headers:
+  - key: 'Authorization'
+    value: 'Bearer {{adminToken}}'
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('200 OK', () => pm.response.to.have.status(200));
+      pm.test('no password hash is exposed', () => pm.expect(pm.response.text()).to.not.include('password_hash'));
+    language: text/javascript

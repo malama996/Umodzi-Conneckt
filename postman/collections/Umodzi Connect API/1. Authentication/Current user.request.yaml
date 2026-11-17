@@ -1,0 +1,14 @@
+$kind: http-request
+name: 'Current user'
+method: GET
+url: '{{baseUrl}}/auth/me'
+order: 9000
+headers:
+  - key: 'Authorization'
+    value: 'Bearer {{customerToken}}'
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('200 OK', () => pm.response.to.have.status(200));
+      pm.test('identity matches the login', () => pm.expect(pm.response.json().data.user.email).to.eql(pm.environment.get('customerEmail')));
+    language: text/javascript

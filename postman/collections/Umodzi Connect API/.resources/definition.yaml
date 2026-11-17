@@ -1,0 +1,9 @@
+$kind: collection
+name: 'Umodzi Connect API'
+description: |-
+  End-to-end smoke suite for the Umodzi Connect backend. Run the folders in order: each request saves the ids and tokens the next one needs. Requires a running API (npm run dev -w backend) and its environment file.
+variables:
+  - key: 'baseUrl'
+    value: 'http://localhost:3001/api/v1'
+  - key: 'password'
+    value: 'LocalTest123!'

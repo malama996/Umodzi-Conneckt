@@ -1,0 +1,14 @@
+$kind: http-request
+name: 'Read the request back'
+method: GET
+url: '{{baseUrl}}/requests/{{requestId}}'
+order: 19000
+headers:
+  - key: 'Authorization'
+    value: 'Bearer {{customerToken}}'
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('200 OK', () => pm.response.to.have.status(200));
+      pm.test('same request id', () => pm.expect(pm.response.json().data.id).to.eql(pm.environment.get('requestId')));
+    language: text/javascript

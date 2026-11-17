@@ -1,0 +1,13 @@
+$kind: http-request
+name: 'Mark all notifications read'
+method: POST
+url: '{{baseUrl}}/me/notifications/read-all'
+order: 26000
+headers:
+  - key: 'Authorization'
+    value: 'Bearer {{customerToken}}'
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('2xx', () => pm.expect(pm.response.code).to.be.within(200, 299));
+    language: text/javascript

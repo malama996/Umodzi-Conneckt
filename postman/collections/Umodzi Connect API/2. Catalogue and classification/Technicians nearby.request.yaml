@@ -1,0 +1,17 @@
+$kind: http-request
+name: 'Technicians nearby'
+method: GET
+url: '{{baseUrl}}/technicians/nearby?latitude=-12.8162&longitude=28.1995&radius=50'
+order: 15000
+queryParams:
+  - key: 'latitude'
+    value: '-12.8162'
+  - key: 'longitude'
+    value: '28.1995'
+  - key: 'radius'
+    value: '50'
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('200 OK', () => pm.response.to.have.status(200));
+    language: text/javascript

@@ -1,0 +1,28 @@
+$kind: http-request
+name: 'Register technician'
+method: POST
+url: '{{baseUrl}}/auth/register'
+order: 6000
+headers:
+  - key: 'Content-Type'
+    value: 'application/json'
+body:
+  type: text
+  content: |-
+    {
+      "email": "technician{{$timestamp}}@umodzi.test",
+      "password": "{{password}}",
+      "firstName": "Daniel",
+      "lastName": "Phiri",
+      "role": "technician",
+      "category": "Plumbing",
+      "serviceArea": "Kitwe"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('201 Created', () => pm.response.to.have.status(201));
+      const u = pm.response.json().data.user;
+      pm.environment.set('technicianEmail', u.email);
+      pm.environment.set('technicianId', u.id);
+    language: text/javascript

@@ -1,0 +1,15 @@
+$kind: http-request
+name: 'My conversations'
+method: GET
+url: '{{baseUrl}}/me/conversations'
+order: 27000
+headers:
+  - key: 'Authorization'
+    value: 'Bearer {{customerToken}}'
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('200 OK', () => pm.response.to.have.status(200));
+      const list = pm.response.json().data.conversations;
+      if (list && list.length) { pm.environment.set('conversationId', list[0].id); }
+    language: text/javascript

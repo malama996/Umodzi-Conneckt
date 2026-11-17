@@ -1,0 +1,10 @@
+$kind: http-request
+name: 'Unauthenticated request is refused'
+method: GET
+url: '{{baseUrl}}/auth/me'
+order: 11000
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('401 without a token', () => pm.response.to.have.status(401));
+    language: text/javascript

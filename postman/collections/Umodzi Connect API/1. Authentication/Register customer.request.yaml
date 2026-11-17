@@ -1,0 +1,27 @@
+$kind: http-request
+name: 'Register customer'
+method: POST
+url: '{{baseUrl}}/auth/register'
+order: 5000
+headers:
+  - key: 'Content-Type'
+    value: 'application/json'
+body:
+  type: text
+  content: |-
+    {
+      "email": "customer{{$timestamp}}@umodzi.test",
+      "password": "{{password}}",
+      "firstName": "Carol",
+      "lastName": "Mwale",
+      "role": "customer"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('201 Created', () => pm.response.to.have.status(201));
+      const u = pm.response.json().data.user;
+      pm.environment.set('customerEmail', u.email);
+      pm.environment.set('customerId', u.id);
+      pm.test('role is customer', () => pm.expect(u.role).to.eql('customer'));
+    language: text/javascript

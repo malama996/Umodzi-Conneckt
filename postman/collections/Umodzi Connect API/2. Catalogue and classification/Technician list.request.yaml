@@ -1,0 +1,14 @@
+$kind: http-request
+name: 'Technician list'
+method: GET
+url: '{{baseUrl}}/technicians'
+order: 14000
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('200 OK', () => pm.response.to.have.status(200));
+      const list = pm.response.json().data;
+      pm.test('a list is returned', () => pm.expect(list).to.be.an('array'));
+      const pick = list.find((t) => t.category === 'Plumbing' && t.serviceArea === 'Kitwe') || list[0];
+      if (pick) { pm.environment.set('anyTechnicianId', pick.id); }
+    language: text/javascript

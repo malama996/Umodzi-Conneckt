@@ -1,0 +1,27 @@
+$kind: http-request
+name: 'Customer creates a request'
+method: POST
+url: '{{baseUrl}}/requests'
+order: 18000
+headers:
+  - key: 'Content-Type'
+    value: 'application/json'
+  - key: 'Authorization'
+    value: 'Bearer {{customerToken}}'
+body:
+  type: text
+  content: |-
+    {
+      "description": "Burst pipe under the kitchen sink, water everywhere",
+      "category": "Plumbing",
+      "city": "Kitwe",
+      "clientRequestId": "postman-{{$timestamp}}"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('201 Created', () => pm.response.to.have.status(201));
+      const b = pm.response.json();
+      pm.environment.set('requestId', b.data.id);
+      pm.test('status is pending or matching', () => pm.expect(['pending', 'matching']).to.include(b.data.status));
+    language: text/javascript
