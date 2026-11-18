@@ -278,7 +278,7 @@ export default function Home() {
             </Reveal>
             <Reveal>
               <div>
-                <b>01 / Trust with transparency</b>
+                <b>01. Trust with transparency</b>
                 <span>
                   Verification, ratings and completed-job signals are visible as part of the
                   decision context.
@@ -287,7 +287,7 @@ export default function Home() {
             </Reveal>
             <Reveal>
               <div>
-                <b>02 / Local by nature</b>
+                <b>02. Local by nature</b>
                 <span>
                   The initial service areas are Kitwe and Ndola, aligned with the study scope.
                 </span>
@@ -295,7 +295,7 @@ export default function Home() {
             </Reveal>
             <Reveal>
               <div>
-                <b>03 / Built for low-data use</b>
+                <b>03. Built for low-data use</b>
                 <span>
                   Responsive pages, restrained imagery and lightweight interaction support
                   constrained connections.
