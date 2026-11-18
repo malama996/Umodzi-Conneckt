@@ -52,7 +52,7 @@ const THEME_BOOT_SCRIPT = `(function(){try{var s=null;try{s=window.localStorage.
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
       </head>
